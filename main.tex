@@ -57,31 +57,19 @@
 
 % 自定义设置与额外加载的宏包请写在 \file{hitszthesis.sty} 里
 \usepackage{hitszthesis}
-\usepackage{algorithm}
-\usepackage{algorithmic}
+% 注意：algorithm2e 已在 hitszthesis.sty 中加载，不要重复加载 algorithm/algorithmic
+% \usepackage{algorithm}    % 与 algorithm2e 冲突，已移除
+% \usepackage{algorithmic}  % 与 algorithm2e 冲突，已移除
 \usepackage{booktabs} % 更美观的表格线
 \usepackage{caption}  % 更灵活的标题支持
 \usepackage{amsmath}
 \usepackage{pifont}
-\usepackage{amsmath}
+% \usepackage{amsmath}  % 重复加载，已移除
 \usepackage{adjustbox}
 \usepackage{subcaption}
 \usepackage{multirow} 
 \usepackage{graphicx}
 \usepackage{hyperref}
-
-\makeatletter
-\newcommand\fs@booktabsruled{%
-  \def\@fs@cfont{\bfseries\strut}\let\@fs@capt\floatc@ruled
-  \def\@fs@pre{\hrule height\heavyrulewidth depth0pt \kern\belowrulesep}%
-  \def\@fs@mid{\kern\aboverulesep\hrule height\lightrulewidth\kern\belowrulesep}%
-  \def\@fs@post{\kern\aboverulesep\hrule height\heavyrulewidth\relax}%
-  \let\@fs@iftopcapt\iftrue
-}
-\makeatother
-
-\floatstyle{booktabsruled}
-\restylefloat{algorithm}
 
 % 图片存放路径，在这些文件夹里的图片可以直接使用图片文件名调用
 \graphicspath{{figures/}{pictures/}}

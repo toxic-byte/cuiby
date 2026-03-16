@@ -1,0 +1,85 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: hitszthesis.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: reference.bib
+Warning--I didn't find a database entry for "BLIP-2"
+Warning--I didn't find a database entry for "Sentence-BERT"
+Warning--I didn't find a database entry for "yao2021survey"
+Warning--I didn't find a database entry for "huang2012assessing"
+Warning--I didn't find a database entry for "1025304585.nh"
+Warning--Require address: gao2022graph-survey
+Warning--Require address: he2020lightgcn
+Warning--Require address: fan2023graphDA
+Warning--Require address: wang2019NGCF
+Warning--Require address: chen2021GHCF
+Warning--Require address: gu2022S-MBRec
+Warning--Require address: ying2018Pinsage
+Warning--Require address: wu2019Social
+Warning--Require address: wang2019Knowlegde-Graph
+Warning--Require address: wu2021SGL
+Warning--Require citedate: RJXB202405021
+Warning--Require address: jin2020MBGCN
+Warning--Require address: xia2021MB-GMN
+Warning--Require address: cheng2023cascading
+Warning--Require address: zhang2024POGCN
+Warning--Require address: zhang2023DPT
+Warning--Require address: wang2021ADT
+Warning--Require address: tian2022learning-to-denoising
+Warning--Require address: he2024double
+Warning--Require address: zhang2025dembr
+Warning--Require address: zhang2021mining
+Warning--Require address: zhou2023tale
+Warning--Require address: wei2024llmrec
+Warning--Require address: wang2025unleashing
+Warning--Require address: xu2023MBSSL
+Warning--Require address: wei2022contrastive
+Warning--Require address: chen2020simple
+Warning--Require address: he2020momentum
+Warning--Require address: wang2020understanding
+Warning--Require address: chen2020EHCF
+You've used 46 entries,
+            3191 wiz_defined-function locations,
+            999 strings with 16487 characters,
+and the built_in function-call counts, 92357 in all, are:
+= -- 10208
+> -- 180
+< -- 406
++ -- 8046
+- -- 653
+* -- 2235
+:= -- 10218
+add.period$ -- 0
+call.type$ -- 46
+change.case$ -- 268
+chr.to.int$ -- 0
+cite$ -- 76
+duplicate$ -- 13243
+empty$ -- 3713
+format.name$ -- 536
+if$ -- 24886
+int.to.chr$ -- 0
+int.to.str$ -- 46
+missing$ -- 0
+newline$ -- 165
+num.names$ -- 46
+pop$ -- 1357
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 813
+stack$ -- 0
+substring$ -- 11117
+swap$ -- 2149
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 30
+while$ -- 1267
+width$ -- 48
+write$ -- 604
+(There were 35 warnings)
