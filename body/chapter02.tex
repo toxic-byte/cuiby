@@ -1,0 +1,233 @@
+% !TEX root = ../main.tex
+
+% 中英标题：\chapter{中文标题}[英文标题]
+\chapter{图神经网络与对比学习相关理论概述}
+
+\section{引言}
+随着互联网平台的快速发展，用户与内容之间的交互数据呈指数级增长，如何在海量信息中为用户提供个性化推荐已成为智能信息系统的重要研究方向。传统的推荐算法（如协同过滤与矩阵分解）在建模用户—物品关系方面取得了良好效果，但由于忽略了交互数据的复杂结构与高阶关联，其表达能力和泛化性能仍存在不足。近年来，图神经网络 凭借其在非欧几里得结构化数据上的建模优势\cite{gao2022graph-survey}，被广泛引入推荐系统中，用于捕获用户与物品之间的高阶连接与潜在语义关系，从而显著提升了推荐的准确性与表示能力。
+
+然而，仅依靠监督信号进行训练的推荐模型在实际应用中仍面临诸多挑战。首先，用户行为数据往往存在噪声、稀疏和偏置等问题\cite{xu2023MBSSL, wei2022contrastive}，导致模型学习到的用户表示与真实偏好存在偏差。其次，推荐系统中的多行为交互和多模态内容信息进一步增加了建模难度，使得模型难以充分利用潜在的结构信号与语义信息。为此，对比学习（Contrastive Learning, CL）被引入推荐系统，作为一种自监督学习范式，通过构造正负样本对在无标签条件下优化表示分布，从而提升模型在噪声环境下的鲁棒性与泛化能力。
+
+综上所述，图神经网络与对比学习的结合为推荐系统的研究提供了新的发展方向：前者关注用户—物品关系的结构化建模，后者强调表示空间的一致性约束与自监督优化。二者相辅相成，不仅能够增强推荐模型的表示能力，还能有效缓解数据噪声与稀疏问题。本章将系统梳理与本研究密切相关的理论基础，包括图神经网络的核心原理及其在推荐系统中的典型应用，以及对比学习的基本思想与在推荐场景下的改进策略，为后续章节的模型设计与算法实现奠定理论支撑。
+
+\section{图神经网络相关原理及理论知识}
+
+\subsection{图神经网络的基本流程}
+图神经网络是一类能够在图结构数据上直接进行学习的深度模型。其核心思想是通过消息传递（Message Passing）机制，使节点在嵌入空间中综合自身特征与邻居节点的信息，从而生成具有结构感知与关系表达能力的节点表示。
+
+在一个典型的 GNN 层中，节点特征的更新通常包含两个阶段：
+
+\begin{enumerate}
+    \item \textbf{消息传递}：  
+    每个节点从其邻居节点接收并聚合信息。对于节点 $v$，其邻居集合记为 $\mathcal{N}(v)$。  
+    在第 $l$ 层中，消息传递过程可表示为：
+    \begin{equation}
+        \mathbf{m}_v^{(l)} = \sum_{u \in \mathcal{N}(v)} M^{(l)}\left(\mathbf{h}_v^{(l-1)}, \mathbf{h}_u^{(l-1)}, \mathbf{e}_{uv}\right),
+    \end{equation}
+    其中，$M^{(l)}(\cdot)$ 为消息函数，用于根据节点与边特征计算邻居信息的加权表示，并完成消息的聚合。
+
+    \item \textbf{节点更新}：  
+    节点结合自身上一层的表示与聚合后的消息向量，更新当前层的表示：
+    \begin{equation}
+        \mathbf{h}_v^{(l)} = U^{(l)}\left(\mathbf{h}_v^{(l-1)}, \mathbf{m}_v^{(l)}\right),
+    \end{equation}
+    其中，$U^{(l)}(\cdot)$ 为更新函数，可采用非线性变换（如 MLP、GRU 或残差结构）以捕获复杂的邻域依赖关系。
+\end{enumerate}
+
+通过堆叠多层消息传递与更新操作，GNN 能够逐步捕获高阶邻居的结构信息，实现节点间的深层语义关联建模。 
+在此框架下，众多具有代表性的模型相继被提出，其中部分方法已被广泛应用于推荐系统场景。接下来，本文将介绍几种在推荐算法领域中具有代表性的图神经网络模型及其核心思想。
+
+\subsection{典型图神经网络模型}
+
+\textbf{（1）图卷积网络}
+
+图卷积网络（Graph Convolutional Network, GCN）\cite{kipf2016semi} 是最早提出的基于谱域卷积思想的图神经网络之一，其核心目标是将传统卷积神经网络（CNN）的局部特征提取能力扩展至非欧式的图结构数据中。  
+GCN 的关键思想在于：每个节点不仅依赖自身特征进行表征学习，还通过邻接关系接收邻居节点的信息，实现跨节点的特征传播与全局平滑。其计算过程可归纳为典型的两步形式：\textbf{消息传递} 与 \textbf{节点更新}。
+
+\begin{itemize}
+    \item \textbf{消息传递}：  
+    节点通过邻接矩阵实现特征的聚合与传播。  
+    对于节点 $v$，其邻居集合为 $\mathcal{N}(v)$，消息传递过程可形式化为：
+    \begin{equation}
+        \mathbf{m}_v^{(l)} = 
+        \sum_{u \in \mathcal{N}(v) \cup \{v\}} 
+        \frac{1}{\sqrt{d_u d_v}} 
+        \mathbf{W}^{(l)} \mathbf{h}_u^{(l-1)},
+    \end{equation}
+    其中，$\mathbf{W}^{(l)}$ 为第 $l$ 层的可学习线性变换参数，$d_u$ 与 $d_v$ 分别为节点 $u$ 与 $v$ 的度。  
+    该式中的对称归一化因子 $\frac{1}{\sqrt{d_u d_v}}$ 可有效抑制高连接度节点在聚合过程中的主导效应，从而实现稳定的信息传播。
+
+    \item \textbf{节点更新}：  
+    节点将聚合后的邻域信息 $\mathbf{m}_v^{(l)}$ 经过非线性变换，更新为新的特征表示：
+    \begin{equation}
+        \mathbf{h}_v^{(l)} = \sigma\left(\mathbf{m}_v^{(l)}\right),
+    \end{equation}
+    其中 $\sigma(\cdot)$ 表示非线性激活函数（如 ReLU）。  
+    通过多层堆叠，GCN 能够递归地传播信息，使每个节点在高层表征中融入高阶邻居的结构语义特征。
+\end{itemize}
+
+在矩阵形式下，GCN 的整体更新规则可写为：
+\begin{equation}
+    \mathbf{H}^{(l+1)} = 
+    \sigma\!\left(
+    \widetilde{\mathbf{D}}^{-\frac{1}{2}}
+    \widetilde{\mathbf{A}}
+    \widetilde{\mathbf{D}}^{-\frac{1}{2}}
+    \mathbf{H}^{(l)}
+    \mathbf{W}^{(l)}
+    \right),
+\end{equation}
+其中，$\widetilde{\mathbf{A}} = \mathbf{A} + \mathbf{I}$ 表示加入自连接的邻接矩阵，$\widetilde{\mathbf{D}}$ 为其对应的度矩阵。  
+该更新过程等价于在图拉普拉斯谱域上进行卷积操作，因此 GCN 可视为对图信号进行低通滤波的平滑算子。  
+GCN 以其参数高效、结构简洁的特点成为后续多种图神经网络（如 GraphSAGE、GAT、LightGCN 等）的理论基础。
+
+
+\textbf{（2）图采样聚合网络}  
+
+GraphSAGE（Graph Sample and Aggregate）\cite{hamilton2017inductive} 是一种支持大规模图上归纳式学习的图神经网络模型。  
+与 GCN 依赖全图邻接矩阵计算不同，GraphSAGE 通过采样机制与可学习聚合函数实现了高效的局部邻域特征传播，能够在动态变化或未见过的新节点上进行推理。其核心流程可概括为两步：消息传递与节点更新。
+
+\begin{itemize}
+    \item \textbf{消息传递}：  
+    对于每个节点 $v$，GraphSAGE 首先从其邻居集合 $\mathcal{N}(v)$ 中随机采样固定数量的邻居，以控制计算复杂度。  
+    然后，通过可学习的聚合函数（如均值聚合、LSTM 聚合或池化聚合）将邻居节点的特征表示汇总：
+    \begin{equation}
+        \mathbf{m}_v^{(l)} = 
+        \text{AGGREGATE}\left(
+        \{\mathbf{h}_u^{(l-1)} \mid u \in \text{Sample}(\mathcal{N}(v))\}
+        \right),
+    \end{equation}
+    其中，$\text{Sample}(\cdot)$ 表示随机采样操作。该聚合机制使得模型能够在保持表达能力的同时显著降低计算与存储开销，从而适应大规模工业级图数据。
+
+    \item \textbf{节点更新}：  
+    节点将自身特征与聚合后的邻居信息进行拼接，通过线性变换与非线性激活生成新的节点表示：
+    \begin{equation}
+        \mathbf{h}_v^{(l)} =
+        \sigma\left(
+        \mathbf{W}^{(l)} \cdot 
+        \text{CONCAT}\!\left(
+        \mathbf{h}_v^{(l-1)}, 
+        \mathbf{m}_v^{(l)}
+        \right)
+        \right),
+    \end{equation}
+    其中，$\mathbf{W}^{(l)}$ 为可学习参数矩阵，$\sigma(\cdot)$ 为激活函数。  
+    这种更新方式既保留了节点自身的语义信息，又融合了邻域特征，使得 GraphSAGE 在异质节点和稀疏场景中具备更强的泛化能力。
+\end{itemize}
+
+通过分层采样与聚合，GraphSAGE 支持在训练阶段仅访问部分图结构，并在推理阶段对新增节点进行嵌入生成（inductive inference），因而广泛应用于推荐系统、社交网络与知识图谱等大规模动态图场景。
+
+\textbf{（3）图注意力网络}  
+
+图注意力网络（Graph Attention Network, GAT）\cite{GAT} 在消息传递框架中引入了注意力机制，以自适应地分配邻居节点的重要性权重，从而克服了传统 GCN 中均匀聚合的局限性。  
+GAT 不再依赖预定义的归一化矩阵，而是通过可学习的注意力参数在局部邻域内动态调整信息流强度。其核心流程同样可分为两步：\textbf{消息传递}与\textbf{节点更新}。
+
+\begin{itemize}
+    \item \textbf{消息传递}：  
+    对于每个节点 $v$，首先通过线性变换矩阵 $\mathbf{W}$ 将节点特征映射到新的表示空间：
+    \begin{equation}
+        \mathbf{h}_v' = \mathbf{W}\mathbf{h}_v.
+    \end{equation}
+    然后，通过注意力机制计算节点 $v$ 与邻居节点 $u \in \mathcal{N}(v)$ 之间的关联强度：
+    \begin{equation}
+        e_{uv} = 
+        \text{LeakyReLU}\left(
+        \mathbf{a}^\top [\mathbf{h}_u' \Vert \mathbf{h}_v']
+        \right),
+    \end{equation}
+    并使用 softmax 函数对所有邻居的注意力得分进行归一化：
+    \begin{equation}
+        \alpha_{uv} = 
+        \frac{\exp(e_{uv})}
+        {\sum_{k \in \mathcal{N}(v)} \exp(e_{kv})},
+    \end{equation}
+    其中，$\mathbf{a}$ 为可学习的注意力向量，$\Vert$ 表示向量拼接操作。该机制允许节点对语义上更相关的邻居分配更高权重，从而提升消息传播的针对性。
+
+    \item \textbf{节点更新}：  
+    节点基于注意力权重对邻居特征进行加权聚合，形成更新后的表示：
+    \begin{equation}
+        \mathbf{h}_v^{(l)} = 
+        \sigma\left(
+        \sum_{u \in \mathcal{N}(v)} 
+        \alpha_{uv} \mathbf{h}_u'
+        \right),
+    \end{equation}
+    其中，$\sigma(\cdot)$ 表示非线性激活函数。为了增强模型的表达能力，GAT 通常采用多头注意力机制（Multi-Head Attention），即并行计算多个注意力通道并对其结果进行拼接或平均，从而捕获不同语义视角下的邻域特征相关性。
+\end{itemize}
+
+通过注意力机制的引入，GAT 实现了节点间关系的自适应建模，不再依赖图结构的固定拓扑权重，在异质图、社交网络及多模态推荐任务中展现出优越的特征选择与语义过滤能力。
+
+
+\textbf{（4）LightGCN 模型}  
+
+LightGCN（Light Graph Convolution Network）\cite{he2020lightgcn} 是一种专为推荐系统设计的轻量级图神经网络模型，其核心思想是对传统 GCN 结构进行简化，仅保留最关键的邻居特征聚合过程，去除了非线性激活与特征变换等操作，从而在保持模型表达能力的同时显著提升训练与推理效率。其整体流程可分为两个阶段：消息传递与节点更新。
+
+\begin{itemize}
+    \item \textbf{消息传递}：  
+    LightGCN 不再引入额外的线性变换矩阵或激活函数，而是直接基于对称归一化的邻接矩阵传播节点特征。对于第 $l$ 层传播，节点特征的更新公式为：
+    \begin{equation}
+        \mathbf{E}^{(l+1)} = \mathbf{D}^{-\frac{1}{2}} \mathbf{A} \mathbf{D}^{-\frac{1}{2}} \mathbf{E}^{(l)},
+    \end{equation}
+    其中，$\mathbf{A}$ 为用户–物品二部图的邻接矩阵，$\mathbf{D}$ 为其度矩阵。  
+    该归一化传播机制确保了不同度节点之间的平衡，使得每个节点能够稳定地吸收邻居的嵌入信息，从而实现高效的信息扩散与结构平滑。
+
+    \item \textbf{节点更新}：  
+    为充分利用多层传播过程中不同阶邻居所包含的协同信息，LightGCN 将所有层的节点表示进行加权融合，形成最终的节点嵌入：
+    \begin{equation}
+        \mathbf{e}_u = \sum_{l=0}^{L} \alpha_l \mathbf{e}_u^{(l)}, \quad 
+        \mathbf{e}_i = \sum_{l=0}^{L} \alpha_l \mathbf{e}_i^{(l)},
+    \end{equation}
+    其中，$\alpha_l$ 为第 $l$ 层的权重系数，通常设为均值或按经验衰减分配。  
+    这种跨层融合方式有效整合了不同阶邻居的结构特征，使模型在保持轻量化的同时依然具备捕获高阶协同信号的能力。
+\end{itemize}
+
+通过去除非必要的非线性变换与参数矩阵，LightGCN 显著减少了计算与存储开销，同时在多行为推荐、社交推荐等任务中仍能保持强大的表示能力，因此成为近年来推荐系统研究中的核心基线模型。
+
+\section{对比学习相关原理及理论知识}
+
+对比学习（Contrastive Learning）是一种基于相似性约束的自监督表示学习方法，其核心思想是通过构建正负样本对（Positive/Negative Pairs）来学习高质量的特征表示，使语义相似的样本在嵌入空间中靠近，而语义无关的样本彼此远离。  
+相比传统的监督学习依赖人工标签的方式，对比学习能够从无标注数据中挖掘潜在结构信息，显著提升模型的泛化能力和鲁棒性。
+
+早期的对比学习思想可追溯至互信息最大化（Mutual Information Maximization）方法，其目标在于通过最大化不同视图之间的互信息来捕获共享语义特征。此类方法包括 Deep InfoMax \cite{bachman2019learning} 和 CPC（Contrastive Predictive Coding）\cite{oord2018representation} 等。  
+随着大规模无监督表示学习的发展，SimCLR \cite{chen2020simple}、MoCo \cite{he2020momentum} 和 BYOL \cite{grill2020bootstrap} 等方法进一步推动了对比学习在计算机视觉和推荐系统中的广泛应用。
+
+对比学习的一般流程可分为三个阶段：样本构建、相似度度量与目标优化。
+
+\begin{enumerate}
+    \item \textbf{样本构建}：  
+    模型首先需要从原始样本中生成具有语义关联的多视图表示。  
+    对于给定样本 $x$，通过两种不同的数据增强或视角变换（如裁剪、遮挡、掩码或行为扰动）生成两个相关视图 $(x_i, x_j)$，称为正样本对。  
+    来自其他样本的数据 $(x_i, x_k)$ 被视为负样本对。  
+    这种设计使得模型在无监督条件下能够自动学习到“语义一致性”，即同一实体的不同观测在嵌入空间中应保持接近。
+
+    \item \textbf{相似度度量}：  
+    为量化样本对在表示空间中的关系，常用的相似度度量为余弦相似度：
+    \begin{equation}
+        \mathrm{sim}(\mathbf{z}_i, \mathbf{z}_j) = 
+        \frac{\mathbf{z}_i^\top \mathbf{z}_j}{\|\mathbf{z}_i\| \, \|\mathbf{z}_j\|},
+    \end{equation}
+    其中，$\mathbf{z}_i$ 与 $\mathbf{z}_j$ 分别表示样本经过编码器 $f_\theta(\cdot)$ 后的特征表示。  
+    余弦相似度通过角度关系刻画样本间的相对语义距离，保证了尺度不变性和数值稳定性。
+
+    \item \textbf{目标优化}：  
+    对比学习的核心目标是最大化正样本对的相似度并最小化负样本对的相似度。  
+    最常用的优化目标是 InfoNCE 损失函数 \cite{oord2018representation}：
+    \begin{equation}
+        \mathcal{L}_{\mathrm{InfoNCE}} = 
+        -\log 
+        \frac{\exp(\mathrm{sim}(\mathbf{z}_i, \mathbf{z}_j)/\tau)}
+        {\sum_{k=1}^{N} \exp(\mathrm{sim}(\mathbf{z}_i, \mathbf{z}_k)/\tau)},
+    \end{equation}
+    其中，$\tau$ 为温度系数，用于调整相似度分布的平滑程度，$N$ 表示候选样本数量。  
+    该损失通过软最大化机制强化正样本对的区分性，并在嵌入空间中形成自然的簇结构（Cluster Structure）。
+\end{enumerate}
+
+从信息论角度来看，InfoNCE 可被视为互信息的下界估计，其优化过程等价于最大化样本视图间共享信息的期望。  
+这种思想被称为互信息最大化原理（Mutual Information Maximization Principle），能够有效减少特征冗余并提升表达能力。  
+此外，Wang 与 Isola \cite{wang2020understanding} 提出了对比学习的两个关键理论目标：  
+（1）\textbf{对齐性（Alignment）}——正样本对在嵌入空间中的距离应尽可能接近；  
+（2）\textbf{均匀性（Uniformity）}——所有样本在单位超球面上应均匀分布，以避免塌陷（Collapse）问题。  
+对比学习的目标可视为在这两种约束之间取得平衡，从而在保持判别性的同时维持表示多样性。
+
+\section{本章小结}
+本章主要介绍了图神经网络与对比学习的相关理论基础。在图神经网络部分，首先阐述了 GNN 的一般工作流程，包括消息构造与聚合机制，并重点介绍了若干具有代表性的模型（如 GCN、GraphSAGE、GAT 与 LightGCN），以说明不同结构在特征传播与表示学习上的差异与优势。在对比学习部分，本章系统总结了其核心思想、基本流程与典型优化目标（如 InfoNCE 损失），并分析了其在特征对齐与表示均匀性方面的理论依据。  

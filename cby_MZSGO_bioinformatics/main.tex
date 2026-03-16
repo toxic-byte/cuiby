@@ -1,0 +1,518 @@
+\documentclass[unnumsec,webpdf,contemporary,large]{oup-authoring-template}%
+
+\usepackage{xr} 
+\externaldocument[S-]{supp} 
+
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{booktabs}
+\usepackage{multirow, booktabs, colortbl, xcolor}
+
+\theoremstyle{thmstyleone}%
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}%
+
+\theoremstyle{thmstyletwo}%
+\newtheorem{example}{Example}%
+\newtheorem{remark}{Remark}%
+\theoremstyle{thmstylethree}%
+\newtheorem{definition}{Definition}
+\setcitestyle{authoryear round}
+\setcitestyle{aysep={}} 
+
+
+\begin{document}
+
+\journaltitle{Bioinformatics, YYYY, 0–0}
+\DOI{10.1093/bioinformatics/xxxxx}
+\copyrightyear{2025}
+\pubyear{2025}
+\access{Advance Access Publication Date: xx xx xx}
+\appnotes{Paper}
+\firstpage{1}
+
+
+\title[MZSGO]{MZSGO: multimodal zero-shot protein function annotation via evolutionary signals and textual semantics}
+
+\author[1]{Boyue Cui}
+\author[1]{Yujuan Li}
+\author[1]{Shiqu Chen}
+\author[1]{Jiaming Wei}
+\author[1]{Xuan Wang}
+\author[2,3]{Yadong Wang\ORCID{0000-0001-6500-6217}}
+\author[1,3,$\ast$]{Junyi Li\ORCID{0000-0001-8045-5264}}
+
+\authormark{Cui et al.}
+
+\address[1]{\orgdiv{School of Computer Science and Technology}, \orgname{Harbin Institute of Technology (Shenzhen)}, \orgaddress{\street{Shenzhen},\postcode{518055}, \state{Guangdong}, \country{China}}}
+\address[2]{\orgdiv{Center for Bioinformatics, Faculty of Computing}, \orgname{Harbin Institute of Technology}, \orgaddress{\street{Harbin}, \postcode{150001}, \state{Heilongjiang}, \country{China}}}
+\address[3]{\orgdiv{Key Laboratory of Biological Bigdata, Ministry of Education}, \orgname{Harbin Institute of Technology}, \orgaddress{\street{Harbin}, \postcode{150001}, \state{Heilongjiang}, \country{China}}}
+
+\corresp[$\ast$]{Corresponding author. \href{mailto:lijunyi@hit.edu.cn}{lijunyi@hit.edu.cn}}
+
+\received{Date}{0}{Year}
+\revised{Date}{0}{Year}
+\accepted{Date}{0}{Year}
+
+\abstract{
+\textbf{Motivation:} Although deep learning has significantly propelled the field of protein function prediction, current approaches are limited by their reliance on a single or a small number of modalities. Specifically, these methods tend to rely exclusively on sequence patterns and treat protein domain data and functional labels merely as categorical tags. Consequently, they fail to capitalize on the semantic richness embedded within their textual definitions. These constraints hinder generalization to novel labels. To tackle this issue, we present MZSGO, a multimodal zero‑shot framework that fuses evolutionary signals from protein language models with semantic features derived from Large Language Models(LLMs). By employing an adaptive gated fusion mechanism, MZSGO effectively aligns sequence-based and text-based modalities to enable robust predictions for unseen labels.\\
+\textbf{Results:} By unifying protein representations and functional annotations, we bridge the semantic gap that limits current approaches. Results indicate that our model is competitive on supervised benchmarks but demonstrates a marked advantage over existing methods in zero-shot tasks. It specifically excels at recognizing previously unseen long-tail and novel Gene Ontology (GO) terms.\\
+\textbf{Availability and implementation:} The source code and datasets are available at: \url{https://github.com/toxic-byte/MZSGO}
+}
+
+
+\maketitle
+
+\section{1 Introduction}
+
+Proteins play key roles in living systems, directing intricate cellular and molecular processes. Therefore, elucidating protein function constitutes a cornerstone of biology, medicine, and drug discovery\citep{eisenberg2000protein}. Despite the exponential growth in protein sequence data driven by high-throughput sequencing technologies, the experimental verification of protein function remains resource-intensive, slow, and expensive. This widening disparity between the abundance of sequences and the scarcity of experimentally validated functions—often termed the "sequence–function gap"—has created an urgent need for robust Automated Function Prediction (AFP)\citep{friedberg2006automated} methods. Such approaches are essential for large-scale protein annotation using Gene Ontology (GO)\citep{ashburner2000gene} classifications across the Biological Process (BP), Molecular Function (MF), and Cellular Component (CC) domains.
+
+Methodologically, AFP approaches have historically been delineated into homology-based and deep learning-based categories. Early solutions adhered to the principle of "guilt-by-association". Simple baselines, such as the Naïve method\citep{kulmanov2020deepgoplus}, predict functions based on label frequency within databases, whereas alignment-based tools like Diamond\citep{diamond} transfer annotations from evolutionarily related sequences. While effective for proteins exhibiting high sequence similarity, the predictive accuracy of these methods drops significantly when processing sequences that lack significant homologs in the training data.
+
+To surmount the limitations of homology transfer, deep learning techniques have emerged to extract feature patterns directly from sequences or structures. DeepGOCNN\citep{kulmanov2020deepgoplus} employed convolutional neural networks (CNNs)\citep{o2015introduction} to capture local sequence motifs. Subsequent models sought to incorporate biological constraints; for instance, DeepGOZero\citep{kulmanov2022deepgozero} integrated GO hierarchical axioms to constrain predictions, thereby enabling zero-shot prediction for terms with explicit logical relationships. Building on the emergence of AlphaFold2\citep{jumper2021highly}, Struct2GO\citep{jiao2023struct2go} further enhanced performance by leveraging 3D structural features via graph neural networks\citep{wu2020comprehensive}.
+
+Recent research has pivoted toward integrating rich semantic knowledge and multimodal data to improve generalization. DeepGO-SE\citep{kulmanov2024protein} introduced a neuro-symbolic approach combining protein language models with formal axiomatic reasoning to approximate semantic entailment. Addressing the topological complexity of the label space, PO2GO\citep{li2024partial} utilized a novel embedding method, PO2Vec, to capture partial order relationships within the GO Directed Acyclic Graph (DAG)\citep{goeman2008multiple}. ProtGO\citep{wang2025protgo} established a framework fusing four modalities, including PLM-based representations and explainable text descriptions, while DPFunc\citep{wang2025dpfunc} supplemented sequence data with protein domain information to capture functional motifs. Notably, ProtNote\citep{char2025protnote} pioneered the application of LLMs for translating amino acid sequences directly into text-based functional descriptions. This approach effectively transforms the complex multi-label classification problem into a set of per-GO-term binary classification tasks.
+
+Despite these significant strides, existing multimodal methods face challenges in the effective fusion of heterogeneous modalities. Methods like ProtGO and DPFunc encode each modality separately, which can limit their ability to model the rich semantic correspondence between sequence features and textual descriptions. Furthermore, while innovative, ProtNote exhibits distinct limitations: it relies on rudimentary one-hot encoding to represent sequence information and neglects other critical modalities, resulting in suboptimal performance in supervised settings and insufficient generalization in zero-shot scenarios. Moreover, training all ontologies jointly hampers the model’s capacity to learn features unique to each ontology(see Supplementary Data S1 for detailed experimental validation). In addition, straightforward concatenation of multimodal features can introduce noise, as different modalities contribute information unevenly. To overcome these issues, we introduce MZSGO, a zero‑shot protein function prediction framework built on multimodal semantic alignment.
+
+Drawing upon the strategy of ProtNote, we redefine the AFP task as a "Protein-GO" matching problem. MZSGO leverages pre-trained LLMs to extract deep semantic features from GO label definitions and protein domain texts, mapping them alongside protein evolutionary features into a unified latent space. We design an Adaptive Gated Fusion mechanism that dynamically balances the influence of sequence and textual modalities, allowing the model to emphasize the most informative signals. Simultaneously, inspired by dropout regularization \citep{srivastava2014dropout}, we employ an asymmetric dropout strategy to enhance robustness against modal noise. This design enables MZSGO not only to classify proteins based on learned patterns but also to infer unseen functional labels via semantic similarity.
+
+The main contributions of this work are as follows:
+\begin{itemize}
+\item We develop a new multimodal AFP framework that improves feature representation by integrating protein sequence information with domain‑specific textual descriptions.
+\item We introduce LLMs to construct a semantic space for domains and labels, enabling zero-shot prediction for unseen GO labels and alleviating the limitations of traditional supervised learning.
+\item We propose an adaptive gated fusion module together with an asymmetric dropout strategy to reduce noise in multimodal inputs. Experiments show that MZSGO achieves superior performance compared with state‑of‑the‑art approaches on standard benchmarks.
+\end{itemize}
+
+\section{2 Materials and methods}\label{sec2}
+
+\begin{figure*}[t]  
+    \centering
+    \includegraphics[width=0.85\textwidth]{picture/model_v4.pdf}
+    \caption{ Architecture of the MZSGO framework. The pipeline comprises four integrated stages: (1) multi-modal feature projection; (2) protein modality dropout during training, where dashed lines (with red crosses) indicate the stochastic discarding of protein features with a probability of p=0.15, while solid lines represent preserved modalities; (3) a gated fusion module for adaptive feature integration; (4) a binary classification head for GO function prediction.}
+    \label{fig:model_architecture}
+\end{figure*}
+
+\subsection{2.1 Overview}\label{Overview}
+
+The overall structure of our multimodal zero‑shot protein function prediction framework is shown in Fig.~\ref{fig:model_architecture}. The system consists of four interconnected components that align biological entities with their functional concepts:
+
+\begin{enumerate}
+\item Unified Feature Encoding:  We utilize two pre-trained models to extract features. ESM2-650M\citep{lin2023evolutionary} encodes protein sequences to capture evolutionary patterns. Simultaneously, Qwen3-Embedding-4B\citep{zhang2025qwen3} serves as a unified semantic encoder, projecting both structural domain descriptions (aggregated via mean pooling) and target GO term definitions into a shared latent space.
+
+\item Asymmetric Feature Dropout: To mitigate modality overfitting and enhance robustness, we introduce a stochastic dropout mechanism during training. This module randomly masks either the sequence or domain features while preserving the GO embedding, compelling the model to learn effective representations even from partial protein information.
+
+\item Label-Aware Gated Fusion: We introduce a gated fusion mechanism that dynamically integrates protein features with functional definitions. Instead of using fixed concatenation, this module assigns adaptive weights to the sequence, domain, and GO embeddings according to their shared context, enabling the model to adjust how much the functional text contributes relative to the biological signals.
+
+\item Prediction: The fused multimodal representation is projected through an MLP classifier\citep{taud2017multilayer} to generate a compatibility score, predicting the probability that the protein is associated with the specific GO function.
+\end{enumerate}
+
+
+\subsection{2.2 Datasets}\label{Datasets}
+
+To rigorously evaluate the generalization capability of our framework, particularly in zero-shot scenarios, we constructed a comprehensive benchmark based on the CAFA5 challenge and the Swiss-Prot database\citep{boutet2007uniprotkb}. By incorporating strict homology filtering and temporal partitioning of Gene Ontology (GO) versions, the data construction process simulates the real-world workflow of protein function discovery.
+
+\subsubsection{2.2.1 Supervised Training Set Construction}
+
+Our training corpus is derived from the CAFA5 dataset, adopting the data source and train/test split strategy utilized in ProtGO, while restricting data entries to those indexed in the Swiss-Prot database. This subset consists of manually reviewed proteins, ensuring high reliability in annotation quality and providing a foundation for fair comparisons with baseline methods that require structural information. We employed the Gene Ontology version released on January 1, 2023, to retrieve functional annotations. This dataset represents the known functional space, where the model learns to map protein sequences and textual descriptions to existing functional labels.
+
+Distinct from the training protocol of ProtGO, we implemented an ontology-specific filtering strategy. For each ontology category, we exclusively utilized proteins annotated with functions corresponding to that specific category, rather than employing the entire training set directly. This decision was based on the observation that proteins lacking annotations for a specific ontology in the full dataset adversely affect the performance of baseline models. Although our method remains robust on the full dataset without significant performance degradation, we pruned the training set to achieve optimal performance and ensure a rigorous and fair comparison with state-of-the-art baselines. Further details on this construction and the corresponding comparative results are elaborated in Supplementary Data S2.
+
+\subsubsection{2.2.2 Zero-shot Test Set Construction}
+The zero‑shot test set is built to assess the model’s capability to annotate proteins it has never encountered and to recognize newly appearing labels. Its design follows two key principles:
+
+\begin{enumerate}
+    \item Protein Novelty (sequence level): We selected Swiss-Prot proteins that are absent from the training set. To prevent information leakage caused by sequence similarity, we applied strict homology reduction. Using the Diamond tool, we removed test proteins that had over 30\% sequence identity with any sequence in the training set.
+    \item Label Novelty (semantic level): We implemented a temporal evaluation strategy by introducing the ontology updated on October 10, 2025. We define "Zero-shot Labels" as GO terms that exist in the 2025 version but were absent in the 2023 version. Consequently, the final zero-shot test set comprises non-homologous proteins annotated with these newly emerged functions.
+\end{enumerate}
+
+\subsubsection{2.2.3 Dataset Statistics}
+The dataset statistics are presented in Table~\ref{tab:dataset_stats}, with samples grouped into the three GO sub‑ontologies: Molecular Function (MF), Cellular Component (CC), and Biological Process (BP). Due to the complexity of biological pathways, the BP category contains the highest number of zero-shot proteins.
+
+Table~\ref{tab:label_stats} details the distribution of labels. During the testing phase, we distinguish between three types of labels:
+\begin{itemize}
+    \item Shared Labels: GO terms that appear in both the training set and the test set.
+    \item Unseen Labels: Terms existing in the test set but missing from the training data.
+    \item Zero-shot Labels: Specifically referring to new terms arising from the ontology update.
+\end{itemize}
+This rigorous distinction ensures that evaluation metrics on the zero-shot set genuinely reflect the model's reasoning capability rather than the effects of rote memorization.
+
+\begin{table}[h]
+\centering
+\caption{Dataset Statistics}
+\label{tab:dataset_stats}
+\begin{tabular}{lccc}
+\hline
+Dataset & MF & CC & BP \\
+\hline
+Training Set & 50,874 & 51,743 & 51,618 \\
+Test Set & 5,584 & 5,764 & 5,712 \\
+Zero-shot & 555 & 17 & 3,687 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Label Statistics}
+\label{tab:label_stats}
+\begin{tabular}{lccc}
+\hline
+Label Category & MF & CC & BP \\
+\hline
+Total Labels & 7,007 & 2,803 & 20,639 \\
+Unseen Labels & 191 & 26 & 328 \\
+Shared Labels & 2,983 & 1,581 & 11,691 \\
+Training-only Labels & 3,833 & 1,196 & 8,620 \\
+Zero-shot Labels & 35 & 6 & 34 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{2.3 Feature Extraction Phase}
+The primary goal of the feature extraction stage is to encode diverse biological inputs—protein sequences, domain descriptions, and functional definitions—into dense vector embeddings. Example input data are provided in Supplementary Data S3. We employ advanced pre‑trained models to capture the intrinsic features of each modality, avoiding the need to build encoders from the ground up.
+
+\subsubsection{2.3.1 Protein Sequence Representation}
+To capture the evolutionary signals and physicochemical properties inherent in the primary sequence, we utilize the ESM2-650M model. This Transformer-based\citep{vaswani2017attention} network, pre-trained on millions of sequences, yields high-fidelity embeddings that reflect both protein structure and function. Let a protein sequence be denoted as $P = \{a_1, a_2, \dots, a_L\}$, where $L$ is the sequence length and $a_i$ is the specific residue at position $i$. We feed this sequence into ESM-2 to extract token-level representations from the last hidden layer. Finally, a global fixed-dimensional representation is obtained by mean pooling all residue embeddings:
+\begin{equation}
+    \mathbf{E}_{seq} = \frac{1}{L} \sum_{i=1}^{L} \text{ESM}(a_i)
+\end{equation}
+where $\text{ESM}(a_i) \in \mathbb{R}^{d_{seq}}$ is the embedding of the $i$-th residue, and $\mathbf{E}_{seq} \in \mathbb{R}^{d_{seq}}$ serves as the raw evolutionary feature vector of the protein.
+
+\subsubsection{2.3.2 Semantic Text Representation}
+To bridge the semantic gap between biological entities and natural language, we employ Qwen3-Embedding-4B, a large-scale text embedding model, as our unified semantic encoder. To obtain fixed‑length vectors for functional labels and protein domains, we employ pooling strategies designed to suit the structure of each type of text.
+
+\paragraph{Label Definition Encoding:}
+For each GO term, we utilize its official textual definition as a semantic anchor. Let $T_{GO}$ be the description text of a specific functional label, consisting of $N$ tokens. The Qwen model outputs a sequence of token embeddings $\{h_1, h_2, \dots, h_N\}$. We perform a \textit{single mean pooling} operation over these tokens to obtain the global semantic vector for the label:
+
+\begin{equation}
+    \mathbf{E}_{label} = \frac{1}{N} \sum_{n=1}^{N} h_n
+\end{equation}
+where $\mathbf{E}_{label} \in \mathbb{R}^{d_{text}}$ captures the semantic meaning of the function, enabling the model to generalize to unseen labels based on textual similarity.
+
+\paragraph{Domain Description Encoding:}
+Proteins often contain multiple functional domains. Let $\mathcal{D} = \{d_1, d_2, \dots, d_K\}$ denote the set of domain descriptions associated with a protein, where $K$ is the total number of domains. The domain encoding procedure adopts a \textit{two-level mean pooling} strategy:
+\begin{enumerate}
+    \item Token-level Pooling (First Pooling): For the $k$-th domain description $d_k$ consisting of $M_k$ tokens, we first aggregate its token embeddings $\{h_{k,1}, \dots, h_{k,M_k}\}$ to generate a specific domain embedding $\mathbf{e}_k$:
+    \begin{equation}
+        \mathbf{e}_k = \frac{1}{M_k} \sum_{m=1}^{M_k} h_{k,m}
+    \end{equation}
+
+    \item Domain-level Pooling (Second Pooling): To form a unified domain feature representation for the entire protein, we aggregate the embeddings of all $K$ domains associated with that protein:
+    \begin{equation}
+        \mathbf{E}_{dom} = \frac{1}{K} \sum_{k=1}^{K} \mathbf{e}_k
+    \end{equation}
+\end{enumerate}
+where $\mathbf{E}_{dom} \in \mathbb{R}^{d_{text}}$. If a protein has no annotated domains, a zero vector is used as a placeholder. According to the InterPro database\citep{blum2025interpro}, over 80\% of proteins in the UniProtKB database\citep{uniprot2025uniprot} have matching domain information, demonstrating the broad applicability of domain-based features in our framework.
+
+\subsection{2.4 Training Stage}
+The objective of the training phase is to learn a mapping function that estimates the likelihood that a protein $P$ is linked to a particular Gene Ontology (GO) term $T$. Our architecture employs a custom-designed Gated Fusion Network, which adaptively weighs the importance of sequence evolutionary information, structural domain features, and semantic functional descriptions during the decision-making process. The pseudo-code of the training procedure is presented in Supplementary Data S4.
+
+\subsubsection{2.4.1 Feature Projection and Modality-Specific Dropout}
+
+Let $\mathbf{E}_{seq}$, $\mathbf{E}_{dom}$, and $\mathbf{E}_{label}$ denote the input embeddings for the protein sequence (ESM), protein domains, and GO labels, respectively. To map these heterogeneous representations into a shared latent space of dimension $d_{model}$, we employ three independent Multi-Layer Perceptrons (MLPs). Each projection block comprises a linear layer followed by Layer Normalization (LN) \citep{ba2016layer} and a GELU activation \citep{hendrycks2016gaussian}:
+\begin{equation}
+\mathbf{h}_{m} = \text{Dropout}(\text{GELU}(\text{LN}(\mathbf{W}_m \mathbf{E}_m + \mathbf{b}_m)))
+\end{equation}
+where $m \in \{\text{seq}, \text{dom}, \text{label}\}$ indicates the modality, and $\mathbf{h}_m \in \mathbb{R}^{d_{\text{model}}}$ is the projected feature vector.
+
+To prevent over-reliance on a single protein modality and simulate missing data scenarios, we introduce a Modality-Specific Dropout strategy during training. We define a binary mask $\mathbf{M} = [m_{seq}, m_{dom}]$, where each modality is independently dropped with probability $p = 0.15$. Specifically, we sample $r_{seq}, r_{dom} \sim \text{Uniform}(0, 1)$ and set:
+\begin{equation}
+m_{seq} = \mathbb{I}[r_{seq} > p], \quad m_{dom} = \mathbb{I}[r_{dom} > p]
+\end{equation}
+The masked features are computed as $\hat{\mathbf{h}}_{\text{seq}} = \mathbf{h}_{\text{seq}} \cdot m_{\text{seq}}$ and $\hat{\mathbf{h}}_{\text{dom}} = \mathbf{h}_{\text{dom}} \cdot m_{\text{dom}}$. To guarantee at least one protein modality is available, we implement a forced retention mechanism. If both masks are zero ($m_{seq} = m_{dom} = 0$), we randomly force one to 1:
+\begin{equation}
+\text{if } m_{seq} = m_{dom} = 0: \quad m_k \leftarrow 1, \quad k \sim \text{Uniform}\{seq, dom\}
+\end{equation}
+This ensures meaningful input while maintaining regularization. During inference, no dropout is applied, allowing the model to leverage full multimodal information.
+
+\subsubsection{2.4.2 Adaptive Gated Fusion Mechanism}
+To effectively integrate the multimodal features, we design a Gated Fusion Module that learns to assign adaptive importance weights to each information source. First, we concatenate the features to construct a global context vector, which is passed through a gate network to generate attention scores:
+
+\begin{equation}
+    \mathbf{S} = [\hat{\mathbf{h}}_{dom} \parallel \hat{\mathbf{h}}_{seq} \parallel \mathbf{h}_{label}]
+\end{equation}
+\begin{equation}
+    \boldsymbol{\alpha} = \text{Softmax}(\mathbf{W}_{\text{gate}} \cdot \text{ReLU}(\text{LN}(\mathbf{W}_{\text{ctx}}\mathbf{S})))
+\end{equation}
+
+where $\parallel$ indicates concatenation, and $\boldsymbol{\alpha} \in \mathbb{R}^{3}$ denotes the normalized gate weights assigned to the three modalities. Simultaneously, each individual feature is passed through a transformation layer $\phi(\cdot)$. The final fused representation $\mathbf{H}_{fused}$ is obtained via a weighted summation:
+
+\begin{equation}
+    \mathbf{H}_{fused} = \sum_{k=1}^{3} \alpha_k \cdot \phi(\mathbf{h}_k)
+\end{equation}
+
+Where k indexes the three modalities (sequence, domain, label).
+This mechanism allows the model to dynamically adjust its focus, for instance, by assigning higher weight to domain features when structural motifs are prominent, or relying more on sequence features when domain information is sparse.
+
+\subsubsection{2.4.3 Optimization Objective}
+The fused representation $\mathbf{H}_{\text{fused}}$ is passed through a final classifier MLP to generate a scalar logit. The predicted probability $\hat{y}$ of the protein possessing a specific function is obtained via the sigmoid activation function:
+\begin{equation}
+    \hat{y} = \sigma(\mathbf{W}_{\text{out}}\mathbf{H}_{\text{fused}} + b_{\text{out}})
+\end{equation}
+
+We formulate the protein function prediction problem as a binary classification task. However, to address the varying degrees of class imbalance inherent in different GO sub-ontologies, we employ distinct loss functions for specific branches.
+
+For the BP and MF sub-ontologies, we train the model using the standard Binary Cross-Entropy (BCE) loss:
+\begin{equation}
+    \mathcal{L}_{\text{BCE}} = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right]
+\end{equation}
+where $y_i \in \{0, 1\}$ indicates the ground-truth label of whether the protein is associated with the corresponding function, and $N$ represents the number of samples.
+
+For the CC sub-ontology, we adopt the Focal Loss to down-weight the contribution of easy negatives and focus training on hard examples (for a detailed analysis of loss function selection, please refer to Supplementary Data S5):
+\begin{equation}
+\begin{split}
+    \mathcal{L}_{\text{Focal}} = -\frac{1}{N} \sum_{i=1}^{N} \Big[ & \alpha (1 - \hat{y}_i)^\gamma y_i \log(\hat{y}_i) \\
+    & + (1 - \alpha) \hat{y}_i^\gamma (1 - y_i) \log(1 - \hat{y}_i) \Big]
+\end{split}
+\end{equation}
+where $\alpha$ is a weighting factor to balance positive and negative classes, and $\gamma$ is the focusing parameter that modulates the loss for well-classified examples.
+
+\section{3 Experimental Results and Analysis}
+
+\subsection{3.1 Metrics for Evaluation}
+To thoroughly assess the effectiveness of our model in protein function prediction, especially its performance in generalized zero-shot settings, we adopt a diverse set of evaluation metrics. In line with the CAFA challenge protocol\citep{zhou2019cafa}, we primarily report protein-centric Fmax and AUPR to quantify overall performance.
+
+$F_{max}$ is a threshold-dependent metric. It determines the optimal F1-score by calculating precision and recall values over a range of decision thresholds from 0 to 1, effectively highlighting the model's peak accuracy. Conversely, the Area Under the Precision–Recall Curve (AUPR) functions independently of specific thresholds. Given the significant class imbalance inherent to functional annotation tasks, AUPR provides a more robust assessment of global performance across all potential thresholds.
+
+To further assess the model’s capability to identify novel functions, we divide the label space into a “Seen Label Set” (present during training) and an “Unseen Label Set” (not observed in training). We calculate Seen AUPR and Unseen AUPR to evaluate the model's fit to known functions and its ability to transfer semantic knowledge to new functions, respectively. To assess the balance between known and unknown functions, we adopt the Harmonic Mean (H) of Seen AUPR and Unseen AUPR as a critical metric. A high $H$ value is achieved only when the model performs well on both seen and unseen labels, thereby demonstrating robust generalization capabilities. Comprehensive mathematical definitions for these metrics and experiments regarding weighted correlation metrics are provided in Supplementary Data S6.
+
+\subsection{Experimental Setup}
+
+Our framework was implemented using PyTorch \citep{paszke2019pytorch}. To align heterogeneous modalities, we project the 1280-dimensional ESM embeddings and 2560-dimensional text/domain features into a unified latent space ($d_{model} = 512$). These features are concatenated and processed by the Gated Fusion Network—a two-layer MLP—to compute adaptive modality weights, followed by a transformation layer. The fused representation is finally compressed to 256 dimensions for classification.
+
+Training was conducted on a single NVIDIA A6000 GPU (48GB) using the Adam optimizer \citep{kingma2014adam} with a learning rate of $5 \times 10^{-4}$ and a batch size of 16. To mitigate overfitting, we applied a neuron-level dropout rate of 0.5. Considering the varying complexities of the sub-ontologies, the model was trained for 30 epochs on BP and 20 epochs on both MF and CC. For optimization, we employed BCE loss for BP and MF, while using Focal Loss ($\gamma=2$, no $\alpha$) for CC to address class imbalance.
+
+\subsection{3.3 Performance Comparison}
+We validate the effectiveness of MZSGO by contrasting its results with those obtained from ten advanced baseline methods. These baseline methods span three major categories: (1) Traditional methods (Naive, Diamond), which rely on label frequency or sequence homology; (2) Deep learning-based methods (DeepGOCNN, DeepGOZero, Struct2GO, PO2GO, DeepGO-SE), which utilize convolutional networks, graph neural networks, or neuro-symbolic reasoning; and (3) Multimodal/LLM-based methods (ProtGO, DPFunc, ProtNote), which integrate textual or domain information. Table \ref{tab:comparison_general} summarizes the performance comparison for the three ontologies. 
+
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\begin{table*}[htbp]
+\centering
+\caption{Performance comparison between MZSGO and state-of-the-art methods on the test set. The top-performing results are shown in \textbf{bold}, and the runner‑up results are \underline{underlined}.}
+\label{tab:comparison_general}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}llC{2.2cm}C{2.2cm}C{2.2cm}C{2.2cm}C{2.2cm}@{}}
+\toprule
+\textbf{Ontology} & \textbf{Model} & \textbf{Fmax}$\uparrow$ & \textbf{AUPR}$\uparrow$ & \textbf{Unseen AUPR}$\uparrow$ & \textbf{Seen AUPR}$\uparrow$ & \textbf{H}$\uparrow$ \\
+\midrule
+\multirow{11}{*}{\textbf{BP}} 
+ & Naive & 0.2991 & 0.2073 & 0.0025 & 0.2076 & 0.0049 \\
+ & Diamond & 0.4703 & 0.2913 & 0.0025 & 0.2934 & 0.0050 \\
+ & DeepGOCNN (2020) & 0.3964 & 0.3676 & 0.0025 & 0.3684 & 0.0050 \\
+ & DeepGOZero (2022) & 0.4888 & 0.4535 & 0.0025 & 0.4558 & 0.0050 \\
+ & Struct2GO (2023) & 0.4022 & 0.3744 & 0.0025 & 0.3747 & 0.0050 \\
+ & PO2GO (2024) & 0.2975 & 0.2303 & 0.0025 & 0.2307 & 0.0049 \\
+ & DeepGO-SE (2024) & \underline{0.5006} & 0.4373 & 0.0025 & 0.4404 & 0.0050 \\
+ & ProtGO (2025) & 0.4636 & 0.4377 & 0.0025 & 0.4410 & 0.0050 \\
+ & DPFunc (2025) & 0.4984 & \underline{0.4902} & 0.0069 & \underline{0.4936} & 0.0136 \\
+ & ProtNote (2025) & 0.3555 & 0.2993 & \underline{0.0303} & 0.2997 & \underline{0.0550} \\
+ & \textbf{MZSGO (Ours)} & \textbf{0.5045} & \textbf{0.5008} & \textbf{0.2393} & \textbf{0.5021} & \textbf{0.3241} \\
+\midrule
+\multirow{11}{*}{\textbf{MF}} 
+ & Naive & 0.5496 & 0.3318 & 0.0032 & 0.3327 & 0.0063 \\
+ & Diamond & 0.6727 & 0.3330 & 0.0032 & 0.3366 & 0.0063 \\
+ & DeepGOCNN (2020) & 0.6603 & 0.5225 & 0.0032 & 0.5242 & 0.0064 \\
+ & DeepGOZero (2022) & 0.7441 & 0.6333 & 0.0032 & 0.6380 & 0.0064 \\
+ & Struct2GO (2023) & 0.6564 & 0.5940 & 0.0032 & 0.5962 & 0.0064 \\
+ & PO2GO (2024) & 0.5496 & 0.4136 & 0.0032 & 0.4148 & 0.0064 \\
+ & DeepGO-SE (2024) & 0.7481 & 0.6332 & 0.0032 & 0.6376 & 0.0064 \\
+ & ProtGO (2025) & 0.7262 & \underline{0.7399} & 0.0032 & \underline{0.7453} & 0.0064 \\
+ & DPFunc (2025) & \underline{0.7495} & \textbf{0.7416} & 0.0051 & \textbf{0.7480} & 0.0101 \\
+ & ProtNote (2025) & 0.6140 & 0.5283 & \underline{0.0490} & 0.5301 & \underline{0.0897} \\
+ & \textbf{MZSGO (Ours)} & \textbf{0.7611} & 0.7337 & \textbf{0.4806} & 0.7380 & \textbf{0.5821} \\
+\midrule
+\multirow{11}{*}{\textbf{CC}} 
+ & Naive & 0.6143 & 0.0793 & 0.0207 & 0.5270 & 0.0398 \\
+ & Diamond & 0.6331 & 0.3076 & 0.0207 & 0.3093 & 0.0388 \\
+ & DeepGOCNN (2020) & 0.6918 & 0.5284 & 0.0207 & 0.5292 & 0.0398 \\
+ & DeepGOZero (2022) & 0.7075 & 0.6598 & 0.0207 & 0.6612 & 0.0401 \\
+ & Struct2GO (2023) & 0.6989 & 0.7380 & 0.0207 & 0.7382 & 0.0403 \\
+ & PO2GO (2024) & 0.6143 & 0.5828 & 0.0207 & 0.5830 & 0.0400 \\
+ & DeepGO-SE (2024) & 0.7379 & 0.6991 & 0.0207 & 0.7003 & 0.0402 \\
+ & ProtGO (2025) & 0.7209 & \underline{0.7717} & 0.0207 & \underline{0.7727} & 0.0403 \\
+ & DPFunc (2025) & \underline{0.7386} & 0.7709 & 0.0274 & 0.7722 & 0.0529 \\
+ & ProtNote (2025) & 0.6636 & 0.6605 & \underline{0.2530} & 0.6607 & \underline{0.3659} \\
+ & \textbf{MZSGO (Ours)} & \textbf{0.7470} & \textbf{0.7726} & \textbf{0.5862} & \textbf{0.7733} & \textbf{0.6669} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+\subsubsection{3.3.1 Performance on General Test Set}
+In conventional classification settings (Fmax and AUPR), MZSGO delivers the best results across all three ontologies, highlighting the effectiveness of our multimodal fusion approach.
+
+\begin{itemize}
+    \item BP Ontology: In the most challenging BP branch, MZSGO achieved an Fmax of 0.5045, surpassing strong competitors such as domain-aware method DPFunc (0.4984) and DeepGO-SE (0.5006).
+    \item MF and CC Ontologies: Our model maintained its lead with Fmax scores of 0.7611 and 0.7470, respectively.
+\end{itemize}
+
+Unlike methods that rely on a single modality, MZSGO effectively integrates protein sequence features (ESM) with domain descriptions via an adaptive gated fusion mechanism. This enables the model to integrate complementary semantic cues, producing stronger feature representations that surpass those of existing methods.
+
+\subsubsection{3.3.2 Evaluation of Unseen Capabilities}
+A key strength of MZSGO is its capacity to infer functions associated with unseen labels. This zero-shot performance is reflected by the Unseen AUPR and the H reported in Table \ref{tab:comparison_general}.
+
+Traditional alignment methods and standard deep learning models exhibited limited generalization in zero-shot scenarios. This is primarily because these models typically treat labels as independent one-hot identifiers. During training, the optimization process suppresses the weights corresponding to unseen labels since they never appear as positive samples, effectively forcing the model to predict a probability of zero for any class not present in the training set. Notably, although DeepGOZero is theoretically capable of zero-shot prediction via logical constraints, it fails to effectively predict rare classes that lack explicit GO axioms, resulting in an AUPR score near 0. While ProtNote demonstrated some capability by leveraging LLMs (e.g., 0.0303 in BP), MZSGO outperformed it by a substantial margin. Specifically, MZSGO achieved a Unseen AUPR of 0.2393 in the BP branch—an approximately 8-fold improvement over ProtNote. Consistent trends are observed within the MF and CC ontologies, with MZSGO achieving Unseen AUPR values of 0.4806 and 0.5862, respectively.
+
+The Harmonic Mean (H), which balances performance on seen and unseen classes, further highlights the comprehensive strength of our model. MZSGO achieved H scores of 0.3241 (BP), 0.5821 (MF), and 0.6669 (CC), significantly outperforming the runner-up ProtNote (0.0550, 0.0897, and 0.3659). This confirms that MZSGO does not merely memorize training labels but learns a generalized semantic alignment between protein features and functional descriptions.
+
+\subsubsection{3.3.3 Detailed Evaluation on Zero-shot Scenarios}
+
+To rigorously validate this generalization ability, we conducted a dedicated experiment on a pure zero-shot test set, comparing MZSGO directly with ProtNote, the strongest baseline for unseen classes. The results are detailed in Table \ref{tab:comparison_zeroshot}. MZSGO consistently outperforms ProtNote in terms of Fmax and AUPR across all three ontologies. A granular analysis of Precision and Recall reveals distinct behavioral differences and improvements:
+
+\begin{table}[htbp]
+\centering
+\caption{Performance comparison on a dedicated true zero-shot test set constructed via temporal evolution. This evaluation assesses the model's ability to predict GO functional labels that emerged in the 2025 version but were absent from the training cutoff.}
+\label{tab:comparison_zeroshot}
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Ontology} & \textbf{Model} & \textbf{Fmax} & \textbf{AUPR} & \textbf{Precision} & \textbf{Recall} \\
+\midrule
+\multirow{2}{*}{BP} 
+ & ProtNote  & 0.3763 & 0.2705 & 0.2580 & \textbf{0.6951} \\
+ & \textbf{MZSGO} & \textbf{0.4881} & \textbf{0.4546} & \textbf{0.4475} & 0.5369 \\
+\midrule
+\multirow{2}{*}{MF} 
+ & ProtNote & 0.3599 & 0.3393 & 0.4545 & 0.2979 \\
+ & \textbf{MZSGO} & \textbf{0.5982} & \textbf{0.5435} & \textbf{0.6261} & \textbf{0.5727} \\
+\midrule
+\multirow{2}{*}{CC} 
+ & ProtNote & 0.2983 & 0.1652 & 0.1853 & 0.7647 \\
+ & \textbf{MZSGO} & \textbf{0.6610} & \textbf{0.6291} & \textbf{0.5521} & \textbf{0.8235} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item Balanced Precision-Recall Trade-off in BP: In the Biological Process ontology, ProtNote exhibits a high Recall (0.6951) but suffers from low Precision (0.2580), suggesting a tendency to over-predict functional labels. In contrast, MZSGO achieves a more balanced trade-off, improving Precision to 0.4475 while maintaining a competitive Recall of 0.5369. This results in a substantially higher Fmax score (0.4881 vs. 0.3763), indicating more reliable predictions for complex biological processes.
+    
+    \item Comprehensive Dominance in MF and CC: MZSGO demonstrates robust superiority in both the Molecular Function (MF) and Cellular Component (CC) ontologies, significantly outperforming baseline methods across all four evaluation metrics. To further investigate its underlying mechanism, we visualized the functional text embeddings and domain text embeddings for these ontologies. The results reveal that in correctly predicted samples, the domain embedding vectors are spatially closer to the functional text embedding vectors; for a detailed analysis of this phenomenon, please refer to Supplementary Data S7.
+    \begin{itemize}
+        \item In MF, MZSGO attained an Fmax score of 0.5982 compared to ProtNote's 0.3599. Notably, it secures higher Precision (0.6261 vs. 0.4545) and Recall (0.5727 vs. 0.2979), demonstrating its capability to identify unseen molecular functions accurately.
+        \item In CC, the performance gap is most pronounced. While ProtNote struggles with Precision (0.1853)—likely due to "functional hallucinations" caused by broad textual matching—MZSGO achieves a Precision of 0.5521. It also achieves a superior Recall of 0.8235 (vs. 0.7647). This combination leads to a remarkable Fmax of 0.6610, more than doubling the baseline's performance (0.2983).
+    \end{itemize}
+\end{itemize}
+
+This comparison demonstrates that MZSGO provides highly reliable predictions for novel functional categories. By anchoring predictions in a domain-specific semantic space, MZSGO avoids the noise and false positives common in other text-based models, making it a trustworthy tool for annotating proteins with evolving functional definitions.
+
+\subsection{3.4 Ablation Study}
+
+To assess the contribution of each component—particularly multimodal features, the fusion module, and the optimization strategy—we perform ablations on the CC ontology. Variants fall into five groups: (1) Single-modality encoders (ESM Only, Domain Only); (2) Feature representation changes (Domain One-hot, PO2Vec label embeddings); (3) Architectural alterations (Simple Concat, No Feature Drop); (4) Encoder substitutions (BioGPT\citep{luo2022biogpt}, BiomedBERT\citep{chakraborty2020biomedbert}, Qwen3-Embedding-0.6B, ESM2-150M); and (5) Loss function variants (BCE Loss, Weighted BCE).
+
+As summarized in Table \ref{tab:ablation_cc}, MZSGO achieves the highest overall harmonic mean (H=0.6669), surpassing all ablations in balancing seen and unseen performance.
+
+Removing semantic domain information causes the most severe degradation. ESM Only yields an extremely low Unseen Fmax (0.0793), indicating that sequence features alone generalize poorly. Domain Only performs better (0.2322) and Domain One-hot (0.2000) remains far below MZSGO, showing that zero-shot transfer depends on the semantic content of domain descriptions, not mere identifiers.
+
+The fusion mechanism is likewise crucial. Replacing gated fusion with Simple Concat reduces H to 0.6000, illustrating that naive concatenation cannot effectively integrate modalities. Using PO2Vec label embeddings also harms zero-shot performance (Unseen AUPR 0.3193). Beyond its dependence on the fixed GO graph topology, PO2Vec embeddings are less aligned with sequence and text modalities, further widening the semantic gap during multimodal fusion.
+
+Regarding optimization objectives, standard BCE Loss achieves a high Fmax (0.7501) but lags in overall AUPR (0.7143). While adding positive weights (BCE Loss Weighted) improves Unseen Fmax (0.4444), it significantly degrades the overall AUPR (0.7450) and H score (0.6095). Our adoption of Focal Loss (MZSGO) effectively balances the learning of hard examples, yielding the best trade-off.
+
+Encoder replacements uniformly underperform, confirming that MZSGO’s chosen encoders best capture complementary structure across modalities. Removing feature dropout slightly helps seen-class accuracy (Fmax 0.7544) but lowers zero-shot generalization (H=0.5714), highlighting its regularization benefit.
+
+Overall, zero-shot performance emerges from the combined strengths of semantic domain descriptions, text-based label embeddings, and the adaptive gated fusion module, which together enable robust transfer to unseen GO terms. For a detailed analysis of the adaptive gate weights assigned to different modalities across ontologies, please refer to Supplementary Data S8.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Ablation results on the CC ontology. The best-performing scores are shown in bold. The reported metrics include overall Fmax and AUPR, as well as zero‑shot–specific measures. H denotes the Harmonic Mean between seen and unseen performance.}
+  \label{tab:ablation_cc}
+  \resizebox{\linewidth}{!}{
+    \begin{tabular}{lccccc}
+    \toprule
+    \textbf{Method} & \textbf{Fmax} & \textbf{AUPR} & \textbf{Unseen AUPR} & \textbf{Unseen Fmax} & \textbf{H} \\
+    \midrule
+    \multicolumn{6}{l}{\textit{Modality Ablation}} \\
+    ESM Only & 0.7319 & 0.7344 & 0.5203 & 0.0793 & 0.6094 \\
+    Domain Only & 0.7311 & 0.7052 & 0.5187 & 0.2322 & 0.6012 \\
+    \midrule
+    \multicolumn{6}{l}{\textit{Feature \& Architecture Ablation}} \\
+    Domain One-hot & 0.7203 & 0.6731 & 0.5047 & 0.2000 & 0.5889 \\
+    Use PO2Vec Embedding & 0.7406 & 0.7196 & 0.3193 & 0.1818 & 0.4423 \\
+    No Feature Drop & \textbf{0.7544} & 0.6857 & 0.4898 & 0.2500 & 0.5714 \\
+    Simple Concat & 0.7381 & 0.7009 & 0.5245 & 0.2469 & 0.6000 \\
+    \midrule
+    \multicolumn{6}{l}{\textit{Encoder Variants}} \\
+    BioGPT & 0.7419 & 0.7198 & 0.4258 & 0.1935 & 0.5351 \\
+    BiomedBERT & 0.7406 & 0.7218 & 0.5647 & 0.2000 & 0.6337 \\
+    Qwen3-0.6B & 0.7406 & 0.7282 & 0.5469 & 0.1379 & 0.6247 \\
+    ESM-150M & 0.7385 & 0.7310 & 0.3864 & 0.1333 & 0.5056 \\
+    \midrule
+    \multicolumn{6}{l}{\textit{Loss Function Variants}} \\
+    BCE Loss & 0.7501 & 0.7143 & 0.5824 & 0.2581 & 0.6421 \\
+    BCE Weighted & 0.7199 & 0.7450 & 0.5127 & 0.4444 & 0.6095 \\
+    \midrule
+    \textbf{MZSGO (Ours)} & 0.7470 & \textbf{0.7726} & \textbf{0.5862} & \textbf{0.5665} & \textbf{0.6669} \\
+    \bottomrule
+    \end{tabular}%
+  }
+\end{table}
+
+
+\subsection{3.5 Analysis of Parameter Sensitivity}
+To assess the robustness of our model, we investigated the impact of two critical hyperparameters: the dropout rate and the hidden vector dimension. We adopted a controlled-variable strategy, where one parameter was varied at a time while the others remained fixed. The performance fluctuations, measured by the Area Under the Precision–Recall Curve (AUPR) across the CC and MF ontologies, are depicted in Fig.~\ref{fig:sensitivity_analysis}.
+
+First, we examined the influence of the dropout rate, which is applied after feature extraction to reduce overfitting by randomly disabling a subset of neurons. Dropout values between 0.3 and 0.7 were evaluated. As illustrated in Fig.~\ref{fig:sensitivity_analysis}(a) and (b), the model performs best with a dropout rate of 0.5, achieving AUPR scores of 0.7726 on CC and 0.7377 on MF. Lower dropout levels (e.g., 0.3) lead to overfitting and weaker generalization, while higher rates (e.g., 0.7) degrade performance (AUPR falls to 0.7610 for CC and 0.7228 for MF) due to excessive information loss. Consequently, a dropout rate of 0.5 is adopted as the optimal configuration.
+
+Subsequently, we evaluated the impact of the hidden vector dimension size, varying it from 128 to 1024. This parameter controls the capacity of the model to represent protein features; a dimension that is too small may fail to capture necessary semantic details, while a dimension that is too large may introduce noise or lead to overfitting. As shown in Fig.~\ref{fig:sensitivity_analysis}(c) and (d), expanding the hidden dimension from 128 to 512 leads to a consistent performance gain for both ontologies. For CC, the performance peaks at 512 (AUPR 0.7726) and subsequently degrades as the dimension increases to 768 and 1024. Interestingly, while the MF ontology shows continued improvement at dimension 1024 (AUPR 0.8133), the performance on CC drops significantly to 0.7371 at this size. To build a model architecture that generalizes effectively across different Gene Ontology categories without requiring task‑specific adjustments, we set the hidden vector size to 512, providing a good trade‑off between representational capacity and computational cost.
+
+\begin{figure}[htbp]
+    \centering
+    \subfloat[Impact of Dropout (CC)]{
+        \includegraphics[width=0.4\linewidth]{picture/dropout_aupr_cco.png}
+        \label{fig:dropout_cco}
+    }
+    \hfill
+    \subfloat[Impact of Dropout (MF)]{
+        \includegraphics[width=0.4\linewidth]{picture/dropout_aupr_mfo.png}
+        \label{fig:dropout_mfo}
+    }
+    
+    \vspace{0.2cm} 
+    
+    \subfloat[Impact of Hidden Dim (CC)]{
+        \includegraphics[width=0.4\linewidth]{picture/hidden_dim_aupr_cco.png}
+        \label{fig:hidden_cco}
+    }
+    \hfill
+    \subfloat[Impact of Hidden Dim (MF)]{
+        \includegraphics[width=0.4\linewidth]{picture/hidden_dim_aupr_mfo.png}
+        \label{fig:hidden_mfo}
+    }
+    
+    \caption{Parameter sensitivity analysis. (a) and (b) show AUPR with varying dropout rates. (c) and (d) show the impact of hidden dimension size.}
+    \label{fig:sensitivity_analysis}
+\end{figure}
+
+\section{4 Conclusion}
+
+In this work, we introduce MZSGO, a multimodal framework for protein function prediction that tackles the challenges of zero-shot generalization through enhanced semantic alignment. This model combines protein evolutionary patterns with high-level semantic representations, integrating the advantages of protein language models and LLMs to effectively predict functions for both seen and unseen labels. Specifically, we utilize ESM-2 to extract evolutionary features and leverage the Qwen3-Embedding model to project protein domain descriptions and Gene Ontology definitions into a unified semantic space. By employing an Adaptive Gated Fusion mechanism and Asymmetric Dropout, MZSGO dynamically calibrates the contribution of sequence and text modalities, ensuring robust feature learning even in the presence of noise or missing data. The approach presented in this study incorporates comprehensive textual semantics into the AFP task, effectively linking biological entities with natural language descriptions. By moving beyond traditional classifiers that treat labels as independent IDs, the model can infer functions through semantic similarity. Our comparative analysis demonstrates that MZSGO achieves superior performance, establishing a new state-of-the-art. Specifically, in zero-shot scenarios, it significantly outperforms current multimodal and deep learning approaches in terms of both precision and recall.
+
+In future work, we plan to further investigate additional dimensions of protein representation. While MZSGO successfully integrates sequence and textual domain information, the 3D spatial arrangement of proteins remains a critical determinant of function. We plan to incorporate structural features predicted by AlphaFold2 into our multimodal framework. By fusing 3D structural coordinates with our existing sequence-text alignment, we aim to capture functional motifs that are structurally conserved but divergent in sequence, further enhancing prediction accuracy.
+
+Furthermore, we intend to enhance the model's capacity for semantic reasoning. While the existing MZSGO approach depends largely on textual descriptions of GO terms to perform zero-shot inference, this overlooks the structural richness of the Gene Ontology. Since GO is structured as a DAG containing deep logical dependencies, our future work will focus on fusing these graph-based topological constraints with LLM-derived semantic embeddings. We anticipate that merging explicit logical structures with implicit semantic nuances will yield a label space that is more biologically coherent, ultimately boosting the model's navigation through intricate functional hierarchies.\citep{hoang2025locality}
+
+\section{Author Contributions}
+
+Boyue Cui (Conceptualization [equal], Methodology [lead], Software [lead],
+Formal analysis [lead], Visualization [lead], Writing—original draft [lead]);
+Yujuan Li (Data curation [lead], Validation [lead], Software [supporting],
+Writing—original draft [supporting]); Shiqu Chen (Formal analysis [supporting],
+Visualization [supporting], Investigation [supporting]); Jiaming Wei (Visualization [supporting]); Xuan Wang (Methodology
+[supporting], Resources [supporting]); Yadong Wang (Supervision [supporting],
+Writing—review \& editing [supporting]); and Junyi Li (Conceptualization [lead],
+Funding acquisition [lead], Project administration [lead], Supervision [lead],
+Writing—review \& editing [lead]).
+
+
+\section{Supplementary Data}
+Supplementary data are available online at Bioinformatics.
+Conflict of interest: The authors declare no competing interests.
+
+\section{Funding}
+This work was supported by the National Key R\&D Program of China (2021YFA0910700), 
+the National Natural Science Foundation of China (32470704), 
+and the Guangdong Provincial Key Laboratory of Novel Security Intelligence Technologies (2022B1212010005).
+
+\bibliographystyle{abbrvnat}
+\bibliography{reference} 
+
+\end{document}

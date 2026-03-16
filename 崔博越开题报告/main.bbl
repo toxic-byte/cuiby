@@ -1,0 +1,207 @@
+\begin{thebibliography}{10}
+\providecommand{\bibauthor}[1]{#1}
+\providecommand{\bibeditor}[1]{#1}
+\providecommand{\bibtranslator}[1]{#1}
+\providecommand{\bibtitle}[1]{#1}
+\providecommand{\bibbooktitle}[1]{#1}
+\providecommand{\bibjournal}[1]{#1}
+\providecommand{\bibmark}[1]{\mbox{#1}}
+\providecommand{\bibcountry}[1]{#1}
+\providecommand{\bibpatentid}[1]{#1}
+\providecommand{\bibedition}[1]{#1}
+\providecommand{\biborganization}[1]{#1}
+\providecommand{\bibaddress}[1]{#1}
+\providecommand{\bibpublisher}[1]{#1}
+\providecommand{\bibinstitution}[1]{#1}
+\providecommand{\bibschool}[1]{#1}
+\providecommand{\bibvolume}[1]{#1}
+\providecommand{\bibnumber}[1]{#1}
+\providecommand{\bibversion}[1]{#1}
+\providecommand{\bibpages}[1]{#1}
+\providecommand{\bibmodifydate}[1]{#1}
+\providecommand{\bibcitedate}[1]{#1}
+\providecommand{\bibyear}[1]{#1}
+\providecommand{\bibdate}[1]{#1}
+\providecommand{\biburl}[1]{\newline\url{#1}}
+
+\bibitem{eisenberg2000protein}
+\bibauthor{EISENBERG D\@，MARCOTTE E~M\@，XENARIOS I，et~al}\@. \bibtitle{Protein function in the post-genomic era}\bibmark{\,［J］}\@. \bibjournal{Nature}\@，\bibyear{2000}\@，\bibvolume{405}\bibnumber{（6788）\!\!}\thinspace{}\textnormal{：}\bibpages{823\textnormal{-}826}\@.
+
+\bibitem{uniprot2021uniprot}
+\bibauthor{ANON}\@. \bibtitle{UniProt: the universal protein knowledgebase in 2021}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2021}\@，\bibvolume{49}\bibnumber{（D1）\!\!}\thinspace{}\textnormal{：}\bibpages{D480\textnormal{-}D489}\@.
+
+\bibitem{boutet2016uniprotkb}
+\bibauthor{BOUTET E\@，LIEBERHERR D\@，TOGNOLLI M，et~al}\@. \bibtitle{UniProtKB/Swiss-Prot, the manually annotated section of the UniProt KnowledgeBase: how to use the entry view}\bibmark{\,［J］}\@. \bibjournal{Plant bioinformatics: methods and protocols}\@，\bibyear{2016}\thinspace{}\textnormal{：}\bibpages{23\textnormal{-}54}\@.
+
+\bibitem{wang2023large}
+\bibauthor{WANG X\@，CHEN G\@，QIAN G，et~al}\@. \bibtitle{Large-scale multi-modal pre-trained models: A comprehensive survey}\bibmark{\,［J］}\@. \bibjournal{Machine Intelligence Research}\@，\bibyear{2023}\@，\bibvolume{20}\bibnumber{（4）\!\!}\thinspace{}\textnormal{：}\bibpages{447\textnormal{-}482}\@.
+
+\bibitem{zhou2019cafa}
+\bibauthor{ZHOU N\@，JIANG Y\@，BERGQUIST T~R，et~al}\@. \bibtitle{The CAFA challenge reports improved protein function prediction and new functional annotations for hundreds of genes through experimental screens}\bibmark{\,［J］}\@. \bibjournal{Genome biology}\@，\bibyear{2019}\@，\bibvolume{20}\thinspace{}\textnormal{：}\bibpages{1\textnormal{-}23}\@.
+
+\bibitem{altschul1990basic}
+\bibauthor{ALTSCHUL S~F\@，GISH W\@，MILLER W，et~al}\@. \bibtitle{Basic local alignment search tool}\bibmark{\,［J］}\@. \bibjournal{Journal of molecular biology}\@，\bibyear{1990}\@，\bibvolume{215}\bibnumber{（3）\!\!}\thinspace{}\textnormal{：}\bibpages{403\textnormal{-}410}\@.
+
+\bibitem{kulmanov2020deepgoplus}
+\bibauthor{KULMANOV M\@，HOEHNDORF R}\@. \bibtitle{DeepGOPlus: improved protein function prediction from sequence}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2020}\@，\bibvolume{36}\bibnumber{（2）\!\!}\thinspace{}\textnormal{：}\bibpages{422\textnormal{-}429}\@.
+
+\bibitem{kulmanov2018deepgo}
+\bibauthor{KULMANOV M\@，KHAN M~A\@，HOEHNDORF R}\@. \bibtitle{DeepGO: predicting protein functions from sequence and interactions using a deep ontology-aware classifier}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2018}\@，\bibvolume{34}\bibnumber{（4）\!\!}\thinspace{}\textnormal{：}\bibpages{660\textnormal{-}668}\@.
+
+\bibitem{wu2023hifun}
+\bibauthor{WU J\@，QING H\@，OUYANG J，et~al}\@. \bibtitle{HiFun: homology independent protein function prediction by a novel protein-language self-attention model}\bibmark{\,［J］}\@. \bibjournal{Briefings in Bioinformatics}\@，\bibyear{2023}\@，\bibvolume{24}\bibnumber{（5）\!\!}\thinspace{}\textnormal{：}\bibpages{bbad311}\@.
+
+\bibitem{song2014parameterized}
+\bibauthor{SONG D\@，CHEN J\@，CHEN G，et~al}\@. \bibtitle{Parameterized BLOSUM matrices for protein alignment}\bibmark{\,［J］}\@. \bibjournal{IEEE/ACM Transactions on Computational Biology and Bioinformatics}\@，\bibyear{2014}\@，\bibvolume{12}\bibnumber{（3）\!\!}\thinspace{}\textnormal{：}\bibpages{686\textnormal{-}694}\@.
+
+\bibitem{xu2019sentiment}
+\bibauthor{XU G\@，MENG Y\@，QIU X，et~al}\@. \bibtitle{Sentiment analysis of comment texts based on BiLSTM}\bibmark{\,［J］}\@. \bibjournal{Ieee Access}\@，\bibyear{2019}\@，\bibvolume{7}\thinspace{}\textnormal{：}\bibpages{51522\textnormal{-}51532}\@.
+
+\bibitem{gligorijevic2021structure}
+\bibauthor{GLIGORIJEVI{\'C} V\@，RENFREW P~D\@，KOSCIOLEK T，et~al}\@. \bibtitle{Structure-based protein function prediction using graph convolutional networks}\bibmark{\,［J］}\@. \bibjournal{Nature communications}\@，\bibyear{2021}\@，\bibvolume{12}\bibnumber{（1）\!\!}\thinspace{}\textnormal{：}\bibpages{3168}\@.
+
+\bibitem{mistry2021pfam}
+\bibauthor{MISTRY J\@，CHUGURANSKY S\@，WILLIAMS L，et~al}\@. \bibtitle{Pfam: The protein families database in 2021}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2021}\@，\bibvolume{49}\bibnumber{（D1）\!\!}\thinspace{}\textnormal{：}\bibpages{D412\textnormal{-}D419}\@.
+
+\bibitem{graves2012long}
+\bibauthor{GRAVES A\@，GRAVES A}\@. \bibtitle{Long short-term memory}\bibmark{\,［J］}\@. \bibjournal{Supervised sequence labelling with recurrent neural networks}\@，\bibyear{2012}\thinspace{}\textnormal{：}\bibpages{37\textnormal{-}45}\@.
+
+\bibitem{gu2023hierarchical}
+\bibauthor{GU Z\@，LUO X\@，CHEN J，et~al}\@. \bibtitle{Hierarchical graph transformer with contrastive learning for protein function prediction}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2023}\@，\bibvolume{39}\bibnumber{（7）\!\!}\thinspace{}\textnormal{：}\bibpages{btad410}\@.
+
+\bibitem{varadi2022alphafold}
+\bibauthor{VARADI M\@，ANYANGO S\@，DESHPANDE M，et~al}\@. \bibtitle{AlphaFold Protein Structure Database: massively expanding the structural coverage of protein-sequence space with high-accuracy models}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2022}\@，\bibvolume{50}\bibnumber{（D1）\!\!}\thinspace{}\textnormal{：}\bibpages{D439\textnormal{-}D444}\@.
+
+\bibitem{jiao2023struct2go}
+\bibauthor{JIAO P\@，WANG B\@，WANG X，et~al}\@. \bibtitle{Struct2GO: protein function prediction based on graph pooling algorithm and AlphaFold2 structure information}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2023}\@，\bibvolume{39}\bibnumber{（10）\!\!}\thinspace{}\textnormal{：}\bibpages{btad637}\@.
+
+\bibitem{heinzinger2019modeling}
+\bibauthor{HEINZINGER M\@，ELNAGGAR A\@，WANG Y，et~al}\@. \bibtitle{Modeling aspects of the language of life through transfer-learning protein sequences}\bibmark{\,［J］}\@. \bibjournal{BMC bioinformatics}\@，\bibyear{2019}\@，\bibvolume{20}\thinspace{}\textnormal{：}\bibpages{1\textnormal{-}17}\@.
+
+\bibitem{grover2016node2vec}
+\bibauthor{GROVER A\@，LESKOVEC J}\@. \bibtitle{node2vec: Scalable feature learning for networks}\bibmark{\,［C］} //\thinspace{}\bibbooktitle{Proceedings of the 22nd ACM SIGKDD international conference on Knowledge discovery and data mining}\@，\bibaddress{［S.l.］}\@，\bibyear{2016}\thinspace{}\textnormal{：}\bibpages{855\textnormal{-}864}\@.
+
+\bibitem{you2021deepgraphgo}
+\bibauthor{YOU R\@，YAO S\@，MAMITSUKA H，et~al}\@. \bibtitle{DeepGraphGO: graph neural network for large-scale, multispecies protein function prediction}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2021}\@，\bibvolume{37}\bibnumber{（Supplement\_1）\!\!}\thinspace{}\textnormal{：}\bibpages{i262\textnormal{-}i271}\@.
+
+\bibitem{jones2014interproscan}
+\bibauthor{JONES P\@，BINNS D\@，CHANG H-Y，et~al}\@. \bibtitle{InterProScan 5: genome-scale protein function classification}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2014}\@，\bibvolume{30}\bibnumber{（9）\!\!}\thinspace{}\textnormal{：}\bibpages{1236\textnormal{-}1240}\@.
+
+\bibitem{kulmanov2022deepgozero}
+\bibauthor{KULMANOV M\@，HOEHNDORF R}\@. \bibtitle{DeepGOZero: improving protein function prediction from sequence and zero-shot learning based on ontology axioms}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2022}\@，\bibvolume{38}\bibnumber{（Supplement\_1）\!\!}\thinspace{}\textnormal{：}\bibpages{i238\textnormal{-}i245}\@.
+
+\bibitem{kulmanov2019embeddings}
+\bibauthor{KULMANOV M\@，LIU-WEI W\@，YAN Y，et~al}\@. \bibtitle{El embeddings: Geometric construction of models for the description logic el++}\bibmark{\,［J］}\@. \bibjournal{arXiv preprint arXiv:1902.10499}\@，\bibyear{2019}\@.
+
+\bibitem{kulmanov2024protein}
+\bibauthor{KULMANOV M\@，GUZM{\'A}N-VEGA F~J\@，DUEK~ROGGLI P，et~al}\@. \bibtitle{Protein function prediction as approximate semantic entailment}\bibmark{\,［J］}\@. \bibjournal{Nature Machine Intelligence}\@，\bibyear{2024}\@，\bibvolume{6}\bibnumber{（2）\!\!}\thinspace{}\textnormal{：}\bibpages{220\textnormal{-}228}\@.
+
+\bibitem{lin2023evolutionary}
+\bibauthor{LIN Z\@，AKIN H\@，RAO R，et~al}\@. \bibtitle{Evolutionary-scale prediction of atomic-level protein structure with a language model}\bibmark{\,［J］}\@. \bibjournal{Science}\@，\bibyear{2023}\@，\bibvolume{379}\bibnumber{（6637）\!\!}\thinspace{}\textnormal{：}\bibpages{1123\textnormal{-}1130}\@.
+
+\bibitem{zadeh1975concept}
+\bibauthor{ZADEH L~A}\@. \bibtitle{The concept of a linguistic variable and its application to approximate reasoning—I}\bibmark{\,［J］}\@. \bibjournal{Information sciences}\@，\bibyear{1975}\@，\bibvolume{8}\bibnumber{（3）\!\!}\thinspace{}\textnormal{：}\bibpages{199\textnormal{-}249}\@.
+
+\bibitem{wu2023cfago}
+\bibauthor{WU Z\@，GUO M\@，JIN X，et~al}\@. \bibtitle{CFAGO: cross-fusion of network and attributes based on attention mechanism for protein function prediction}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2023}\@，\bibvolume{39}\bibnumber{（3）\!\!}\thinspace{}\textnormal{：}\bibpages{btad123}\@.
+
+\bibitem{vaswani2017attention}
+\bibauthor{VASWANI A}\@. \bibtitle{Attention is all you need}\bibmark{\,［J］}\@. \bibjournal{arXiv preprint arXiv:1706.03762}\@，\bibyear{2017}\@.
+
+\bibitem{hu2023multimodal}
+\bibauthor{HU F\@，HU Y\@，ZHANG W，et~al}\@. \bibtitle{A multimodal protein representation framework for quantifying transferability across biochemical downstream tasks}\bibmark{\,［J］}\@. \bibjournal{Advanced Science}\@，\bibyear{2023}\@，\bibvolume{10}\bibnumber{（22）\!\!}\thinspace{}\textnormal{：}\bibpages{2301223}\@.
+
+\bibitem{clark2024text}
+\bibauthor{CLARK K\@，JAINI P}\@. \bibtitle{Text-to-image diffusion models are zero shot classifiers}\bibmark{\,［J］}\@. \bibjournal{Advances in Neural Information Processing Systems}\@，\bibyear{2024}\@，\bibvolume{36}\@.
+
+\bibitem{li2023your}
+\bibauthor{LI A~C\@，PRABHUDESAI M\@，DUGGAL S，et~al}\@. \bibtitle{Your diffusion model is secretly a zero-shot classifier}\bibmark{\,［C］} //\thinspace{}\bibbooktitle{Proceedings of the IEEE/CVF International Conference on Computer Vision}\@，\bibaddress{［S.l.］}\@，\bibyear{2023}\thinspace{}\textnormal{：}\bibpages{2206\textnormal{-}2217}\@.
+
+\bibitem{rombach2022high}
+\bibauthor{ROMBACH R\@，BLATTMANN A\@，LORENZ D，et~al}\@. \bibtitle{High-resolution image synthesis with latent diffusion models}\bibmark{\,［C］} //\thinspace{}\bibbooktitle{Proceedings of the IEEE/CVF conference on computer vision and pattern recognition}\@，\bibaddress{［S.l.］}\@，\bibyear{2022}\thinspace{}\textnormal{：}\bibpages{10684\textnormal{-}10695}\@.
+
+\bibitem{chen2023robust}
+\bibauthor{CHEN H\@，DONG Y\@，WANG Z，et~al}\@. \bibtitle{Robust classification via a single diffusion model}\bibmark{\,［J］}\@. \bibjournal{arXiv preprint arXiv:2305.15241}\@，\bibyear{2023}\@.
+
+\bibitem{kingma2013auto}
+\bibauthor{KINGMA D~P}\@. \bibtitle{Auto-encoding variational bayes}\bibmark{\,［J］}\@. \bibjournal{arXiv preprint arXiv:1312.6114}\@，\bibyear{2013}\@.
+
+\bibitem{uniprot2023uniprot}
+\bibauthor{ANON}\@. \bibtitle{UniProt: the universal protein knowledgebase in 2023}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2023}\@，\bibvolume{51}\bibnumber{（D1）\!\!}\thinspace{}\textnormal{：}\bibpages{D523\textnormal{-}D531}\@.
+
+\bibitem{huntley2015goa}
+\bibauthor{HUNTLEY R~P\@，SAWFORD T\@，MUTOWO-MEULLENET P，et~al}\@. \bibtitle{The GOA database: gene ontology annotation updates for 2015}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2015}\@，\bibvolume{43}\bibnumber{（D1）\!\!}\thinspace{}\textnormal{：}\bibpages{D1057\textnormal{-}D1063}\@.
+
+\bibitem{ashburner2000gene}
+\bibauthor{ASHBURNER M\@，BALL C~A\@，BLAKE J~A，et~al}\@. \bibtitle{Gene ontology: tool for the unification of biology}\bibmark{\,［J］}\@. \bibjournal{Nature genetics}\@，\bibyear{2000}\@，\bibvolume{25}\bibnumber{（1）\!\!}\thinspace{}\textnormal{：}\bibpages{25\textnormal{-}29}\@.
+
+\bibitem{barrell2009goa}
+\bibauthor{BARRELL D\@，DIMMER E\@，HUNTLEY R~P，et~al}\@. \bibtitle{The GOA database in 2009—an integrated Gene Ontology Annotation resource}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2009}\@，\bibvolume{37}\bibnumber{（suppl\_1）\!\!}\thinspace{}\textnormal{：}\bibpages{D396\textnormal{-}D403}\@.
+
+\bibitem{hayes2024simulating}
+\bibauthor{HAYES T\@，RAO R\@，AKIN H，et~al}\@. \bibtitle{Simulating 500 million years of evolution with a language model}\bibmark{\,［J］}\@. \bibjournal{bioRxiv}\@，\bibyear{2024}\thinspace{}\textnormal{：}\bibpages{2024\textnormal{-}07}\@.
+
+\bibitem{su2023saprot}
+\bibauthor{SU J\@，HAN C\@，ZHOU Y，et~al}\@. \bibtitle{Saprot: Protein language modeling with structure-aware vocabulary}\bibmark{\,［J］}\@. \bibjournal{bioRxiv}\@，\bibyear{2023}\thinspace{}\textnormal{：}\bibpages{2023\textnormal{-}10}\@.
+
+\bibitem{madani2020progen}
+\bibauthor{MADANI A\@，MCCANN B\@，NAIK N，et~al}\@. \bibtitle{Progen: Language modeling for protein generation}\bibmark{\,［J］}\@. \bibjournal{arXiv preprint arXiv:2004.03497}\@，\bibyear{2020}\@.
+
+\bibitem{li2021survey}
+\bibauthor{LI Z\@，LIU F\@，YANG W，et~al}\@. \bibtitle{A survey of convolutional neural networks: analysis, applications, and prospects}\bibmark{\,［J］}\@. \bibjournal{IEEE transactions on neural networks and learning systems}\@，\bibyear{2021}\@，\bibvolume{33}\bibnumber{（12）\!\!}\thinspace{}\textnormal{：}\bibpages{6999\textnormal{-}7019}\@.
+
+\bibitem{yu2019review}
+\bibauthor{YU Y\@，SI X\@，HU C，et~al}\@. \bibtitle{A review of recurrent neural networks: LSTM cells and network architectures}\bibmark{\,［J］}\@. \bibjournal{Neural computation}\@，\bibyear{2019}\@，\bibvolume{31}\bibnumber{（7）\!\!}\thinspace{}\textnormal{：}\bibpages{1235\textnormal{-}1270}\@.
+
+\bibitem{bryant2022improved}
+\bibauthor{BRYANT P\@，POZZATI G\@，ELOFSSON A}\@. \bibtitle{Improved prediction of protein-protein interactions using AlphaFold2}\bibmark{\,［J］}\@. \bibjournal{Nature communications}\@，\bibyear{2022}\@，\bibvolume{13}\bibnumber{（1）\!\!}\thinspace{}\textnormal{：}\bibpages{1265}\@.
+
+\bibitem{guo2020deep}
+\bibauthor{GUO Y\@，WANG H\@，HU Q，et~al}\@. \bibtitle{Deep learning for 3d point clouds: A survey}\bibmark{\,［J］}\@. \bibjournal{IEEE transactions on pattern analysis and machine intelligence}\@，\bibyear{2020}\@，\bibvolume{43}\bibnumber{（12）\!\!}\thinspace{}\textnormal{：}\bibpages{4338\textnormal{-}4364}\@.
+
+\bibitem{binns2009quickgo}
+\bibauthor{BINNS D\@，DIMMER E\@，HUNTLEY R，et~al}\@. \bibtitle{QuickGO: a web-based tool for Gene Ontology searching}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2009}\@，\bibvolume{25}\bibnumber{（22）\!\!}\thinspace{}\textnormal{：}\bibpages{3045\textnormal{-}3046}\@.
+
+\bibitem{gene2004gene}
+\bibauthor{CONSORTIUM G~O}\@. \bibtitle{The Gene Ontology (GO) database and informatics resource}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2004}\@，\bibvolume{32}\bibnumber{（suppl\_1）\!\!}\thinspace{}\textnormal{：}\bibpages{D258\textnormal{-}D261}\@.
+
+\bibitem{hoogeboom2021argmax}
+\bibauthor{HOOGEBOOM E\@，NIELSEN D\@，JAINI P，et~al}\@. \bibtitle{Argmax flows and multinomial diffusion: Learning categorical distributions}\bibmark{\,［J］}\@. \bibjournal{Advances in Neural Information Processing Systems}\@，\bibyear{2021}\@，\bibvolume{34}\thinspace{}\textnormal{：}\bibpages{12454\textnormal{-}12465}\@.
+
+\bibitem{kingma2021variational}
+\bibauthor{KINGMA D\@，SALIMANS T\@，POOLE B，et~al}\@. \bibtitle{Variational diffusion models}\bibmark{\,［J］}\@. \bibjournal{Advances in neural information processing systems}\@，\bibyear{2021}\@，\bibvolume{34}\thinspace{}\textnormal{：}\bibpages{21696\textnormal{-}21707}\@.
+
+\bibitem{song2020score}
+\bibauthor{SONG Y\@，SOHL-DICKSTEIN J\@，KINGMA D~P，et~al}\@. \bibtitle{Score-based generative modeling through stochastic differential equations}\bibmark{\,［J］}\@. \bibjournal{arXiv preprint arXiv:2011.13456}\@，\bibyear{2020}\@.
+
+\bibitem{sohl2015deep}
+\bibauthor{SOHL-DICKSTEIN J\@，WEISS E\@，MAHESWARANATHAN N，et~al}\@. \bibtitle{Deep unsupervised learning using nonequilibrium thermodynamics}\bibmark{\,［C］} //\thinspace{}\bibbooktitle{International conference on machine learning}\@，\bibaddress{［S.l.］}\@，\bibyear{2015}\thinspace{}\textnormal{：}\bibpages{2256\textnormal{-}2265}\@.
+
+\bibitem{ho2020denoising}
+\bibauthor{HO J\@，JAIN A\@，ABBEEL P}\@. \bibtitle{Denoising diffusion probabilistic models}\bibmark{\,［J］}\@. \bibjournal{Advances in neural information processing systems}\@，\bibyear{2020}\@，\bibvolume{33}\thinspace{}\textnormal{：}\bibpages{6840\textnormal{-}6851}\@.
+
+\bibitem{song2019generative}
+\bibauthor{SONG Y\@，ERMON S}\@. \bibtitle{Generative modeling by estimating gradients of the data distribution}\bibmark{\,［J］}\@. \bibjournal{Advances in neural information processing systems}\@，\bibyear{2019}\@，\bibvolume{32}\@.
+
+\bibitem{doucet2015efficient}
+\bibauthor{DOUCET A\@，PITT M~K\@，DELIGIANNIDIS G，et~al}\@. \bibtitle{Efficient implementation of Markov chain Monte Carlo when using an unbiased likelihood estimator}\bibmark{\,［J］}\@. \bibjournal{Biometrika}\@，\bibyear{2015}\@，\bibvolume{102}\bibnumber{（2）\!\!}\thinspace{}\textnormal{：}\bibpages{295\textnormal{-}313}\@.
+
+\bibitem{peebles2023scalable}
+\bibauthor{PEEBLES W\@，XIE S}\@. \bibtitle{Scalable diffusion models with transformers}\bibmark{\,［C］} //\thinspace{}\bibbooktitle{Proceedings of the IEEE/CVF International Conference on Computer Vision}\@，\bibaddress{［S.l.］}\@，\bibyear{2023}\thinspace{}\textnormal{：}\bibpages{4195\textnormal{-}4205}\@.
+
+\bibitem{clark2013information}
+\bibauthor{CLARK W~T\@，RADIVOJAC P}\@. \bibtitle{Information-theoretic evaluation of predicted ontological annotations}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2013}\@，\bibvolume{29}\bibnumber{（13）\!\!}\thinspace{}\textnormal{：}\bibpages{i53\textnormal{-}i61}\@.
+
+\bibitem{radivojac2013large}
+\bibauthor{RADIVOJAC P\@，CLARK W~T\@，ORON T~R，et~al}\@. \bibtitle{A large-scale evaluation of computational protein function prediction}\bibmark{\,［J］}\@. \bibjournal{Nature methods}\@，\bibyear{2013}\@，\bibvolume{10}\bibnumber{（3）\!\!}\thinspace{}\textnormal{：}\bibpages{221\textnormal{-}227}\@.
+
+\bibitem{davis2006relationship}
+\bibauthor{DAVIS J\@，GOADRICH M}\@. \bibtitle{The relationship between Precision-Recall and ROC curves}\bibmark{\,［C］} //\thinspace{}\bibbooktitle{Proceedings of the 23rd international conference on Machine learning}\@，\bibaddress{［S.l.］}\@，\bibyear{2006}\thinspace{}\textnormal{：}\bibpages{233\textnormal{-}240}\@.
+
+\bibitem{song2024deepss2go}
+\bibauthor{SONG F~V\@，SU J\@，HUANG S，et~al}\@. \bibtitle{DeepSS2GO: protein function prediction from secondary structure}\bibmark{\,［J］}\@. \bibjournal{Briefings in Bioinformatics}\@，\bibyear{2024}\@，\bibvolume{25}\bibnumber{（3）\!\!}\thinspace{}\textnormal{：}\bibpages{bbae196}\@.
+
+\bibitem{ibtehaz2023domain}
+\bibauthor{IBTEHAZ N\@，KAGAYA Y\@，KIHARA D}\@. \bibtitle{Domain-PFP allows protein function prediction using function-aware domain embedding representations}\bibmark{\,［J］}\@. \bibjournal{Communications Biology}\@，\bibyear{2023}\@，\bibvolume{6}\bibnumber{（1）\!\!}\thinspace{}\textnormal{：}\bibpages{1103}\@.
+
+\end{thebibliography}

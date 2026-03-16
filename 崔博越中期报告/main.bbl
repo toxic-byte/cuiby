@@ -1,0 +1,96 @@
+\begin{thebibliography}{10}
+\providecommand{\bibauthor}[1]{#1}
+\providecommand{\bibeditor}[1]{#1}
+\providecommand{\bibtranslator}[1]{#1}
+\providecommand{\bibtitle}[1]{#1}
+\providecommand{\bibbooktitle}[1]{#1}
+\providecommand{\bibjournal}[1]{#1}
+\providecommand{\bibmark}[1]{\mbox{#1}}
+\providecommand{\bibcountry}[1]{#1}
+\providecommand{\bibpatentid}[1]{#1}
+\providecommand{\bibedition}[1]{#1}
+\providecommand{\biborganization}[1]{#1}
+\providecommand{\bibaddress}[1]{#1}
+\providecommand{\bibpublisher}[1]{#1}
+\providecommand{\bibinstitution}[1]{#1}
+\providecommand{\bibschool}[1]{#1}
+\providecommand{\bibvolume}[1]{#1}
+\providecommand{\bibnumber}[1]{#1}
+\providecommand{\bibversion}[1]{#1}
+\providecommand{\bibpages}[1]{#1}
+\providecommand{\bibmodifydate}[1]{#1}
+\providecommand{\bibcitedate}[1]{#1}
+\providecommand{\bibyear}[1]{#1}
+\providecommand{\bibdate}[1]{#1}
+\providecommand{\biburl}[1]{\newline\url{#1}}
+
+\bibitem{eisenberg2000protein}
+\bibauthor{EISENBERG D\@，MARCOTTE E~M\@，XENARIOS I，et~al}\@. \bibtitle{Protein function in the post-genomic era}\bibmark{\,［J］}\@. \bibjournal{Nature}\@，\bibyear{2000}\@，\bibvolume{405}\bibnumber{（6788）\!\!}\thinspace{}\textnormal{：}\bibpages{823\textnormal{-}826}\@.
+
+\bibitem{uniprot2021uniprot}
+\bibauthor{ANON}\@. \bibtitle{UniProt: the universal protein knowledgebase in 2021}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2021}\@，\bibvolume{49}\bibnumber{（D1）\!\!}\thinspace{}\textnormal{：}\bibpages{D480\textnormal{-}D489}\@.
+
+\bibitem{boutet2016uniprotkb}
+\bibauthor{BOUTET E\@，LIEBERHERR D\@，TOGNOLLI M，et~al}\@. \bibtitle{UniProtKB/Swiss-Prot, the manually annotated section of the UniProt KnowledgeBase: how to use the entry view}\bibmark{\,［J］}\@. \bibjournal{Plant bioinformatics: methods and protocols}\@，\bibyear{2016}\thinspace{}\textnormal{：}\bibpages{23\textnormal{-}54}\@.
+
+\bibitem{wang2023large}
+\bibauthor{WANG X\@，CHEN G\@，QIAN G，et~al}\@. \bibtitle{Large-scale multi-modal pre-trained models: A comprehensive survey}\bibmark{\,［J］}\@. \bibjournal{Machine Intelligence Research}\@，\bibyear{2023}\@，\bibvolume{20}\bibnumber{（4）\!\!}\thinspace{}\textnormal{：}\bibpages{447\textnormal{-}482}\@.
+
+\bibitem{doi:10.1073/pnas.2016239118}
+\bibauthor{RIVES A\@，MEIER J\@，SERCU T，et~al}\@. \bibtitle{Biological structure and function emerge from scaling unsupervised learning to 250 million protein sequences}\bibmark{\,［J/OL］}\@. \bibjournal{Proceedings of the National Academy of Sciences}\@，\bibyear{2021}\@，\bibvolume{118}\bibnumber{（15）\!\!}\thinspace{}\textnormal{：}\bibpages{e2016239118}\@. \url{https://www.pnas.org/doi/abs/10.1073/pnas.2016239118}\@.
+
+\bibitem{zhang2019heterogeneous}
+\bibauthor{ZHANG C\@，SONG D\@，HUANG C，et~al}\@. \bibtitle{Heterogeneous graph neural network}\bibmark{\,［C］} //\thinspace{}\bibbooktitle{Proceedings of the 25th ACM SIGKDD international conference on knowledge discovery \& data mining}\@，\bibaddress{［S.l.］}\@，\bibyear{2019}\thinspace{}\textnormal{：}\bibpages{793\textnormal{-}803}\@.
+
+\bibitem{qwen3embedding}
+\bibauthor{ZHANG Y\@，LI M\@，LONG D，et~al}\@. \bibtitle{Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models}\bibmark{\,［J］}\@. \bibjournal{arXiv preprint arXiv:2506.05176}\@，\bibyear{2025}\@.
+
+\bibitem{taud2017multilayer}
+\bibauthor{TAUD H\@，MAS J-F}\@. \bibtitle{Multilayer perceptron (MLP)}\bibmark{\,［G］} //\thinspace{}\bibbooktitle{Geomatic approaches for modeling land change scenarios}\@. \bibaddress{［S.l.］}\thinspace{}\textnormal{：}\bibpublisher{Springer}\@，\bibyear{2017}\thinspace{}\textnormal{：}\bibpages{451\textnormal{-}455}\@.
+
+\bibitem{lin2017focal}
+\bibauthor{LIN T-Y\@，GOYAL P\@，GIRSHICK R，et~al}\@. \bibtitle{Focal loss for dense object detection}\bibmark{\,［C］} //\thinspace{}\bibbooktitle{Proceedings of the IEEE international conference on computer vision}\@，\bibaddress{［S.l.］}\@，\bibyear{2017}\thinspace{}\textnormal{：}\bibpages{2980\textnormal{-}2988}\@.
+
+\bibitem{khosla2020supervised}
+\bibauthor{KHOSLA P\@，TETERWAK P\@，WANG C，et~al}\@. \bibtitle{Supervised contrastive learning}\bibmark{\,［J］}\@. \bibjournal{Advances in neural information processing systems}\@，\bibyear{2020}\@，\bibvolume{33}\thinspace{}\textnormal{：}\bibpages{18661\textnormal{-}18673}\@.
+
+\bibitem{devalal2018lora}
+\bibauthor{DEVALAL S\@，KARTHIKEYAN A}\@. \bibtitle{LoRa technology-an overview}\bibmark{\,［C］} //\thinspace{}\bibbooktitle{2018 second international conference on electronics, communication and aerospace technology (ICECA)}\@，\bibaddress{［S.l.］}\@，\bibyear{2018}\thinspace{}\textnormal{：}\bibpages{284\textnormal{-}290}\@.
+
+\bibitem{uniprot2023uniprot}
+\bibauthor{ANON}\@. \bibtitle{UniProt: the universal protein knowledgebase in 2023}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2023}\@，\bibvolume{51}\bibnumber{（D1）\!\!}\thinspace{}\textnormal{：}\bibpages{D523\textnormal{-}D531}\@.
+
+\bibitem{varadi2022alphafold}
+\bibauthor{VARADI M\@，ANYANGO S\@，DESHPANDE M，et~al}\@. \bibtitle{AlphaFold Protein Structure Database: massively expanding the structural coverage of protein-sequence space with high-accuracy models}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2022}\@，\bibvolume{50}\bibnumber{（D1）\!\!}\thinspace{}\textnormal{：}\bibpages{D439\textnormal{-}D444}\@.
+
+\bibitem{huntley2015goa}
+\bibauthor{HUNTLEY R~P\@，SAWFORD T\@，MUTOWO-MEULLENET P，et~al}\@. \bibtitle{The GOA database: gene ontology annotation updates for 2015}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2015}\@，\bibvolume{43}\bibnumber{（D1）\!\!}\thinspace{}\textnormal{：}\bibpages{D1057\textnormal{-}D1063}\@.
+
+\bibitem{sanderson2023proteinfer}
+\bibauthor{SANDERSON T\@，BILESCHI M~L\@，BELANGER D，et~al}\@. \bibtitle{ProteInfer, deep neural networks for protein functional inference}\bibmark{\,［J］}\@. \bibjournal{Elife}\@，\bibyear{2023}\@，\bibvolume{12}\thinspace{}\textnormal{：}\bibpages{e80942}\@.
+
+\bibitem{barrell2009goa}
+\bibauthor{BARRELL D\@，DIMMER E\@，HUNTLEY R~P，et~al}\@. \bibtitle{The GOA database in 2009—an integrated Gene Ontology Annotation resource}\bibmark{\,［J］}\@. \bibjournal{Nucleic acids research}\@，\bibyear{2009}\@，\bibvolume{37}\bibnumber{（suppl\_1）\!\!}\thinspace{}\textnormal{：}\bibpages{D396\textnormal{-}D403}\@.
+
+\bibitem{binns2009quickgo}
+\bibauthor{BINNS D\@，DIMMER E\@，HUNTLEY R，et~al}\@. \bibtitle{QuickGO: a web-based tool for Gene Ontology searching}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2009}\@，\bibvolume{25}\bibnumber{（22）\!\!}\thinspace{}\textnormal{：}\bibpages{3045\textnormal{-}3046}\@.
+
+\bibitem{yan2021videogpt}
+\bibauthor{YAN W\@，ZHANG Y\@，ABBEEL P，et~al}\@. \bibtitle{Videogpt: Video generation using vq-vae and transformers}\bibmark{\,［J］}\@. \bibjournal{arXiv preprint arXiv:2104.10157}\@，\bibyear{2021}\@.
+
+\bibitem{hou2019cross}
+\bibauthor{HOU R\@，CHANG H\@，MA B，et~al}\@. \bibtitle{Cross attention network for few-shot classification}\bibmark{\,［J］}\@. \bibjournal{Advances in neural information processing systems}\@，\bibyear{2019}\@，\bibvolume{32}\@.
+
+\bibitem{altschul1990basic}
+\bibauthor{ALTSCHUL S~F\@，GISH W\@，MILLER W，et~al}\@. \bibtitle{Basic local alignment search tool}\bibmark{\,［J］}\@. \bibjournal{Journal of molecular biology}\@，\bibyear{1990}\@，\bibvolume{215}\bibnumber{（3）\!\!}\thinspace{}\textnormal{：}\bibpages{403\textnormal{-}410}\@.
+
+\bibitem{char2025protnote}
+\bibauthor{CHAR S\@，CORLEY N\@，ALAMDARI S，et~al}\@. \bibtitle{ProtNote: a multimodal method for protein--function annotation}\bibmark{\,［J］}\@. \bibjournal{Bioinformatics}\@，\bibyear{2025}\@，\bibvolume{41}\bibnumber{（5）\!\!}\thinspace{}\textnormal{：}\bibpages{btaf170}\@.
+
+\bibitem{luo2022biogpt}
+\bibauthor{LUO R\@，SUN L\@，XIA Y，et~al}\@. \bibtitle{BioGPT: generative pre-trained transformer for biomedical text generation and mining}\bibmark{\,［J］}\@. \bibjournal{Briefings in bioinformatics}\@，\bibyear{2022}\@，\bibvolume{23}\bibnumber{（6）\!\!}\thinspace{}\textnormal{：}\bibpages{bbac409}\@.
+
+\bibitem{wang2024multilingual}
+\bibauthor{WANG L\@，YANG N\@，HUANG X，et~al}\@. \bibtitle{Multilingual e5 text embeddings: A technical report}\bibmark{\,［J］}\@. \bibjournal{arXiv preprint arXiv:2402.05672}\@，\bibyear{2024}\@.
+
+\end{thebibliography}

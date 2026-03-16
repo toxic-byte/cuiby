@@ -1,0 +1,58 @@
+This is BibTeX, Version 0.99e (TeX Live 2026)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: hitszthesis.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: reference.bib
+Warning--Require author: uniprot2021uniprot
+Warning--Require address: grover2016node2vec
+Warning--Require address: li2023your
+Warning--Require address: rombach2022high
+Warning--Require author: uniprot2023uniprot
+Warning--Require address: sohl2015deep
+Warning--Require address: peebles2023scalable
+Warning--Require address: davis2006relationship
+You've used 60 entries,
+            3189 wiz_defined-function locations,
+            1046 strings with 18884 characters,
+and the built_in function-call counts, 118625 in all, are:
+= -- 13272
+> -- 219
+< -- 498
++ -- 10587
+- -- 765
+* -- 3131
+:= -- 13222
+add.period$ -- 0
+call.type$ -- 60
+change.case$ -- 318
+chr.to.int$ -- 0
+cite$ -- 68
+duplicate$ -- 16989
+empty$ -- 4412
+format.name$ -- 636
+if$ -- 31651
+int.to.chr$ -- 0
+int.to.str$ -- 60
+missing$ -- 0
+newline$ -- 207
+num.names$ -- 60
+pop$ -- 1601
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 926
+stack$ -- 0
+substring$ -- 14426
+swap$ -- 3083
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 8
+while$ -- 1496
+width$ -- 62
+write$ -- 867
+(There were 8 warnings)
