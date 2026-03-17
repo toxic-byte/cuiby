@@ -12,8 +12,8 @@ cuiby/
 │   ├── body/                   # 正文章节
 │   │   ├── chapter01.tex       # 第1章 绪论
 │   │   ├── chapter02.tex       # 第2章 相关理论与技术
-│   │   ├── chapter03.tex       # 第3章 噪声识别与偏好提取的多行为去噪推荐方法
-│   │   └── chapter04.tex       # 第4章 多模态多行为去噪推荐方法
+│   │   ├── chapter03.tex       # 第3章 
+│   │   └── chapter04.tex       # 第4章 
 │   ├── back/                   # 结论、致谢、发表文章等
 │   ├── figures/                # 论文图片
 │   ├── reference.bib           # 参考文献
