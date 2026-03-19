@@ -1,26 +1,26 @@
-This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.3.10)  17 MAR 2026 19:22
+This is XeTeX, Version 3.141592653-2.6-0.999998 (TeX Live 2026) (preloaded format=xelatex 2026.3.9)  17 MAR 2026 20:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
  %&-line parsing enabled.
-**/mnt/data/wjm/fhy_hitszthesis-main/main
-(/mnt/data/wjm/fhy_hitszthesis-main/main.tex
+**/Users/toxic/school/cuiby/cby_latex/main
+(/Users/toxic/school/cuiby/cby_latex/main.tex
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
 (./hitszthesis.cls
 Document Class: hitszthesis 2024/11/22 v3.4 Dissertation Template for Harbin Institute of Technology, ShenZhen (HITSZ)
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/base/ifthen.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/ifthen.sty
 Package: ifthen 2024/03/16 v1.1e Standard LaTeX ifthen package (DPC)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/kvoptions/kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics/keyval.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
 \KV@toks@=\toks17
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
 Package: ltxcmds 2023-12-04 v1.26 LaTeX kernel commands for general use (HO)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty
 Package: kvsetkeys 2022-10-05 v1.19 Key value parser (HO)
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/etex-pkg/etex.sty
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/etex-pkg/etex.sty
 Package: etex 2016/08/01 v2.7 eTeX basic definition package (PEB,DPC)
 
 
@@ -30,24 +30,24 @@ Package etex Warning: Extended allocation already in use.
 (etex)                \RequirePackage{etex}
 (etex)                at the start of the document.
 
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/ctexbook.cls (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/config/ctexbackend.cfg
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/ctexbook.cls (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/config/ctexbackend.cfg
 File: ctexbackend.cfg 2022/07/14 v2.5.10 Backend configuration file (CTEX)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/l3kernel/expl3.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/l3kernel/expl3.sty
 Package: expl3 2026-01-19 L3 programming layer (loader) 
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/l3backend/l3backend-xetex.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/l3backend/l3backend-xetex.def
 File: l3backend-xetex.def 2025-10-09 L3 backend support: XeTeX
 \g__graphics_track_int=\count271
 \g__pdfannot_backend_int=\count272
 \g__pdfannot_backend_link_int=\count273
 ))
 Document Class: ctexbook 2022/07/14 v2.5.10 Chinese adapter for class book (CTEX)
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/ctexhook.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/ctexhook.sty
 Package: ctexhook 2022/07/14 v2.5.10 Document and package hooks (CTEX)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/ctexpatch.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/ctexpatch.sty
 Package: ctexpatch 2022/07/14 v2.5.10 Patching commands (CTEX)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/base/fix-cm.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/base/fix-cm.sty
 Package: fix-cm 2020/11/24 v1.1t fixes to LaTeX
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/base/ts1enc.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/base/ts1enc.def
 File: ts1enc.def 2001/06/05 v3.0e (jk/car/fm) Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding TS1 on input line 47.
 LaTeX Encoding Info:    Redeclaring text command \capitalcedilla (encoding TS1) on input line 49.
@@ -183,11 +183,11 @@ LaTeX Encoding Info:    Redeclaring text symbol \textdiv (encoding TS1) on input
 \l__ctex_tmp_dim=\dimen148
 \g__ctex_section_depth_int=\count275
 \g__ctex_font_size_int=\count276
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/config/ctexopts.cfg
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/config/ctexopts.cfg
 File: ctexopts.cfg 2022/07/14 v2.5.10 Option configuration file (CTEX)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/base/book.cls
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/base/book.cls
 Document Class: book 2025/01/22 v1.4n Standard LaTeX document class
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/base/bk12.clo
+(/usr/local/texlive/2026/texmf-dist/tex/latex/base/bk12.clo
 File: bk12.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
 )
 \c@part=\count277
@@ -202,11 +202,11 @@ File: bk12.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
 \abovecaptionskip=\skip49
 \belowcaptionskip=\skip50
 \bibindent=\dimen149
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/engine/ctex-engine-xetex.def
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/engine/ctex-engine-xetex.def
 File: ctex-engine-xetex.def 2022/07/14 v2.5.10 XeLaTeX adapter (CTEX)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/xelatex/xecjk/xeCJK.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/xelatex/xecjk/xeCJK.sty
 Package: xeCJK 2022/08/05 v3.9.1 Typesetting CJK scripts with XeLaTeX
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/l3packages/xtemplate/xtemplate.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/l3packages/xtemplate/xtemplate.sty
 Package: xtemplate 2025-10-09 L3 Experimental prototype document functions
 )
 \l__xeCJK_tmp_int=\count286
@@ -269,11 +269,11 @@ LaTeX template Info: Declaring template type 'xeCJK/punctuation' taking 0
 \g__xeCJK_fam_allocation_int=\count296
 \l__xeCJK_verb_case_int=\count297
 \l__xeCJK_verb_exspace_skip=\skip57
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/fontspec/fontspec.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec.sty (/usr/local/texlive/2026/texmf-dist/tex/latex/l3packages/xparse/xparse.sty
 Package: xparse 2025-10-09 L3 Experimental document command parser
 )
 Package: fontspec 2025/09/29 v2.9g Font selection for XeLaTeX and LuaLaTeX
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec-xetex.sty
 Package: fontspec-xetex 2025/09/29 v2.9g Font selection for XeLaTeX and LuaLaTeX
 \l__fontspec_script_int=\count298
 \l__fontspec_language_int=\count299
@@ -289,76 +289,93 @@ Package: fontspec-xetex 2025/09/29 v2.9g Font selection for XeLaTeX and LuaLaTeX
 \l__fontspec_tmpa_dim=\dimen177
 \l__fontspec_tmpb_dim=\dimen178
 \l__fontspec_tmpc_dim=\dimen179
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/base/fontenc.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/base/fontenc.sty
 Package: fontenc 2025/07/18 v2.1d Standard LaTeX package
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/fontspec/fontspec.cfg))) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/xelatex/xecjk/xeCJK.cfg
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/fontspec/fontspec.cfg))) (/usr/local/texlive/2026/texmf-dist/tex/xelatex/xecjk/xeCJK.cfg
 File: xeCJK.cfg 2022/08/05 v3.9.1 Configuration file for xeCJK package
 ))
 \ccwd=\dimen180
 \l__ctex_ccglue_skip=\skip58
 )
 \l__ctex_ziju_dim=\dimen181
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/zhnumber/zhnumber.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/zhnumber/zhnumber.sty
 Package: zhnumber 2022/07/14 v3.0 Typesetting numbers with Chinese glyphs
 \l__zhnum_scale_int=\count309
 \l__zhnum_tmp_int=\count310
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/zhnumber/zhnumber-utf8.cfg
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/zhnumber/zhnumber-utf8.cfg
 File: zhnumber-utf8.cfg 2022/07/14 v3.0 Chinese numerals with UTF8 encoding
 ))
 \l__ctex_heading_skip=\skip59
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/scheme/ctex-scheme-plain-book.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/scheme/ctex-scheme-plain-book.def
 File: ctex-scheme-plain-book.def 2022/07/14 v2.5.10 Plain scheme for book (CTEX)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/ctex-cs4size.clo
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/ctex-cs4size.clo
 File: ctex-cs4size.clo 2022/07/14 v2.5.10 cs4size option (CTEX)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/fontset/ctex-fontset-fandol.def
-File: ctex-fontset-fandol.def 2022/07/14 v2.5.10 Fandol fonts definition (CTEX)
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/fontset/ctex-fontset-mac.def
+File: ctex-fontset-mac.def 2022/07/14 v2.5.10 macOS fonts definition (CTEX)
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/fontset/ctex-fontset-macold.def
+File: ctex-fontset-macold.def 2022/07/14 v2.5.10 macOS fonts definition for Yosemite or earlier version (CTEX)
 
 Package fontspec Info: 
 (fontspec)             Script 'CJK' not explicitly supported within font
-(fontspec)             'FandolSong-Regular'. Check the typeset output, and if
-(fontspec)             it is okay then ignore this warning. Otherwise a
-(fontspec)             different font should be chosen.
+(fontspec)             'STSong'. Check the typeset output, and if it is okay
+(fontspec)             then ignore this warning. Otherwise a different font
+(fontspec)             should be chosen.
 
 
 Package fontspec Info: 
-(fontspec)             Font family 'FandolSong-Regular(0)' created for font
-(fontspec)             'FandolSong-Regular' with options
-(fontspec)             [Script={CJK},Extension={.otf},BoldFont={FandolSong-Bold},ItalicFont={FandolKai-Regular}].
+(fontspec)             Could not resolve font "STKaiti/B" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Could not resolve font "STHeiti/I" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Could not resolve font "STSong/BI" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Font family 'STSong(0)' created for font 'STSong' with
+(fontspec)             options
+(fontspec)             [Script={CJK},BoldFont={STHeiti},ItalicFont={STKaiti}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[FandolSong-Regular.otf]/OT:script=hani;language=dflt;"
+(fontspec)             <->"STSong/OT:script=hani;language=dflt;"
 (fontspec)             - 'bold' (b/n) with NFSS spec.:
-(fontspec)             <->"[FandolSong-Bold.otf]/OT:script=hani;language=dflt;"
+(fontspec)             <->"STHeiti/OT:script=hani;language=dflt;"
 (fontspec)             - 'italic' (m/it) with NFSS spec.:
-(fontspec)             <->"[FandolKai-Regular.otf]/OT:script=hani;language=dflt;"
+(fontspec)             <->"STKaiti/OT:script=hani;language=dflt;"
 
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ctex/config/ctex.cfg
+))) (/usr/local/texlive/2026/texmf-dist/tex/latex/ctex/config/ctex.cfg
 File: ctex.cfg 2022/07/14 v2.5.10 Configuration file (CTEX)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/etoolbox/etoolbox.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/etoolbox/etoolbox.sty
 Package: etoolbox 2025/10/02 v2.5m e-TeX tools for LaTeX (JAW)
 \etb@tempcnta=\count311
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/iftex/ifxetex.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/iftex/ifxetex.sty
 Package: ifxetex 2019/10/25 v0.7 ifxetex legacy package. Use iftex instead.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/iftex/iftex.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/iftex/iftex.sty
 Package: iftex 2024/12/12 v1.0g TeX engine tests
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/amsmath/amsmath.sty
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsmath.sty
 Package: amsmath 2025/07/09 v2.17z AMS math features
 \@mathmargin=\skip60
 
 For additional information on amsmath, use the `?' option.
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amstext.sty
 Package: amstext 2024/11/17 v2.01 AMS text
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/amsmath/amsgen.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
 \@emptytoks=\toks18
 \ex@=\dimen182
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/amsmath/amsbsy.sty
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
 \pmbraise@=\dimen183
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/amsmath/amsopn.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/amsmath/amsopn.sty
 Package: amsopn 2022/04/08 v2.04 operator names
 )
 \inf@bad=\count312
@@ -408,7 +425,7 @@ LaTeX Info: Redefining \Relbar on input line 970.
 \mathdisplay@stack=\toks22
 LaTeX Info: Redefining \[ on input line 2950.
 LaTeX Info: Redefining \] on input line 2951.
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ntheorem/ntheorem.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/ntheorem/ntheorem.sty
 Style `ntheorem', Version 1.33 <2011/08/15>
 Package: ntheorem 2011/08/15 1.33
 \theorem@style=\toks23
@@ -448,9 +465,9 @@ Package ntheorem Info: Option `thmmarks' loaded on input line 1175.
 Package ntheorem Info: option `amsmath' handling for `thmmarks' loaded on input line 1175.
 \thm@amstmpdepth=\dimen195
 \tagwidth=\dimen196
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/amsfonts/amssymb.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/amsfonts.sty
 Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 \symAMSa=\mathgroup4
 \symAMSb=\mathgroup5
@@ -588,22 +605,22 @@ Package fontspec Info:
 (fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.:
 (fontspec)             <->s*[0.9]"[texgyreheros-bolditalic.otf]/OT:script=latn;language=dflt;+smcp;mapping=tex-text;"
 
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/newtx/newtxmath.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/newtxmath.sty
 Package: newtxmath 2024/09/22 v1.754
- `newtxmath' v1.754, 2024/09/22 Math macros based originally on txfonts (msharpe) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+ `newtxmath' v1.754, 2024/09/22 Math macros based originally on txfonts (msharpe) (/usr/local/texlive/2026/texmf-dist/tex/latex/xkeyval/xkeyval.sty
 Package: xkeyval 2025/11/04 v2.10 package option processing (HA)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/xkeyval/xkeyval.tex (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/xkeyval/xkeyval.tex (/usr/local/texlive/2026/texmf-dist/tex/generic/xkeyval/xkvutils.tex
 \XKV@toks=\toks41
 \XKV@tempa@toks=\toks42
 \XKV@tempb@toks=\toks43
 )
 \XKV@depth=\count326
 File: xkeyval.tex 2014/12/03 v2.7a key=value parser (HA)
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/oberdiek/centernot.sty
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/oberdiek/centernot.sty
 Package: centernot 2016/05/16 v1.4 Centers the not symbol horizontally (HO)
 )
 \tx@cntz=\count327
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/kastrup/binhex.tex)
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/kastrup/binhex.tex)
 \tx@Isdigit=\count328
 \tx@IsAlNum=\count329
 \tx@tA=\toks44
@@ -702,24 +719,24 @@ LaTeX Font Info:    Redeclaring math accent \ddot on input line 992.
 LaTeX Font Info:    Redeclaring math accent \vec on input line 2057.
 LaTeX Info: Redefining \Bbbk on input line 2847.
 LaTeX Info: Redefining \not on input line 2995.
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics/graphicx.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2024/12/31 v1.2e Enhanced LaTeX Graphics (DPC,SPQR)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics/graphics.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/graphics.sty
 Package: graphics 2024/08/06 v1.4g Standard LaTeX Graphics (DPC,SPQR)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics/trig.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 2023/12/02 v1.11 sin cos tan (DPC)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
 File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
 )
 Package graphics Info: Driver file: xetex.def on input line 106.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics-def/xetex.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-def/xetex.def
 File: xetex.def 2025/11/01 v5.0p Graphics/color driver for xetex
 ))
 \Gin@req@height=\dimen197
 \Gin@req@width=\dimen198
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pdfpages/pdfpages.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/pdfpages.sty
 Package: pdfpages 2025/07/23 v0.6g Insert pages of external PDF documents (AM)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/tools/calc.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/tools/calc.sty
 Package: calc 2025/03/01 v4.3b Infix arithmetic (KKT,FJ)
 \calc@Acount=\count330
 \calc@Bcount=\count331
@@ -731,17 +748,17 @@ LaTeX Info: Redefining \setlength on input line 86.
 LaTeX Info: Redefining \addtolength on input line 87.
 \calc@Ccount=\count332
 \calc@Cskip=\skip74
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/eso-pic/eso-pic.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/eso-pic/eso-pic.sty
 Package: eso-pic 2025/12/10 v3.0d eso-pic (RN)
 \ESO@tempdima=\dimen257
 \ESO@tempdimb=\dimen258
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/xcolor/xcolor.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/xcolor/xcolor.sty
 Package: xcolor 2024/09/29 v3.02 LaTeX color extensions (UK)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics-cfg/color.cfg
 File: color.cfg 2016/01/02 v1.6 sample color configuration
 )
 Package xcolor Info: Driver file: xetex.def on input line 274.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics/mathcolor.ltx)
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/mathcolor.ltx)
 Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1349.
 Package xcolor Info: Model `RGB' extended on input line 1365.
 Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1367.
@@ -754,7 +771,7 @@ Package xcolor Info: Model `wave' substituted by `hsb' on input line 1372.
 \AM@pagewidth=\dimen259
 \AM@pageheight=\dimen260
 \AM@fboxrule=\dimen261
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pdfpages/ppxetex.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/pdfpages/ppxetex.def
 File: ppxetex.def 2025/07/23 v0.6g Pdfpages driver for XeTeX (AM)
 )
 \pdfpages@includegraphics@status=\count333
@@ -765,7 +782,7 @@ File: ppxetex.def 2025/07/23 v0.6g Pdfpages driver for XeTeX (AM)
 \AM@lof@heading=\toks49
 \c@AM@survey=\count335
 \AM@templatesizebox=\box59
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/enumitem/enumitem.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/enumitem/enumitem.sty
 Package: enumitem 2025/02/06 v3.11 Customized lists
 \labelindent=\skip75
 \enit@outerparindent=\dimen262
@@ -773,15 +790,15 @@ Package: enumitem 2025/02/06 v3.11 Customized lists
 \enit@inbox=\box60
 \enit@count@id=\count336
 \enitdp@description=\count337
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/environ/environ.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/environ/environ.sty
 Package: environ 2014/05/04 v0.3 A new way to define environments
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/trimspaces/trimspaces.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/trimspaces/trimspaces.sty
 Package: trimspaces 2009/09/17 v1.1 Trim spaces around a token list
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/footmisc/footmisc.sty
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/footmisc/footmisc.sty
 Package: footmisc 2025/05/09 v7.0b a miscellany of footnote facilities
 \FN@temptoken=\toks51
 \footnotemargin=\dimen263
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/bigfoot/perpage.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/bigfoot/perpage.sty
 Package: perpage 2014/10/25 2.0 Reset/sort counters per page
 \c@abspage=\count338
 )
@@ -792,9 +809,9 @@ Package footmisc Info: Declaring symbol style wiley on input line 566.
 Package footmisc Info: Declaring symbol style lamport-robust on input line 577.
 Package footmisc Info: Declaring symbol style lamport* on input line 597.
 Package footmisc Info: Declaring symbol style lamport*-robust on input line 618.
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/xelatex/xecjk/xeCJKfntef.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/xelatex/xecjk/xeCJKfntef.sty
 Package: xeCJKfntef 2022/08/05 v3.9.1 xeCJK font effect
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/ulem/ulem.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/ulem/ulem.sty
 \UL@box=\box61
 \UL@hyphenbox=\box62
 \UL@skip=\skip76
@@ -812,7 +829,7 @@ Package: ulem 2019/11/18
 \l__xeCJK_fntef_box=\box65
 \l__xeCJK_under_symbol_box=\box66
 \c__xeCJK_filll_skip=\skip78
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/tools/longtable.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/tools/longtable.sty
 Package: longtable 2025-10-13 v4.24 Multi-page Table package (DPC)
 \LTleft=\skip79
 \LTright=\skip80
@@ -830,7 +847,7 @@ Package: longtable 2025-10-13 v4.24 Multi-page Table package (DPC)
 \c@LT@tables=\count344
 \c@LT@chunks=\count345
 \LT@p@ftn=\toks53
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/booktabs/booktabs.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/booktabs/booktabs.sty
 Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \heavyrulewidth=\dimen269
 \lightrulewidth=\dimen270
@@ -849,52 +866,52 @@ Package: booktabs 2020/01/12 v1.61803398 Publication quality tables
 \@thisruleclass=\count348
 \@lastruleclass=\count349
 \@thisrulewidth=\dimen281
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/natbib/natbib.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/natbib/natbib.sty
 Package: natbib 2010/09/13 8.31b (PWD, AO)
 \bibhang=\skip83
 \bibsep=\skip84
 LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count350
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/subeqnarray/subeqnarray.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/subeqnarray/subeqnarray.sty
 Package: subeqnarray 2026/01/02 v2.1f subeqnarray package
 \c@subequation=\count351
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/hyperref/hyperref.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2026-01-29 v7.01p Hypertext links for LaTeX
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
 Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pdfescape/pdfescape.sty
 Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
 Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/infwarerr/infwarerr.sty
 Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
 )
 Package pdftexcmds Info: \pdf@primitive is available.
 Package pdftexcmds Info: \pdf@ifprimitive is available.
 Package pdftexcmds Info: \pdfdraftmode not found.
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/hycolor/hycolor.sty
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/hycolor/hycolor.sty
 Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/hyperref/nameref.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2026-01-29 v2.58 Cross-referencing by name of section
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/refcount/refcount.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/refcount/refcount.sty
 Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count352
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/stringenc/stringenc.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/stringenc/stringenc.sty
 Package: stringenc 2019/11/29 v1.12 Convert strings between diff. encodings (HO)
 )
 \@linkdim=\dimen282
 \Hy@linkcounter=\count353
 \Hy@pagecounter=\count354
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/hyperref/pd1enc.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2026-01-29 v7.01p Hyperref: PDFDocEncoding definition (HO)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/intcalc/intcalc.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/intcalc/intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
 \Hy@SavedSpaceFactor=\count355
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/hyperref/puenc.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/puenc.def
 File: puenc.def 2026-01-29 v7.01p Hyperref: PDF Unicode definition (HO)
 )
 Package hyperref Info: Option `unicode' set `true' on input line 4072.
@@ -906,15 +923,15 @@ Package hyperref Info: Backreferencing OFF on input line 4221.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4468.
 \c@Hy@tempcnt=\count356
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/url/url.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip18
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4807.
 \XeTeXLinkMargin=\dimen283
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/bitset/bitset.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/bitset/bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
 ))
 \Fld@menulength=\count357
@@ -932,16 +949,16 @@ Package hyperref Info: PDF/A mode OFF on input line 6114.
 \c@Hfootnote=\count360
 )
 Package hyperref Info: Driver (autodetected): hxetex.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/hyperref/hxetex.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/hyperref/hxetex.def
 File: hxetex.def 2026-01-29 v7.01p Hyperref driver for XeTeX
 \pdfm@box=\box72
 \c@Hy@AnnotLevel=\count361
 \HyField@AnnotCount=\count362
 \Fld@listcount=\count363
 \c@bookmark@seq@number=\count364
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
 Package: rerunfilecheck 2025-06-21 v1.11 Rerun checks for auxiliary files (HO)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
 Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 )
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 284.
@@ -954,9 +971,9 @@ Package hyperref Info: Option `bookmarksopen' set `true' on input line 223.
 Package hyperref Info: Option `breaklinks' set `true' on input line 223.
 Package hyperref Info: Option `colorlinks' set `false' on input line 223.
 Package hyperref Info: Option `plainpages' set `false' on input line 223.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/geometry/geometry.sty
-Package: geometry 2026/03/07 v6.0 Page Geometry
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/iftex/ifvtex.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/iftex/ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 )
 \Gm@cnth=\count365
@@ -971,7 +988,7 @@ Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 \Gm@layouthoffset=\dimen292
 \Gm@layoutvoffset=\dimen293
 \Gm@dimlist=\toks54
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
 Package: fancyhdr 2025/02/07 v5.2 Extensive control of page headers and footers
 \f@nch@headwidth=\skip86
 \f@nch@offset@elh=\skip87
@@ -988,9 +1005,9 @@ Package: fancyhdr 2025/02/07 v5.2 Extensive control of page headers and footers
 \f@nch@widthC=\skip98
 \f@nch@widthR=\skip99
 \@temptokenb=\toks55
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/tools/tabularx.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/tools/tabularx.sty
 Package: tabularx 2023/12/11 v2.12a `tabularx' package (DPC)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/tools/array.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/tools/array.sty
 Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 \col@sep=\dimen294
 \ar@mcellbox=\box73
@@ -1007,7 +1024,7 @@ Package: array 2025/09/25 v2.6n Tabular extension package (FMi)
 \TX@delta=\dimen300
 \TX@cols=\count368
 \TX@ftn=\toks57
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/varwidth/varwidth.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/varwidth/varwidth.sty
 Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 \@vwid@box=\box75
 \sift@deathcycles=\count369
@@ -1015,11 +1032,11 @@ Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 \@vwid@roff=\dimen302
 )
 ==> First Aid for varwidth.sty applied!
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/changepage/changepage.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/changepage/changepage.sty
 Package: changepage 2009/10/20 v1.0c check page and change page layout
 \c@cp@cntr=\count370
 \cp@tempcnt=\count371
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/tools/multicol.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/tools/multicol.sty
 Package: multicol 2025/10/21 v2.0b multicolumn formatting (FMi)
 \c@tracingmulticols=\count372
 \mult@box=\box76
@@ -1089,20 +1106,20 @@ Package: multicol 2025/10/21 v2.0b multicolumn formatting (FMi)
 \colbreak@box=\box121
 \mc@col@check@num=\count381
 \g__mc_curr_col_int=\count382
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/placeins/placeins.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/placeins/placeins.sty
 Package: placeins 2005/04/18  v 2.2
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/base/flafter.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/base/flafter.sty
 Package: flafter 2025/08/22 v1.4z Standard LaTeX floats after reference (FMi)
 Applying: [2025/06/01] float order in 2-column on input line 49.
 Already applied: [2015/01/01] float order in 2-column on input line 152.
 Already applied: [0000/00/00] float order in 2-column on input line 254.
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/multirow/multirow.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/multirow/multirow.sty
 Package: multirow 2024/11/12 v2.9 Span multiple rows of a table
 \multirow@colwidth=\skip104
 \multirow@cntb=\count383
 \multirow@dima=\skip105
 \bigstrutjot=\dimen312
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/subfigure/subfigure.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/subfigure/subfigure.sty
 Package: subfigure 2002/03/15 v2.1.5 subfigure package
 \subfigtopskip=\skip106
 \subfigcapskip=\skip107
@@ -1118,10 +1135,10 @@ Package: subfigure 2002/03/15 v2.1.5 subfigure package
 ****************************************
 * Local config file subfigure.cfg used *
 ****************************************
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/subfigure/subfigure.cfg)
+(/usr/local/texlive/2026/texmf-dist/tex/latex/subfigure/subfigure.cfg)
 \subfig@top=\skip110
 \subfig@bottom=\skip111
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ccaption/ccaption.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/ccaption/ccaption.sty
 Package: ccaption 2011/08/07 v3.2c Extended captioning and new floats
 \@contcwidth=\skip112
 \@contindw=\skip113
@@ -1129,7 +1146,7 @@ Package: ccaption 2011/08/07 v3.2c Extended captioning and new floats
 \belowlegendskip=\skip115
 \c@@contsubnum=\count388
 \c@newflo@tctr=\count389
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/splitindex/splitidx.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/splitindex/splitidx.sty
 Package: splitidx 2016/02/18 v1.2c multiple indices for LaTeX
 )
 \@indexfile=\write3
@@ -1138,14 +1155,14 @@ Package: splitidx 2016/02/18 v1.2c multiple indices for LaTeX
 
 Writing index file main.idx
 Using splitted index at main.idx
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/xelatex/xltxtra/xltxtra.sty
+(/usr/local/texlive/2026/texmf-dist/tex/xelatex/xltxtra/xltxtra.sty
 Package: xltxtra 2018/12/31 v0.7 Improvements for the "XeLaTeX" format
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/iftex/ifluatex.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/iftex/ifluatex.sty
 Package: ifluatex 2019/10/25 v1.5 ifluatex legacy package. Use iftex instead.
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/realscripts/realscripts.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/realscripts/realscripts.sty
 Package: realscripts 2016/02/13 v0.3d Access OpenType subscripts and superscripts
 \subsupersep=\dimen315
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/metalogo/metalogo.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/metalogo/metalogo.sty
 Package: metalogo 2010/05/29 v0.12 Extended TeX logo macros
 \xl@everylogo=\toks58
 \xl@@everylogo=\toks59
@@ -1208,7 +1225,7 @@ File: hitszthesis.cfg 2024/11/22 v3.4 Dissertation Template for Harbin Institute
 \c@conjecture=\count432
 ) (./hitszthesis.sty
 Package: hitszthesis 2024/11/22 v3.4 Style Collection of Dissertation Template for Harbin Institute of Technology, ShenZhen (HITSZ)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/siunitx/siunitx.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/siunitx/siunitx.sty
 Package: siunitx 2025-07-09 v3.4.14 A comprehensive (SI) units package
 \l__siunitx_number_uncert_offset_int=\count433
 \l__siunitx_number_exponent_fixed_int=\count434
@@ -1224,7 +1241,7 @@ Package: siunitx 2025-07-09 v3.4.14 A comprehensive (SI) units package
 \l__siunitx_angle_marker_box=\box127
 \l__siunitx_angle_unit_box=\box128
 \l__siunitx_compound_count_int=\count443
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/translations/translations.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/translations/translations.sty
 Package: translations 2022/02/05 v1.12 internationalization of LaTeX2e packages (CN)
 )
 \l__siunitx_table_tmp_box=\box129
@@ -1261,7 +1278,7 @@ Package siunitx Info: Option "detect-family" has been deprecated in this
 (siunitx)             Use "reset-text-family = false, text-family-to-math =
 (siunitx)             true" as a replacement.
 
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/tools/bm.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/tools/bm.sty
 Package: bm 2025/10/21 v1.2g Bold Symbol Support (DPC/FMi)
 \symboldoperators=\mathgroup10
 \symboldletters=\mathgroup11
@@ -1270,37 +1287,37 @@ Package: bm 2025/10/21 v1.2g Bold Symbol Support (DPC/FMi)
 Package bm Info: No bold for \U/msa/m/n, using \pmb.
 Package bm Info: No bold for \U/msb/m/n, using \pmb.
 LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 149.
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/jknapltx/mathrsfs.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/jknapltx/mathrsfs.sty
 Package: mathrsfs 1996/01/01 Math RSFS package v1.0 (jk)
 \symrsfs=\mathgroup14
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics/rotating.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/rotating.sty
 Package: rotating 2025/01/14 v2.16e rotated objects in LaTeX
 \c@r@tfl@t=\count447
 \rotFPtop=\skip118
 \rotFPbot=\skip119
 \rot@float@box=\box135
 \rot@mess@toks=\toks60
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/lipsum/lipsum.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2e.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/lipsum/lipsum.sty (/usr/local/texlive/2026/texmf-dist/tex/latex/l3packages/l3keys2e/l3keys2e.sty
 Package: l3keys2e 2025-10-09 LaTeX2e option processing using LaTeX3 keys
 )
 Package: lipsum 2021-09-20 v2.7 150 paragraphs of Lorem Ipsum dummy text
 \g__lipsum_par_int=\count448
 \l__lipsum_a_int=\count449
 \l__lipsum_b_int=\count450
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/algorithm2e/algorithm2e.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/lipsum/lipsum.ltd.tex)) (/usr/local/texlive/2026/texmf-dist/tex/latex/algorithm2e/algorithm2e.sty
 Invalid UTF-8 byte or sequence at line 284 replaced by U+FFFD.
 Invalid UTF-8 byte or sequence at line 299 replaced by U+FFFD.
 Invalid UTF-8 byte or sequence at line 550 replaced by U+FFFD.
 Package: algorithm2e 2017/07/18 v5.2 algorithms environments
 \c@AlgoLine=\count451
 \algocf@hangindent=\skip120
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/ifoddpage/ifoddpage.sty
 Package: ifoddpage 2022/10/18 v1.2 Conditionals for odd/even page detection
 \c@checkoddpage=\count452
 LaTeX Info: Redefining \checkoddpage on input line 45.
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/tools/xspace.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/tools/xspace.sty
 Package: xspace 2014/10/28 v1.13 Space after command names (DPC,MH)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/relsize/relsize.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/relsize/relsize.sty
 Package: relsize 2013/03/29 ver 4.1
 )
 \skiptotal=\skip121
@@ -1346,7 +1363,7 @@ Package: relsize 2013/03/29 ver 4.1
 \c@aendepth=\count457
 \cftbeforeaentitleskip=\skip142
 \cftafteraentitleskip=\skip143
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/listings.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/listings.sty
 \lst@mode=\count458
 \lst@gtempboxa=\box144
 \lst@token=\toks61
@@ -1359,18 +1376,18 @@ Package: relsize 2013/03/29 ver 4.1
 \lst@newlines=\count462
 \lst@lineno=\count463
 \lst@maxwidth=\dimen330
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstpatch.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstpatch.sty
 File: lstpatch.sty 2025/11/14 1.11b (Carsten Heinz)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstmisc.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2025/11/14 1.11b (Carsten Heinz)
 \c@lstnumber=\count464
 \lst@skipnumbers=\count465
 \lst@framebox=\box145
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/listings.cfg
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/listings.cfg
 File: listings.cfg 2025/11/14 1.11b listings configuration
 ))
 Package: listings 2025/11/14 1.11b (Carsten Heinz)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/xelatex/xecjk/xeCJK-listings.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/xelatex/xecjk/xeCJK-listings.sty
 Package: xeCJK-listings 2022/08/05 v3.9.1 xeCJK patch file for listings
 \l__xeCJK_listings_max_char_int=\count466
 \l__xeCJK_listings_flag_int=\count467
@@ -1381,39 +1398,39 @@ Package: xeCJK-listings 2022/08/05 v3.9.1 xeCJK patch file for listings
     but found:
         2025/11/14 1.11b (Carsten Heinz)
     so I'm assuming it got fixed.
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstlang1.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2025/11/14 1.11b listings language file
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstlang2.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang2.sty
 File: lstlang2.sty 2025/11/14 1.11b listings language file
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstlang3.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang3.sty
 File: lstlang3.sty 2025/11/14 1.11b listings language file
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstlang1.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2025/11/14 1.11b listings language file
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstlang2.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang2.sty
 File: lstlang2.sty 2025/11/14 1.11b listings language file
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstlang3.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang3.sty
 File: lstlang3.sty 2025/11/14 1.11b listings language file
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstlang1.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2025/11/14 1.11b listings language file
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstlang2.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang2.sty
 File: lstlang2.sty 2025/11/14 1.11b listings language file
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstlang3.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstlang3.sty
 File: lstlang3.sty 2025/11/14 1.11b listings language file
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/listings/lstmisc.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/listings/lstmisc.sty
 File: lstmisc.sty 2025/11/14 1.11b (Carsten Heinz)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/glossaries/base/glossaries.sty
-Package: glossaries 2026/03/06 v5.0 (NLCT)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/mfirstuc/mfirstuc.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/glossaries/base/glossaries.sty
+Package: glossaries 2025/11/09 v4.9 (NLCT)
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/mfirstuc/mfirstuc.sty
 Package: mfirstuc 2025/04/03 v2.09 (NLCT)
 \@glsmfirst=\toks62
 \@glsmrest=\toks63
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/xfor/xfor.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/xfor/xfor.sty
 Package: xfor 2009/02/05 v1.05 (NLCT)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/datatool/datatool-base.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/datatool/datatool-base.sty
 Package: datatool-base 2025/12/04 v3.4.3 (NLCT)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/tracklang/tracklang.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/tracklang/tracklang.sty
 Package: tracklang 2025/03/11 v1.6.6 (NLCT) Track Languages
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/tracklang/tracklang.tex))
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/tracklang/tracklang.tex))
 \l__datatool_tmpa_int=\count468
 \l__datatool_tmpb_int=\count469
 \l__datatool_tmpc_int=\count470
@@ -1422,7 +1439,7 @@ Package: tracklang 2025/03/11 v1.6.6 (NLCT) Track Languages
 \l__datatool_tmp_datatype_int=\count473
 \l__datatool_tmpa_dim=\dimen331
 \l__datatool_tmpb_dim=\dimen332
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/datatool/datatool-l3fp.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/datatool/datatool-l3fp.def
 File: datatool-l3fp.def 2025/12/04 v3.4.3 (NLCT)
 )
 \@dtl@toks=\toks64
@@ -1430,7 +1447,7 @@ File: datatool-l3fp.def 2025/12/04 v3.4.3 (NLCT)
 \dtl@tmplength=\skip144
 \l__datatool_measure_box=\box146
 \dtl@sortresult=\count475
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/datatool/datatool-utf8.ldf
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/datatool/datatool-utf8.ldf
 File: datatool-utf8.ldf 2025/12/04 v3.4.3 (NLCT)
 )
 \@dtl@datatype=\count476
@@ -1460,18 +1477,18 @@ File: datatool-utf8.ldf 2025/12/04 v3.4.3 (NLCT)
 \glslabeltok=\toks67
 \glsshorttok=\toks68
 \glslongtok=\toks69
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/glossaries/styles/glossary-hypernav.sty
-Package: glossary-hypernav 2026/03/06 v5.0 (NLCT)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/glossaries/styles/glossary-list.sty
-Package: glossary-list 2026/03/06 v5.0 (NLCT)
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/glossaries/styles/glossary-hypernav.sty
+Package: glossary-hypernav 2025/11/09 v4.9 (NLCT)
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/glossaries/styles/glossary-list.sty
+Package: glossary-list 2025/11/09 v4.9 (NLCT)
 \glslistdottedwidth=\skip146
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/glossaries/styles/glossary-long.sty
-Package: glossary-long 2026/03/06 v5.0 (NLCT)
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/glossaries/styles/glossary-long.sty
+Package: glossary-long 2025/11/09 v4.9 (NLCT)
 \glsdescwidth=\skip147
 \glspagelistwidth=\skip148
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/glossaries/styles/glossary-super.sty
-Package: glossary-super 2026/03/06 v5.0 (NLCT)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/supertabular/supertabular.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/glossaries/styles/glossary-super.sty
+Package: glossary-super 2025/11/09 v4.9 (NLCT)
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/supertabular/supertabular.sty
 Package: supertabular 2025/06/26 v4.2d the supertabular environment
 \c@tracingst=\count494
 \ST@wd=\dimen335
@@ -1488,8 +1505,8 @@ Package: supertabular 2025/06/26 v4.2d the supertabular environment
 \ST@toadd=\dimen343
 \ST@dimen=\dimen344
 \ST@pbox=\box147
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/glossaries/styles/glossary-tree.sty
-Package: glossary-tree 2026/03/06 v5.0 (NLCT)
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/glossaries/styles/glossary-tree.sty
+Package: glossary-tree 2025/11/09 v4.9 (NLCT)
 \l__glossaries_tree_max_known_level_int=\count495
 \l__glossaries_tree_offset_dim=\dimen345
 \l__glossaries_tree_namewidth_dim=\dimen346
@@ -1502,22 +1519,22 @@ Package: glossary-tree 2026/03/06 v5.0 (NLCT)
 \l__glossaries_tree_namesymbolwidth_padding_dim=\dimen353
 \l__glossaries_tree_level_int=\count496
 \glstreeindent=\skip152
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-common.tex
 \pgfutil@everybye=\toks70
 \pgfutil@tempdima=\dimen354
 \pgfutil@tempdimb=\dimen355
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfutil-latex.def
 \pgfutil@abb=\box148
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/pgf.revision.tex)
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.tex (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/pgf.revision.tex)
 Package: pgfrcs 2025-08-29 v3.1.11a (3.1.11a)
 ))
 Package: pgf 2025-08-29 v3.1.11a (3.1.11a)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.code.tex
 Package: pgfsys 2025-08-29 v3.1.11a (3.1.11a)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex
 \pgfkeys@pathtoks=\toks71
 \pgfkeys@temptoks=\toks72
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.code.tex
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibraryfiltered.code.tex
 \pgfkeys@tmptoks=\toks73
 ))
 \pgf@x=\dimen356
@@ -1540,36 +1557,36 @@ Package: pgfsys 2025-08-29 v3.1.11a (3.1.11a)
 \t@pgf@tokb=\toks75
 \t@pgf@tokc=\toks76
 \pgf@sys@id@count=\count501
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg
 File: pgf.cfg 2025-08-29 v3.1.11a (3.1.11a)
 )
 Driver file for pgf: pgfsys-xetex.def
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-xetex.def
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-xetex.def
 File: pgfsys-xetex.def 2025-08-29 v3.1.11a (3.1.11a)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-dvipdfmx.def
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-dvipdfmx.def
 File: pgfsys-dvipdfmx.def 2025-08-29 v3.1.11a (3.1.11a)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-common-pdf.def
 File: pgfsys-common-pdf.def 2025-08-29 v3.1.11a (3.1.11a)
 )
 \pgfsys@objnum=\count502
-))) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex
+))) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoftpath.code.tex
 File: pgfsyssoftpath.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgfsyssoftpath@smallbuffer@items=\count503
 \pgfsyssoftpath@bigbuffer@items=\count504
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprotocol.code.tex
 File: pgfsysprotocol.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
+)) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.code.tex
 Package: pgfcore 2025-08-29 v3.1.11a (3.1.11a)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathparser.code.tex
 \pgfmath@dimen=\dimen366
 \pgfmath@count=\count505
 \pgfmath@box=\box149
 \pgfmath@toks=\toks77
 \pgfmath@stack@operand=\toks78
 \pgfmath@stack@operation=\toks79
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.basic.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.trigonometric.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.random.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.comparison.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.base.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.round.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.misc.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.integerarithmetics.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code.tex
 \c@pgfmathroundto@lastzeros=\count506
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfint.code.tex) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex
+)) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfint.code.tex) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoints.code.tex
 File: pgfcorepoints.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@picminx=\dimen367
 \pgf@picmaxx=\dimen368
@@ -1585,75 +1602,75 @@ File: pgfcorepoints.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@yy=\dimen378
 \pgf@zx=\dimen379
 \pgf@zy=\dimen380
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathconstruct.code.tex
 File: pgfcorepathconstruct.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@path@lastx=\dimen381
 \pgf@path@lasty=\dimen382
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathusage.code.tex
 File: pgfcorepathusage.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@shorten@end@additional=\dimen383
 \pgf@shorten@start@additional=\dimen384
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescopes.code.tex
 File: pgfcorescopes.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgfpic=\box150
 \pgf@hbox=\box151
 \pgf@layerbox@main=\box152
 \pgf@picture@serial@count=\count507
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregraphicstate.code.tex
 File: pgfcoregraphicstate.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgflinewidth=\dimen385
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransformations.code.tex
 File: pgfcoretransformations.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@pt@x=\dimen386
 \pgf@pt@y=\dimen387
 \pgf@pt@temp=\dimen388
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequick.code.tex
 File: pgfcorequick.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobjects.code.tex
 File: pgfcoreobjects.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepathprocessing.code.tex
 File: pgfcorepathprocessing.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearrows.code.tex
 File: pgfcorearrows.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgfarrowsep=\dimen389
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshade.code.tex
 File: pgfcoreshade.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@max=\dimen390
 \pgf@sys@shading@range@num=\count508
 \pgf@shadingcount=\count509
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimage.code.tex
 File: pgfcoreimage.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexternal.code.tex
 File: pgfcoreexternal.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgfexternal@startupbox=\box153
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelayers.code.tex
 File: pgfcorelayers.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretransparency.code.tex
 File: pgfcoretransparency.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatterns.code.tex
 File: pgfcorepatterns.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.code.tex
 File: pgfcorerdf.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-))) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex
+))) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleshapes.code.tex
 File: pgfmoduleshapes.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgfnodeparttextbox=\box154
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
+) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.code.tex
 File: pgfmoduleplot.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-0-65.sty
 Package: pgfcomp-version-0-65 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@nodesepstart=\dimen391
 \pgf@nodesepend=\dimen392
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-version-1-18.sty
 Package: pgfcomp-version-1-18 2025-08-29 v3.1.11a (3.1.11a)
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/utilities/pgffor.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pgf/math/pgfmath.sty (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgffor.sty (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code.tex)) (/usr/local/texlive/2026/texmf-dist/tex/latex/pgf/math/pgfmath.sty (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex)) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/utilities/pgffor.code.tex
 Package: pgffor 2025-08-29 v3.1.11a (3.1.11a)
 \pgffor@iter=\dimen393
 \pgffor@skip=\dimen394
 \pgffor@stack=\toks80
 \pgffor@toks=\toks81
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
+)) (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tikz.code.tex
 Package: tikz 2025-08-29 v3.1.11a (3.1.11a)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers.code.tex
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/libraries/pgflibraryplothandlers.code.tex
 File: pgflibraryplothandlers.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgf@plot@mark@count=\count510
 \pgfplotmarksize=\dimen395
@@ -1674,18 +1691,18 @@ File: pgflibraryplothandlers.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \tikznumberofchildren=\count512
 \tikznumberofcurrentchild=\count513
 \tikz@fig@count=\count514
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/modules/pgfmodulematrix.code.tex
 File: pgfmodulematrix.code.tex 2025-08-29 v3.1.11a (3.1.11a)
 \pgfmatrixcurrentrow=\count515
 \pgfmatrixcurrentcolumn=\count516
 \pgf@matrix@numberofcolumns=\count517
 )
 \tikz@expandcount=\count518
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarytopaths.code.tex
+ (/usr/local/texlive/2026/texmf-dist/tex/generic/pgf/frontendlayer/tikz/libraries/tikzlibrarytopaths.code.tex
 File: tikzlibrarytopaths.code.tex 2025-08-29 v3.1.11a (3.1.11a)
-)))) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/caption/caption.sty
+)))) (/usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption.sty
 Package: caption 2023/08/05 v3.6o Customizing captions (AR)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/caption/caption3.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/caption/caption3.sty
 Package: caption3 2023/07/31 v2.4d caption3 kernel (AR)
 \caption@tempdima=\dimen404
 \captionmargin=\dimen405
@@ -1712,28 +1729,28 @@ Package caption Info: changepage package is loaded.
 Package caption Info: hyperref package is loaded.
 Package caption Info: listings package is loaded.
 Package caption Info: longtable package is loaded.
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/caption/ltcaption.sty
+(/usr/local/texlive/2026/texmf-dist/tex/latex/caption/ltcaption.sty
 Package: ltcaption 2021/01/08 v1.4c longtable captions (AR)
 )
 Package caption Info: rotating package is loaded.
 Package caption Info: subfigure package is loaded.
 Package caption Info: supertabular package is loaded.
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/psnfss/pifont.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/pifont.sty
 Package: pifont 2020/03/25 PSNFSS-v9.3 Pi font support (SPQR) 
 LaTeX Font Info:    Trying to load font information for U+pzd on input line 63.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/psnfss/upzd.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/upzd.fd
 File: upzd.fd 2001/06/04 font definitions for U/pzd.
 )
 LaTeX Font Info:    Trying to load font information for U+psy on input line 64.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/psnfss/upsy.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/psnfss/upsy.fd
 File: upsy.fd 2001/06/04 font definitions for U/psy.
-)) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/adjustbox/adjustbox.sty
+)) (/usr/local/texlive/2026/texmf-dist/tex/latex/adjustbox/adjustbox.sty
 Package: adjustbox 2025/02/26 v1.3c Adjusting TeX boxes (trim, clip, ...)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/adjustbox/adjcalc.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/adjustbox/adjcalc.sty
 Package: adjcalc 2012/05/16 v1.1 Provides advanced setlength with multiple back-ends (calc, etex, pgfmath)
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/adjustbox/trimclip.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/adjustbox/trimclip.sty
 Package: trimclip 2025/02/21 v1.2a Trim and clip general TeX material
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/collectbox/collectbox.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/collectbox/collectbox.sty
 Package: collectbox 2022/10/17 v0.4c Collect macro arguments as boxes
 \collectedbox=\box159
 )
@@ -1742,7 +1759,7 @@ Package: collectbox 2022/10/17 v0.4c Collect macro arguments as boxes
 \tc@urx=\dimen416
 \tc@ury=\dimen417
 Package trimclip Info: Using driver 'tc-xetex.def'.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/adjustbox/tc-xetex.def
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/adjustbox/tc-xetex.def
 File: tc-xetex.def 2019/01/04 v2.2 Clipping driver for xetex
 ))
 \adjbox@Width=\dimen418
@@ -1753,7 +1770,7 @@ File: tc-xetex.def 2019/01/04 v2.2 Clipping driver for xetex
 \adjbox@pheight=\dimen423
 \adjbox@pdepth=\dimen424
 \adjbox@ptotalheight=\dimen425
-) (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/caption/subcaption.sty
+) (/usr/local/texlive/2026/texmf-dist/tex/latex/caption/subcaption.sty
 Package: subcaption 2023/07/28 v1.6b Sub-captions (AR)
 LaTeX Info: Redefining \subref on input line 189.
 Package subcaption Info: The counter `subfigure' was already defined by
@@ -1767,7 +1784,7 @@ Package translations Info: No language package found. I am going to use `english
 
 LaTeX Font Info:    Checking defaults for OML/ntxmi/m/it on input line 74.
 LaTeX Font Info:    Trying to load font information for OML+ntxmi on input line 74.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/newtx/omlntxmi.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/omlntxmi.fd
 File: omlntxmi.fd 2015/08/25 Fontinst v1.933 font definitions for OML/ntxmi.
 )
 LaTeX Font Info:    ... okay on input line 74.
@@ -1785,19 +1802,19 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 74.
 LaTeX Font Info:    ... okay on input line 74.
 LaTeX Font Info:    Checking defaults for U/ntxexa/m/n on input line 74.
 LaTeX Font Info:    Trying to load font information for U+ntxexa on input line 74.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/newtx/untxexa.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/untxexa.fd
 File: untxexa.fd 2012/04/16 Fontinst v1.933 font definitions for U/ntxexa.
 )
 LaTeX Font Info:    ... okay on input line 74.
 LaTeX Font Info:    Checking defaults for LMS/ntxsy/m/n on input line 74.
 LaTeX Font Info:    Trying to load font information for LMS+ntxsy on input line 74.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/newtx/lmsntxsy.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/lmsntxsy.fd
 File: lmsntxsy.fd 2016/07/02 Fontinst v1.933 font definitions for LMS/ntxsy.
 )
 LaTeX Font Info:    ... okay on input line 74.
 LaTeX Font Info:    Checking defaults for LMX/ntxexx/m/n on input line 74.
 LaTeX Font Info:    Trying to load font information for LMX+ntxexx on input line 74.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/newtx/lmxntxexx.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/lmxntxexx.fd
 File: lmxntxexx.fd 2016/07/03 Fontinst v1.933 font definitions for LMX/ntxexx.
 )
 LaTeX Font Info:    ... okay on input line 74.
@@ -1807,11 +1824,11 @@ LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 74.
 LaTeX Font Info:    ... okay on input line 74.
 LaTeX Info: Command `\dddot' is already robust on input line 74.
 LaTeX Info: Command `\ddddot' is already robust on input line 74.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pdflscape/pdflscape.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape.sty
 Package: pdflscape 2025-06-23 v0.14 Display of landscape pages in PDF
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty
 Package: pdflscape-nometadata 2025-06-23 v0.14 Display of landscape pages in PDF (HO)
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/graphics/lscape.sty
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/graphics/lscape.sty
 Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
 )
 Package pdflscape Info: Auto-detected driver: dvipdfm (xetex) on input line 98.
@@ -1857,7 +1874,7 @@ Package hyperref Info: Link coloring OFF on input line 74.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-(/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/translations/translations-basic-dictionary-english.trsl
+(/usr/local/texlive/2026/texmf-dist/tex/latex/translations/translations-basic-dictionary-english.trsl
 File: translations-basic-dictionary-english.trsl (english translation file `translations-basic-dictionary')
 )
 Package translations Info: loading dictionary `translations-basic-dictionary' for `english'. on input line 74.
@@ -1868,23 +1885,37 @@ Package caption Info: End \AtBeginDocument code.
 
 Package fontspec Info: 
 (fontspec)             Script 'CJK' not explicitly supported within font
-(fontspec)             'FandolSong-Regular'. Check the typeset output, and if
-(fontspec)             it is okay then ignore this warning. Otherwise a
-(fontspec)             different font should be chosen.
+(fontspec)             'STSong'. Check the typeset output, and if it is okay
+(fontspec)             then ignore this warning. Otherwise a different font
+(fontspec)             should be chosen.
 
 
 Package fontspec Info: 
-(fontspec)             Font family 'FandolSong-Regular(1)' created for font
-(fontspec)             'FandolSong-Regular' with options
-(fontspec)             [Script={CJK},Extension={.otf},BoldFont={FandolSong-Bold}].
+(fontspec)             Could not resolve font "STSong/I" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Could not resolve font "STSong/BI" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Could not resolve font "STSong/I" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Font family 'STSong(1)' created for font 'STSong' with
+(fontspec)             options [Script={CJK},AutoFakeBold={2}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[FandolSong-Regular.otf]/OT:script=hani;language=dflt;"
+(fontspec)             <->"STSong/OT:script=hani;language=dflt;"
 (fontspec)             - 'bold' (b/n) with NFSS spec.:
-(fontspec)             <->"[FandolSong-Bold.otf]/OT:script=hani;language=dflt;"
+(fontspec)             <->"STSong/OT:script=hani;language=dflt;embolden=2;"
 
 LaTeX Font Info:    Font shape `TU/texgyretermes(0)/m/n' will be
 (Font)              scaled to size 24.09pt on input line 83.
@@ -1899,46 +1930,74 @@ LaTeX Font Info:    Font shape `TU/texgyretermes(0)/m/n' will be
 
 Package fontspec Info: 
 (fontspec)             Script 'CJK' not explicitly supported within font
-(fontspec)             'FandolHei-Regular'. Check the typeset output, and if
-(fontspec)             it is okay then ignore this warning. Otherwise a
-(fontspec)             different font should be chosen.
+(fontspec)             'STHeiti'. Check the typeset output, and if it is okay
+(fontspec)             then ignore this warning. Otherwise a different font
+(fontspec)             should be chosen.
 
 
 Package fontspec Info: 
-(fontspec)             Font family 'FandolHei-Regular(0)' created for font
-(fontspec)             'FandolHei-Regular' with options
-(fontspec)             [Script={CJK},Extension={.otf},BoldFont={FandolHei-Bold}].
+(fontspec)             Could not resolve font "STHeiti/I" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Could not resolve font "STHeiti/BI" (it probably
+(fontspec)             doesn't exist).
+
+
+Package fontspec Info: 
+(fontspec)             Could not resolve font "STHeiti/I" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Font family 'STHeiti(0)' created for font 'STHeiti'
+(fontspec)             with options [Script={CJK},AutoFakeBold={2}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[FandolHei-Regular.otf]/OT:script=hani;language=dflt;"
+(fontspec)             <->"STHeiti/OT:script=hani;language=dflt;"
 (fontspec)             - 'bold' (b/n) with NFSS spec.:
-(fontspec)             <->"[FandolHei-Bold.otf]/OT:script=hani;language=dflt;"
+(fontspec)             <->"STHeiti/OT:script=hani;language=dflt;embolden=2;"
 
 LaTeX Font Info:    Font shape `TU/texgyretermes(0)/b/n' will be
 (Font)              scaled to size 22.08249pt on input line 83.
 
 Package fontspec Info: 
 (fontspec)             Script 'CJK' not explicitly supported within font
-(fontspec)             'FandolKai-Regular'. Check the typeset output, and if
-(fontspec)             it is okay then ignore this warning. Otherwise a
-(fontspec)             different font should be chosen.
+(fontspec)             'STKaiti'. Check the typeset output, and if it is okay
+(fontspec)             then ignore this warning. Otherwise a different font
+(fontspec)             should be chosen.
 
 
 Package fontspec Info: 
-(fontspec)             Font family 'FandolKai-Regular(0)' created for font
-(fontspec)             'FandolKai-Regular' with options
-(fontspec)             [Script={CJK},Extension={.otf},AutoFakeBold={2}].
+(fontspec)             Could not resolve font "STKaiti/I" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Could not resolve font "STKaiti/BI" (it probably
+(fontspec)             doesn't exist).
+
+
+Package fontspec Info: 
+(fontspec)             Could not resolve font "STKaiti/I" (it probably doesn't
+(fontspec)             exist).
+
+
+Package fontspec Info: 
+(fontspec)             Font family 'STKaiti(0)' created for font 'STKaiti'
+(fontspec)             with options [Script={CJK},AutoFakeBold={2}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS
 (fontspec)             series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"[FandolKai-Regular.otf]/OT:script=hani;language=dflt;"
+(fontspec)             <->"STKaiti/OT:script=hani;language=dflt;"
 (fontspec)             - 'bold' (b/n) with NFSS spec.:
-(fontspec)             <->"[FandolKai-Regular.otf]/OT:script=hani;language=dflt;embolden=2;"
+(fontspec)             <->"STKaiti/OT:script=hani;language=dflt;embolden=2;"
 
  [1
 
@@ -1947,7 +2006,7 @@ Package fontspec Info:
 
 ]
 LaTeX Font Info:    Trying to load font information for OT1+ntxtlf on input line 83.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/newtx/ot1ntxtlf.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/ot1ntxtlf.fd
 File: ot1ntxtlf.fd 2021/05/24 v1.0 font definition file for OT1/ntx/tlf
 )
 LaTeX Font Info:    Font shape `OML/ntxmi/m/it' will be
@@ -1969,15 +2028,15 @@ LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
 LaTeX Font Info:    Font shape `LMX/ntxexx/m/n' will be
 (Font)              scaled to size 6.0pt on input line 83.
 LaTeX Font Info:    Trying to load font information for U+msa on input line 83.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/amsfonts/umsa.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
 LaTeX Font Info:    Trying to load font information for U+msb on input line 83.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/amsfonts/umsb.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Trying to load font information for U+ntxmia on input line 83.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/newtx/untxmia.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/untxmia.fd
 File: untxmia.fd 2024/04/09 Fontinst v1.933 font definitions for U/ntxmia.
 )
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
@@ -1987,7 +2046,7 @@ LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
 LaTeX Font Info:    Font shape `U/ntxmia/m/it' will be
 (Font)              scaled to size 6.0pt on input line 83.
 LaTeX Font Info:    Trying to load font information for U+ntxsym on input line 83.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/newtx/untxsym.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/untxsym.fd
 File: untxsym.fd 2023/08/16 Fontinst v1.933 font definitions for U/ntxsym.
 )
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
@@ -1997,7 +2056,7 @@ LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
 LaTeX Font Info:    Font shape `U/ntxsym/m/n' will be
 (Font)              scaled to size 6.0pt on input line 83.
 LaTeX Font Info:    Trying to load font information for U+ntxsyc on input line 83.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/newtx/untxsyc.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/newtx/untxsyc.fd
 File: untxsyc.fd 2012/04/12 Fontinst v1.933 font definitions for U/ntxsyc.
 )
 LaTeX Font Info:    Font shape `U/ntxsyc/m/n' will be
@@ -2031,7 +2090,7 @@ LaTeX Font Info:    Font shape `LMX/ntxexx/b/n' will be
 LaTeX Font Info:    Font shape `LMX/ntxexx/b/n' will be
 (Font)              scaled to size 6.0pt on input line 83.
 LaTeX Font Info:    Trying to load font information for U+rsfs on input line 83.
- (/mnt/data/wjm/A100/texlive2026/texmf-dist/tex/latex/jknapltx/ursfs.fd
+ (/usr/local/texlive/2026/texmf-dist/tex/latex/jknapltx/ursfs.fd
 File: ursfs.fd 1998/03/24 rsfs font definition file (jk)
 )
 LaTeX Font Info:    Font shape `TU/texgyretermes(0)/m/n' will be
@@ -2161,12 +2220,12 @@ LaTeX Font Info:    Font shape `TU/texgyretermes(0)/m/n' will be
 第3章
 
 Underfull \hbox (badness 1314) in paragraph at lines 17--18
-[]\TU/FandolSong-Regular(0)/m/n/12.045 在 本 研 究 中，|  定 义 用 户 集 合 为 $\OML/ntxmi/m/it/12.045 U \U/ntxmia/m/it/12.045 = \LMS/ntxsy/m/n/12.045 f\OML/ntxmi/m/it/12.045 u[]; u[]; :::; u[]\LMS/ntxsy/m/n/12.045 g$\TU/FandolSong-Regular(0)/m/n/12.045 ，|  物 品 集 合 为 $\OML/ntxmi/m/it/12.045 I \U/ntxmia/m/it/12.045 =
+[]\TU/STSong(0)/m/n/12.045 在 本 研 究 中，|  定 义 用 户 集 合 为 $\OML/ntxmi/m/it/12.045 U \U/ntxmia/m/it/12.045 = \LMS/ntxsy/m/n/12.045 f\OML/ntxmi/m/it/12.045 u[]; u[]; :::; u[]\LMS/ntxsy/m/n/12.045 g$\TU/STSong(0)/m/n/12.045 ，|  物 品 集 合 为 $\OML/ntxmi/m/it/12.045 I \U/ntxmia/m/it/12.045 =
  []
 
 
 Underfull \hbox (badness 1845) in paragraph at lines 21--22
-[]\TU/FandolSong-Regular(0)/m/n/12.045 在 此 基 础 上，|  可 将 每 种 行 为 的 交 互 矩 阵 映 射 为 对 应 的 行 为 子 图 $\OML/ntxmi/m/it/12.045 G[] \U/ntxmia/m/it/12.045 =
+[]\TU/STSong(0)/m/n/12.045 在 此 基 础 上，|  可 将 每 种 行 为 的 交 互 矩 阵 映 射 为 对 应 的 行 为 子 图 $\OML/ntxmi/m/it/12.045 G[] \U/ntxmia/m/it/12.045 =
  []
 
 [19
@@ -2291,7 +2350,7 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 第4章
 
 Underfull \hbox (badness 1320) in paragraph at lines 16--17
-[]\TU/FandolSong-Regular(0)/m/n/12.045 在 本 研 究 中，|  设 用 户 集 合 为 $\LMS/ntxsy/m/n/12.045 U \U/ntxmia/m/it/12.045 = \LMS/ntxsy/m/n/12.045 f\OML/ntxmi/m/it/12.045 u[]; u[]; [] ; u[]\LMS/ntxsy/m/n/12.045 g$\TU/FandolSong-Regular(0)/m/n/12.045 ，|  物 品 集 合 为 $\LMS/ntxsy/m/n/12.045 I \U/ntxmia/m/it/12.045 =
+[]\TU/STSong(0)/m/n/12.045 在 本 研 究 中，|  设 用 户 集 合 为 $\LMS/ntxsy/m/n/12.045 U \U/ntxmia/m/it/12.045 = \LMS/ntxsy/m/n/12.045 f\OML/ntxmi/m/it/12.045 u[]; u[]; [] ; u[]\LMS/ntxsy/m/n/12.045 g$\TU/STSong(0)/m/n/12.045 ，|  物 品 集 合 为 $\LMS/ntxsy/m/n/12.045 I \U/ntxmia/m/it/12.045 =
  []
 
 [36
@@ -2349,12 +2408,12 @@ File: figures/red_book.jpg Graphic file (type bmp)
 
 ] [55] [56]
 Underfull \hbox (badness 2512) in paragraph at lines 130--131
-[]\TU/texgyretermes(0)/m/n/12.045 REIMERS N\TU/FandolSong-Regular(0)/m/n/12.045 ，| \TU/texgyretermes(0)/m/n/12.045 GUREVYCH I. Sentence-bert: Sentence embeddings using
+[]\TU/texgyretermes(0)/m/n/12.045 REIMERS N\TU/STSong(0)/m/n/12.045 ，| \TU/texgyretermes(0)/m/n/12.045 GUREVYCH I. Sentence-bert: Sentence embeddings using
  []
 
 [57]
 Underfull \hbox (badness 4391) in paragraph at lines 172--173
-[]\TU/texgyretermes(0)/m/n/12.045 CHERNOZHUKOV V\TU/FandolSong-Regular(0)/m/n/12.045 ，| \TU/texgyretermes(0)/m/n/12.045 CHETVERIKOV D\TU/FandolSong-Regular(0)/m/n/12.045 ，| \TU/texgyretermes(0)/m/n/12.045 DEMIRER M\TU/FandolSong-Regular(0)/m/n/12.045 ，| \TU/texgyretermes(0)/m/n/12.045 et al. Dou-
+[]\TU/texgyretermes(0)/m/n/12.045 CHERNOZHUKOV V\TU/STSong(0)/m/n/12.045 ，| \TU/texgyretermes(0)/m/n/12.045 CHETVERIKOV D\TU/STSong(0)/m/n/12.045 ，| \TU/texgyretermes(0)/m/n/12.045 DEMIRER M\TU/STSong(0)/m/n/12.045 ，| \TU/texgyretermes(0)/m/n/12.045 et al. Dou-
  []
 
 ) (./back/publications.tex [58]) [59
@@ -2387,12 +2446,12 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: C862378C26E89D6745ABF8A734046499;9716.
  ) 
 Here is how much of TeX's memory you used:
- 50637 strings out of 468168
- 1124255 string characters out of 5429574
- 1612566 words of memory out of 5000000
- 78466 multiletter control sequences out of 15000+600000
- 691090 words of font info for 236 fonts, out of 8000000 for 9000
+ 50644 strings out of 468168
+ 1113430 string characters out of 5432816
+ 1611958 words of memory out of 5000000
+ 78462 multiletter control sequences out of 15000+600000
+ 691664 words of font info for 240 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
- 107i,14n,136p,2564b,1355s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 107i,14n,136p,2565b,1355s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
 Output written on main.pdf (69 pages).
