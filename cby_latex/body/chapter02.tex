@@ -1,233 +1,193 @@
 % !TEX root = ../main.tex
 
-% 中英标题：\chapter{中文标题}[英文标题]
-\chapter{图神经网络与对比学习相关理论概述}
+\chapter{相关工作与技术基础}
 
-\section{引言}
-随着互联网平台的快速发展，用户与内容之间的交互数据呈指数级增长，如何在海量信息中为用户提供个性化推荐已成为智能信息系统的重要研究方向。传统的推荐算法（如协同过滤与矩阵分解）在建模用户—物品关系方面取得了良好效果，但由于忽略了交互数据的复杂结构与高阶关联，其表达能力和泛化性能仍存在不足。近年来，图神经网络 凭借其在非欧几里得结构化数据上的建模优势\cite{gao2022graph-survey}，被广泛引入推荐系统中，用于捕获用户与物品之间的高阶连接与潜在语义关系，从而显著提升了推荐的准确性与表示能力。
+本章系统介绍与本文工作密切相关的基础概念和核心技术，为后续章节的方法设计奠定理论基础。首先介绍蛋白质功能注释的标准体系——基因本体，然后依次阐述蛋白质语言模型、大语言模型文本嵌入技术、多标签分类与损失函数设计、Transformer架构与注意力机制、以及对比学习方法。
 
-然而，仅依靠监督信号进行训练的推荐模型在实际应用中仍面临诸多挑战。首先，用户行为数据往往存在噪声、稀疏和偏置等问题\cite{xu2023MBSSL, wei2022contrastive}，导致模型学习到的用户表示与真实偏好存在偏差。其次，推荐系统中的多行为交互和多模态内容信息进一步增加了建模难度，使得模型难以充分利用潜在的结构信号与语义信息。为此，对比学习（Contrastive Learning, CL）被引入推荐系统，作为一种自监督学习范式，通过构造正负样本对在无标签条件下优化表示分布，从而提升模型在噪声环境下的鲁棒性与泛化能力。
+\section{基因本体系统}
 
-综上所述，图神经网络与对比学习的结合为推荐系统的研究提供了新的发展方向：前者关注用户—物品关系的结构化建模，后者强调表示空间的一致性约束与自监督优化。二者相辅相成，不仅能够增强推荐模型的表示能力，还能有效缓解数据噪声与稀疏问题。本章将系统梳理与本研究密切相关的理论基础，包括图神经网络的核心原理及其在推荐系统中的典型应用，以及对比学习的基本思想与在推荐场景下的改进策略，为后续章节的模型设计与算法实现奠定理论支撑。
+基因本体（Gene Ontology, GO）\cite{ashburner2000gene}是生物信息学领域中最广泛使用的标准化功能注释体系，旨在为基因和蛋白质产物提供统一、规范的功能描述。GO系统由三个相互独立的本体论组成：
 
-\section{图神经网络相关原理及理论知识}
+（1）\textbf{分子功能（Molecular Function, MF）}：描述蛋白质在分子层面执行的活动，例如"蛋白激酶活性"（protein kinase activity）、"DNA结合"（DNA binding）等。
 
-\subsection{图神经网络的基本流程}
-图神经网络是一类能够在图结构数据上直接进行学习的深度模型。其核心思想是通过消息传递（Message Passing）机制，使节点在嵌入空间中综合自身特征与邻居节点的信息，从而生成具有结构感知与关系表达能力的节点表示。
+（2）\textbf{生物过程（Biological Process, BP）}：描述蛋白质参与的更高层次的生物学事件，例如"信号转导"（signal transduction）、"细胞凋亡"（apoptosis）等。BP本体具有最多的GO术语数量和最复杂的层级结构，因此也是功能预测中最具挑战性的分支。
 
-在一个典型的 GNN 层中，节点特征的更新通常包含两个阶段：
+（3）\textbf{细胞组分（Cellular Component, CC）}：描述蛋白质在细胞中执行功能的位置，例如"细胞核"（nucleus）、"线粒体"（mitochondrion）等。
 
-\begin{enumerate}
-    \item \textbf{消息传递}：  
-    每个节点从其邻居节点接收并聚合信息。对于节点 $v$，其邻居集合记为 $\mathcal{N}(v)$。  
-    在第 $l$ 层中，消息传递过程可表示为：
-    \begin{equation}
-        \mathbf{m}_v^{(l)} = \sum_{u \in \mathcal{N}(v)} M^{(l)}\left(\mathbf{h}_v^{(l-1)}, \mathbf{h}_u^{(l-1)}, \mathbf{e}_{uv}\right),
-    \end{equation}
-    其中，$M^{(l)}(\cdot)$ 为消息函数，用于根据节点与边特征计算邻居信息的加权表示，并完成消息的聚合。
+GO术语之间以有向无环图（DAG）的形式组织\cite{goeman2008multiple}，主要包含"is\_a"（是一种）和"part\_of"（是...的一部分）两种关系类型。在这种层级结构中，越靠近根节点的术语越抽象、越通用，越靠近叶节点的术语越具体、越细化。根据"真实路径规则"（True Path Rule），如果一个蛋白质被注释了某个GO术语，那么它自动被认为具有该术语所有祖先节点的功能。这一规则在数据预处理和预测评估中具有重要意义。
 
-    \item \textbf{节点更新}：  
-    节点结合自身上一层的表示与聚合后的消息向量，更新当前层的表示：
-    \begin{equation}
-        \mathbf{h}_v^{(l)} = U^{(l)}\left(\mathbf{h}_v^{(l-1)}, \mathbf{m}_v^{(l)}\right),
-    \end{equation}
-    其中，$U^{(l)}(\cdot)$ 为更新函数，可采用非线性变换（如 MLP、GRU 或残差结构）以捕获复杂的邻域依赖关系。
-\end{enumerate}
+每个GO术语都有标准化的文本定义，包括名称（name）和详细的功能描述（definition）。例如，GO:0004672的名称为"protein kinase activity"，其定义为"Catalysis of the phosphorylation of an amino acid residue in a protein"。这些文本定义蕴含着丰富的语义信息，是本文方法利用大语言模型进行语义编码的基础。
 
-通过堆叠多层消息传递与更新操作，GNN 能够逐步捕获高阶邻居的结构信息，实现节点间的深层语义关联建模。 
-在此框架下，众多具有代表性的模型相继被提出，其中部分方法已被广泛应用于推荐系统场景。接下来，本文将介绍几种在推荐算法领域中具有代表性的图神经网络模型及其核心思想。
+值得注意的是，GO本体处于持续的更新演化之中。新的功能术语不断被添加，旧的术语可能被废弃或合并。这种动态特性意味着功能预测模型需要具备对新术语的泛化能力，即零样本预测能力。本文第三章中构建的零样本测试集正是基于GO版本的时间演进来模拟真实的新功能发现场景。
 
-\subsection{典型图神经网络模型}
+\section{蛋白质语言模型}
 
-\textbf{（1）图卷积网络}
+蛋白质语言模型（Protein Language Model, PLM）是近年来生物信息学领域最具变革性的技术之一。其核心思想是将蛋白质序列类比为自然语言中的"句子"，将氨基酸类比为"词汇"，利用自然语言处理（NLP）领域成熟的自监督预训练范式来学习蛋白质序列的表示。
 
-图卷积网络（Graph Convolutional Network, GCN）\cite{kipf2016semi} 是最早提出的基于谱域卷积思想的图神经网络之一，其核心目标是将传统卷积神经网络（CNN）的局部特征提取能力扩展至非欧式的图结构数据中。  
-GCN 的关键思想在于：每个节点不仅依赖自身特征进行表征学习，还通过邻接关系接收邻居节点的信息，实现跨节点的特征传播与全局平滑。其计算过程可归纳为典型的两步形式：\textbf{消息传递} 与 \textbf{节点更新}。
+\subsection{ESM-2模型}
 
-\begin{itemize}
-    \item \textbf{消息传递}：  
-    节点通过邻接矩阵实现特征的聚合与传播。  
-    对于节点 $v$，其邻居集合为 $\mathcal{N}(v)$，消息传递过程可形式化为：
-    \begin{equation}
-        \mathbf{m}_v^{(l)} = 
-        \sum_{u \in \mathcal{N}(v) \cup \{v\}} 
-        \frac{1}{\sqrt{d_u d_v}} 
-        \mathbf{W}^{(l)} \mathbf{h}_u^{(l-1)},
-    \end{equation}
-    其中，$\mathbf{W}^{(l)}$ 为第 $l$ 层的可学习线性变换参数，$d_u$ 与 $d_v$ 分别为节点 $u$ 与 $v$ 的度。  
-    该式中的对称归一化因子 $\frac{1}{\sqrt{d_u d_v}}$ 可有效抑制高连接度节点在聚合过程中的主导效应，从而实现稳定的信息传播。
+ESM-2（Evolutionary Scale Modeling 2）\cite{lin2023evolutionary}是Meta AI研究院开发的蛋白质语言模型系列，包含从800万到150亿参数的多种规模。本文主要使用ESM2-650M变体（6.5亿参数，33层Transformer），在数百万条蛋白质序列上通过掩码语言建模（Masked Language Modeling, MLM）预训练。
 
-    \item \textbf{节点更新}：  
-    节点将聚合后的邻域信息 $\mathbf{m}_v^{(l)}$ 经过非线性变换，更新为新的特征表示：
-    \begin{equation}
-        \mathbf{h}_v^{(l)} = \sigma\left(\mathbf{m}_v^{(l)}\right),
-    \end{equation}
-    其中 $\sigma(\cdot)$ 表示非线性激活函数（如 ReLU）。  
-    通过多层堆叠，GCN 能够递归地传播信息，使每个节点在高层表征中融入高阶邻居的结构语义特征。
-\end{itemize}
+ESM-2的工作原理是：对输入序列中随机选定的氨基酸位置进行掩码，然后利用双向Transformer上下文信息预测被掩码的氨基酸。通过在进化上多样化的序列集合上训练，模型隐式地学习到了蛋白质的进化约束、结构偏好和功能模式。
 
-在矩阵形式下，GCN 的整体更新规则可写为：
+给定一条长度为$L$的蛋白质序列$P = \{a_1, a_2, \ldots, a_L\}$，其中$a_i$表示第$i$个位置的氨基酸，ESM-2输出每个位置的上下文嵌入表示$\text{ESM}(a_i) \in \mathbb{R}^{d_{seq}}$。通过对所有位置的嵌入进行平均池化（Mean Pooling），可以获得蛋白质级别的全局表示：
 \begin{equation}
-    \mathbf{H}^{(l+1)} = 
-    \sigma\!\left(
-    \widetilde{\mathbf{D}}^{-\frac{1}{2}}
-    \widetilde{\mathbf{A}}
-    \widetilde{\mathbf{D}}^{-\frac{1}{2}}
-    \mathbf{H}^{(l)}
-    \mathbf{W}^{(l)}
-    \right),
+    \mathbf{E}_{seq} = \frac{1}{L} \sum_{i=1}^{L} \text{ESM}(a_i) \in \mathbb{R}^{d_{seq}}
 \end{equation}
-其中，$\widetilde{\mathbf{A}} = \mathbf{A} + \mathbf{I}$ 表示加入自连接的邻接矩阵，$\widetilde{\mathbf{D}}$ 为其对应的度矩阵。  
-该更新过程等价于在图拉普拉斯谱域上进行卷积操作，因此 GCN 可视为对图信号进行低通滤波的平滑算子。  
-GCN 以其参数高效、结构简洁的特点成为后续多种图神经网络（如 GraphSAGE、GAT、LightGCN 等）的理论基础。
+其中，$d_{seq} = 1280$（对于ESM2-650M变体）。该嵌入向量蕴含了蛋白质的进化信号和理化性质，是本文方法中序列模态的基础特征表示。
 
+\subsection{适配器技术}
 
-\textbf{（2）图采样聚合网络}  
+蛋白质语言模型通常包含数亿乃至数十亿的参数，对其进行全参数微调不仅计算开销巨大，还容易导致灾难性遗忘——即微调过程中丢失预训练阶段学到的通用知识。适配器（Adapter）\cite{houlsby2019adapter}技术提供了一种参数高效的替代方案。
 
-GraphSAGE（Graph Sample and Aggregate）\cite{hamilton2017inductive} 是一种支持大规模图上归纳式学习的图神经网络模型。  
-与 GCN 依赖全图邻接矩阵计算不同，GraphSAGE 通过采样机制与可学习聚合函数实现了高效的局部邻域特征传播，能够在动态变化或未见过的新节点上进行推理。其核心流程可概括为两步：消息传递与节点更新。
+适配器是一种轻量级的瓶颈结构模块，通常由降维线性层、非线性激活函数和升维线性层组成，并通过残差连接与原始模型相加。设输入为$\mathbf{x} \in \mathbb{R}^{d}$，适配器的计算过程为：
+\begin{equation}
+    \text{Adapter}(\mathbf{x}) = \text{LN}(\mathbf{W}_{\text{up}} \cdot \text{ReLU}(\mathbf{W}_{\text{down}} \cdot \mathbf{x}) + \mathbf{x})
+\end{equation}
+其中，$\mathbf{W}_{\text{down}} \in \mathbb{R}^{d_b \times d}$将输入降维至瓶颈维度$d_b$（通常$d_b = d/2$），$\mathbf{W}_{\text{up}} \in \mathbb{R}^{d \times d_b}$将其恢复至原始维度，LN表示层归一化。由于适配器的参数量远小于原始模型，在训练时只需更新适配器参数而冻结原始模型参数，即可高效地将外部知识注入预训练模型。
 
-\begin{itemize}
-    \item \textbf{消息传递}：  
-    对于每个节点 $v$，GraphSAGE 首先从其邻居集合 $\mathcal{N}(v)$ 中随机采样固定数量的邻居，以控制计算复杂度。  
-    然后，通过可学习的聚合函数（如均值聚合、LSTM 聚合或池化聚合）将邻居节点的特征表示汇总：
-    \begin{equation}
-        \mathbf{m}_v^{(l)} = 
-        \text{AGGREGATE}\left(
-        \{\mathbf{h}_u^{(l-1)} \mid u \in \text{Sample}(\mathcal{N}(v))\}
-        \right),
-    \end{equation}
-    其中，$\text{Sample}(\cdot)$ 表示随机采样操作。该聚合机制使得模型能够在保持表达能力的同时显著降低计算与存储开销，从而适应大规模工业级图数据。
+本文第四章提出的MZSGO-DA方法正是基于适配器技术，在蛋白质语言模型的Transformer层中注入轻量级适配器模块，通过对比学习预训练将域语义信息蒸馏至序列编码器。
 
-    \item \textbf{节点更新}：  
-    节点将自身特征与聚合后的邻居信息进行拼接，通过线性变换与非线性激活生成新的节点表示：
-    \begin{equation}
-        \mathbf{h}_v^{(l)} =
-        \sigma\left(
-        \mathbf{W}^{(l)} \cdot 
-        \text{CONCAT}\!\left(
-        \mathbf{h}_v^{(l-1)}, 
-        \mathbf{m}_v^{(l)}
-        \right)
-        \right),
-    \end{equation}
-    其中，$\mathbf{W}^{(l)}$ 为可学习参数矩阵，$\sigma(\cdot)$ 为激活函数。  
-    这种更新方式既保留了节点自身的语义信息，又融合了邻域特征，使得 GraphSAGE 在异质节点和稀疏场景中具备更强的泛化能力。
-\end{itemize}
+\section{大语言模型文本嵌入}
 
-通过分层采样与聚合，GraphSAGE 支持在训练阶段仅访问部分图结构，并在推理阶段对新增节点进行嵌入生成（inductive inference），因而广泛应用于推荐系统、社交网络与知识图谱等大规模动态图场景。
+大语言模型文本嵌入（LLM-based Text Embedding）技术旨在利用大规模预训练语言模型将任意自然语言文本映射为稠密的向量表示，使得语义相似的文本在向量空间中距离更近。
 
-\textbf{（3）图注意力网络}  
+\subsection{Qwen3-Embedding模型}
 
-图注意力网络（Graph Attention Network, GAT）\cite{GAT} 在消息传递框架中引入了注意力机制，以自适应地分配邻居节点的重要性权重，从而克服了传统 GCN 中均匀聚合的局限性。  
-GAT 不再依赖预定义的归一化矩阵，而是通过可学习的注意力参数在局部邻域内动态调整信息流强度。其核心流程同样可分为两步：\textbf{消息传递}与\textbf{节点更新}。
+Qwen3-Embedding\cite{zhang2025qwen3}是通义千问系列推出的文本嵌入模型，具有强大的语义理解和表示能力。本文采用Qwen3-Embedding-4B（40亿参数）作为统一的语义编码器，对蛋白质域描述文本和GO功能定义文本进行编码。
 
-\begin{itemize}
-    \item \textbf{消息传递}：  
-    对于每个节点 $v$，首先通过线性变换矩阵 $\mathbf{W}$ 将节点特征映射到新的表示空间：
-    \begin{equation}
-        \mathbf{h}_v' = \mathbf{W}\mathbf{h}_v.
-    \end{equation}
-    然后，通过注意力机制计算节点 $v$ 与邻居节点 $u \in \mathcal{N}(v)$ 之间的关联强度：
-    \begin{equation}
-        e_{uv} = 
-        \text{LeakyReLU}\left(
-        \mathbf{a}^\top [\mathbf{h}_u' \Vert \mathbf{h}_v']
-        \right),
-    \end{equation}
-    并使用 softmax 函数对所有邻居的注意力得分进行归一化：
-    \begin{equation}
-        \alpha_{uv} = 
-        \frac{\exp(e_{uv})}
-        {\sum_{k \in \mathcal{N}(v)} \exp(e_{kv})},
-    \end{equation}
-    其中，$\mathbf{a}$ 为可学习的注意力向量，$\Vert$ 表示向量拼接操作。该机制允许节点对语义上更相关的邻居分配更高权重，从而提升消息传播的针对性。
+对于一段包含$N$个token的输入文本$T$，Qwen3-Embedding输出每个token的嵌入$\{h_1, h_2, \ldots, h_N\}$，通过平均池化获得文本的全局语义表示：
+\begin{equation}
+    \mathbf{E}_{text} = \frac{1}{N} \sum_{n=1}^{N} h_n \in \mathbb{R}^{d_{text}}
+\end{equation}
+其中，$d_{text} = 2560$（对于Qwen3-Embedding-4B）。
 
-    \item \textbf{节点更新}：  
-    节点基于注意力权重对邻居特征进行加权聚合，形成更新后的表示：
-    \begin{equation}
-        \mathbf{h}_v^{(l)} = 
-        \sigma\left(
-        \sum_{u \in \mathcal{N}(v)} 
-        \alpha_{uv} \mathbf{h}_u'
-        \right),
-    \end{equation}
-    其中，$\sigma(\cdot)$ 表示非线性激活函数。为了增强模型的表达能力，GAT 通常采用多头注意力机制（Multi-Head Attention），即并行计算多个注意力通道并对其结果进行拼接或平均，从而捕获不同语义视角下的邻域特征相关性。
-\end{itemize}
+选择Qwen3-Embedding而非生物医学专用语言模型（如BioGPT\cite{luo2022biogpt}）的原因在于：文本嵌入模型专门针对句子级语义表示进行了优化训练，能够生成高质量的句向量；而像BioGPT这样的生成式模型需要通过平均token级嵌入来近似句子表示，其句子级语义捕获能力不如专用嵌入模型。本文第三章的消融实验也验证了这一选择的合理性。
 
-通过注意力机制的引入，GAT 实现了节点间关系的自适应建模，不再依赖图结构的固定拓扑权重，在异质图、社交网络及多模态推荐任务中展现出优越的特征选择与语义过滤能力。
+\subsection{蛋白质域的语义编码}
 
+蛋白质域（domain）是蛋白质中独立折叠并行使特定功能的结构和功能单元。InterPro数据库\cite{blum2025interpro}提供了全面的蛋白质域注释信息，包括每个域的标识符及其自然语言描述。例如，某蛋白质可能包含"Protein kinase domain"（蛋白激酶结构域）和"SH2 domain"（SH2结构域）等多个功能域。
 
-\textbf{（4）LightGCN 模型}  
+对于拥有$K$个域注释$\mathcal{D} = \{d_1, d_2, \ldots, d_K\}$的蛋白质，域编码采用两级平均池化策略：
 
-LightGCN（Light Graph Convolution Network）\cite{he2020lightgcn} 是一种专为推荐系统设计的轻量级图神经网络模型，其核心思想是对传统 GCN 结构进行简化，仅保留最关键的邻居特征聚合过程，去除了非线性激活与特征变换等操作，从而在保持模型表达能力的同时显著提升训练与推理效率。其整体流程可分为两个阶段：消息传递与节点更新。
+第一级（token级池化）：对每个域描述$d_k$（含$M_k$个token）内部进行池化：
+\begin{equation}
+    \mathbf{e}_k = \frac{1}{M_k} \sum_{m=1}^{M_k} h_{k,m}
+\end{equation}
 
-\begin{itemize}
-    \item \textbf{消息传递}：  
-    LightGCN 不再引入额外的线性变换矩阵或激活函数，而是直接基于对称归一化的邻接矩阵传播节点特征。对于第 $l$ 层传播，节点特征的更新公式为：
-    \begin{equation}
-        \mathbf{E}^{(l+1)} = \mathbf{D}^{-\frac{1}{2}} \mathbf{A} \mathbf{D}^{-\frac{1}{2}} \mathbf{E}^{(l)},
-    \end{equation}
-    其中，$\mathbf{A}$ 为用户–物品二部图的邻接矩阵，$\mathbf{D}$ 为其度矩阵。  
-    该归一化传播机制确保了不同度节点之间的平衡，使得每个节点能够稳定地吸收邻居的嵌入信息，从而实现高效的信息扩散与结构平滑。
+第二级（域级池化）：对该蛋白质所有域的嵌入进行聚合：
+\begin{equation}
+    \mathbf{E}_{dom} = \frac{1}{K} \sum_{k=1}^{K} \mathbf{e}_k \in \mathbb{R}^{d_{text}}
+\end{equation}
 
-    \item \textbf{节点更新}：  
-    为充分利用多层传播过程中不同阶邻居所包含的协同信息，LightGCN 将所有层的节点表示进行加权融合，形成最终的节点嵌入：
-    \begin{equation}
-        \mathbf{e}_u = \sum_{l=0}^{L} \alpha_l \mathbf{e}_u^{(l)}, \quad 
-        \mathbf{e}_i = \sum_{l=0}^{L} \alpha_l \mathbf{e}_i^{(l)},
-    \end{equation}
-    其中，$\alpha_l$ 为第 $l$ 层的权重系数，通常设为均值或按经验衰减分配。  
-    这种跨层融合方式有效整合了不同阶邻居的结构特征，使模型在保持轻量化的同时依然具备捕获高阶协同信号的能力。
-\end{itemize}
+若蛋白质无域注释，则使用零向量作为占位符。根据InterPro数据库的统计，UniProtKB中超过80\%的蛋白质具有匹配的域信息，表明域特征具有广泛的适用性。
 
-通过去除非必要的非线性变换与参数矩阵，LightGCN 显著减少了计算与存储开销，同时在多行为推荐、社交推荐等任务中仍能保持强大的表示能力，因此成为近年来推荐系统研究中的核心基线模型。
+\section{多标签分类与损失函数}
 
-\section{对比学习相关原理及理论知识}
+蛋白质功能预测本质上是一个多标签分类问题——一个蛋白质通常同时具有多个GO功能注释。在本文的框架中，我们进一步将其转化为多个独立的二分类问题：对每个"蛋白质-GO"对，模型判断该蛋白质是否具有该GO功能。
 
-对比学习（Contrastive Learning）是一种基于相似性约束的自监督表示学习方法，其核心思想是通过构建正负样本对（Positive/Negative Pairs）来学习高质量的特征表示，使语义相似的样本在嵌入空间中靠近，而语义无关的样本彼此远离。  
-相比传统的监督学习依赖人工标签的方式，对比学习能够从无标注数据中挖掘潜在结构信息，显著提升模型的泛化能力和鲁棒性。
+\subsection{二分类交叉熵损失}
 
-早期的对比学习思想可追溯至互信息最大化（Mutual Information Maximization）方法，其目标在于通过最大化不同视图之间的互信息来捕获共享语义特征。此类方法包括 Deep InfoMax \cite{bachman2019learning} 和 CPC（Contrastive Predictive Coding）\cite{oord2018representation} 等。  
-随着大规模无监督表示学习的发展，SimCLR \cite{chen2020simple}、MoCo \cite{he2020momentum} 和 BYOL \cite{grill2020bootstrap} 等方法进一步推动了对比学习在计算机视觉和推荐系统中的广泛应用。
+对于给定的"蛋白质-GO"对，设真实标签为$y \in \{0, 1\}$，模型预测概率为$\hat{y} \in (0, 1)$，二分类交叉熵（Binary Cross-Entropy, BCE）损失定义为：
+\begin{equation}
+    \mathcal{L}_{\text{BCE}} = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right]
+\end{equation}
+其中$N$为样本数。BCE损失在正负样本分布相对均衡的本体分支（如BP和MF）上表现良好。
 
-对比学习的一般流程可分为三个阶段：样本构建、相似度度量与目标优化。
+\subsection{Focal Loss}
 
-\begin{enumerate}
-    \item \textbf{样本构建}：  
-    模型首先需要从原始样本中生成具有语义关联的多视图表示。  
-    对于给定样本 $x$，通过两种不同的数据增强或视角变换（如裁剪、遮挡、掩码或行为扰动）生成两个相关视图 $(x_i, x_j)$，称为正样本对。  
-    来自其他样本的数据 $(x_i, x_k)$ 被视为负样本对。  
-    这种设计使得模型在无监督条件下能够自动学习到“语义一致性”，即同一实体的不同观测在嵌入空间中应保持接近。
+GO功能标签通常呈现极度的长尾分布——少量高频标签覆盖大部分蛋白质，而大量低频标签仅注释少量蛋白质。这种类别不平衡问题在CC本体中尤为严重。为此，本文在CC本体上采用Focal Loss\cite{cui2019class}来缓解类别不平衡问题：
+\begin{equation}
+    \mathcal{L}_{\text{Focal}} = -\frac{1}{N} \sum_{i=1}^{N} \left[ \alpha (1 - \hat{y}_i)^\gamma y_i \log(\hat{y}_i) + (1 - \alpha) \hat{y}_i^\gamma (1 - y_i) \log(1 - \hat{y}_i) \right]
+\end{equation}
+其中，$\alpha$用于平衡正负样本的权重，$\gamma$为聚焦参数（实验中设为2），用于降低易分类样本的损失权重。当$\gamma > 0$时，对于模型已经能够正确且高置信度分类的样本（$\hat{y}_i$接近真实标签），其损失被大幅衰减；而对于模型难以正确分类的"困难样本"，损失保持较大值，使模型训练更加聚焦于困难样本的学习。
 
-    \item \textbf{相似度度量}：  
-    为量化样本对在表示空间中的关系，常用的相似度度量为余弦相似度：
-    \begin{equation}
-        \mathrm{sim}(\mathbf{z}_i, \mathbf{z}_j) = 
-        \frac{\mathbf{z}_i^\top \mathbf{z}_j}{\|\mathbf{z}_i\| \, \|\mathbf{z}_j\|},
-    \end{equation}
-    其中，$\mathbf{z}_i$ 与 $\mathbf{z}_j$ 分别表示样本经过编码器 $f_\theta(\cdot)$ 后的特征表示。  
-    余弦相似度通过角度关系刻画样本间的相对语义距离，保证了尺度不变性和数值稳定性。
+\section{Transformer架构与注意力机制}
 
-    \item \textbf{目标优化}：  
-    对比学习的核心目标是最大化正样本对的相似度并最小化负样本对的相似度。  
-    最常用的优化目标是 InfoNCE 损失函数 \cite{oord2018representation}：
-    \begin{equation}
-        \mathcal{L}_{\mathrm{InfoNCE}} = 
-        -\log 
-        \frac{\exp(\mathrm{sim}(\mathbf{z}_i, \mathbf{z}_j)/\tau)}
-        {\sum_{k=1}^{N} \exp(\mathrm{sim}(\mathbf{z}_i, \mathbf{z}_k)/\tau)},
-    \end{equation}
-    其中，$\tau$ 为温度系数，用于调整相似度分布的平滑程度，$N$ 表示候选样本数量。  
-    该损失通过软最大化机制强化正样本对的区分性，并在嵌入空间中形成自然的簇结构（Cluster Structure）。
-\end{enumerate}
+Transformer\cite{vaswani2017attention}是一种完全基于注意力机制的神经网络架构，最初用于自然语言处理的序列到序列任务，现已成为深度学习领域最广泛使用的基础架构之一。本文使用的蛋白质语言模型ESM-2和大语言模型Qwen3-Embedding均基于Transformer架构构建。
 
-从信息论角度来看，InfoNCE 可被视为互信息的下界估计，其优化过程等价于最大化样本视图间共享信息的期望。  
-这种思想被称为互信息最大化原理（Mutual Information Maximization Principle），能够有效减少特征冗余并提升表达能力。  
-此外，Wang 与 Isola \cite{wang2020understanding} 提出了对比学习的两个关键理论目标：  
-（1）\textbf{对齐性（Alignment）}——正样本对在嵌入空间中的距离应尽可能接近；  
-（2）\textbf{均匀性（Uniformity）}——所有样本在单位超球面上应均匀分布，以避免塌陷（Collapse）问题。  
-对比学习的目标可视为在这两种约束之间取得平衡，从而在保持判别性的同时维持表示多样性。
+\subsection{自注意力机制}
+
+自注意力（Self-Attention）机制是Transformer的核心组件，允许序列中的每个位置与其他所有位置进行信息交互。给定输入表示$\mathbf{X} \in \mathbb{R}^{L \times d}$，自注意力机制首先通过三个可学习的线性映射将输入分别投影为查询（Query）、键（Key）和值（Value）：
+\begin{equation}
+    \mathbf{Q} = \mathbf{X}\mathbf{W}_Q, \quad \mathbf{K} = \mathbf{X}\mathbf{W}_K, \quad \mathbf{V} = \mathbf{X}\mathbf{W}_V
+\end{equation}
+其中$\mathbf{W}_Q, \mathbf{W}_K \in \mathbb{R}^{d \times d_k}$，$\mathbf{W}_V \in \mathbb{R}^{d \times d_v}$为参数矩阵。注意力输出通过缩放点积计算：
+\begin{equation}
+    \text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{Softmax}\left(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\right)\mathbf{V}
+\end{equation}
+其中$\sqrt{d_k}$为缩放因子，防止点积值过大导致梯度消失。
+
+\subsection{多头注意力机制}
+
+为了使模型能够从不同的子空间中捕获多种类型的注意力模式，Transformer采用多头注意力（Multi-Head Attention, MHA）机制。设有$H$个注意力头，每个头独立计算注意力后将结果拼接：
+\begin{equation}
+    \text{MHA}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{Concat}(\text{head}_1, \ldots, \text{head}_H)\mathbf{W}_O
+\end{equation}
+其中$\text{head}_h = \text{Attention}(\mathbf{Q}\mathbf{W}_Q^h, \mathbf{K}\mathbf{W}_K^h, \mathbf{V}\mathbf{W}_V^h)$，$\mathbf{W}_O$为输出投影矩阵。
+
+\subsection{Transformer层结构}
+
+标准的Transformer编码器层由两个子层组成：多头自注意力子层和前馈网络（Feed-Forward Network, FFN）子层，每个子层都包含残差连接和层归一化：
+\begin{align}
+    \mathbf{X}' &= \text{LN}(\mathbf{X} + \text{MHA}(\mathbf{X})) \\
+    \mathbf{X}'' &= \text{LN}(\mathbf{X}' + \text{FFN}(\mathbf{X}'))
+\end{align}
+其中FFN通常由两个线性变换和一个非线性激活函数组成。本文第四章中的适配器模块正是分别嵌入在注意力子层和FFN子层之后。
+
+\section{对比学习}
+
+对比学习\cite{chen2020simple}是一种自监督表示学习方法，其核心思想是在特征空间中拉近语义相似的样本对（正样本对），同时推远语义不相似的样本对（负样本对），从而学习到具有区分性的特征表示。
+
+\subsection{InfoNCE损失函数}
+
+InfoNCE\cite{oord2018representation}是对比学习中最常用的目标函数。给定一批$B$个样本，其中每个样本$i$具有两个视图的表示$\mathbf{z}_i^A$和$\mathbf{z}_i^B$（正样本对），InfoNCE损失定义为：
+\begin{equation}
+    \mathcal{L}_{\text{InfoNCE}} = -\frac{1}{B} \sum_{i=1}^{B} \log \frac{\exp(\text{sim}(\mathbf{z}_i^A, \mathbf{z}_i^B) / \tau)}{\sum_{j=1}^{B} \exp(\text{sim}(\mathbf{z}_i^A, \mathbf{z}_j^B) / \tau)}
+\end{equation}
+其中$\text{sim}(\cdot, \cdot)$为相似度函数（通常采用余弦相似度），$\tau$为温度超参数，控制分布的平滑程度。
+
+在本文第四章的预训练阶段，我们使用双向InfoNCE对比损失来对齐蛋白质序列表示与域嵌入表示：
+\begin{equation}
+    \mathcal{L}_{\text{CL}} = \frac{1}{2}\left(\mathcal{L}_{\text{InfoNCE}}(\mathbf{Z}_{seq} \to \mathbf{Z}_{dom}) + \mathcal{L}_{\text{InfoNCE}}(\mathbf{Z}_{dom} \to \mathbf{Z}_{seq})\right)
+\end{equation}
+通过这种双向对比学习，同一蛋白质的序列表示和域描述嵌入被拉近，不同蛋白质的表示被推远。预训练完成后，序列编码器无需显式输入域信息，即可生成携带域语义信息的蛋白质表示。
+
+\subsection{投影头设计}
+
+在对比学习中，通常在编码器输出之后附加一个投影头（Projection Head），将高维特征映射至低维对比空间\cite{chen2020simple}。这是因为投影头能够过滤掉与对比目标无关的高层特征变化，使对比损失更聚焦于语义层面的对齐。
+
+本文采用的投影头结构为：
+\begin{equation}
+    \text{ProjHead}(\mathbf{x}) = \text{LN}(\mathbf{W}_2 \cdot \text{Dropout}(\text{GELU}(\text{LN}(\mathbf{W}_1 \cdot \mathbf{x}))))
+\end{equation}
+其中$\mathbf{W}_1 \in \mathbb{R}^{d_p \times d}$、$\mathbf{W}_2 \in \mathbb{R}^{d_p \times d_p}$为线性变换参数，$d_p$为投影维度（设为256），GELU为激活函数\cite{hendrycks2016gaussian}。输出向量经过L2归一化后用于计算余弦相似度。
+
+\section{评价指标}
+
+为全面评估蛋白质功能预测的性能，尤其是在零样本场景下的泛化能力，本文采用以下评价指标体系。
+
+\subsection{蛋白质中心评价指标}
+
+遵循CAFA挑战\cite{zhou2019cafa}的标准协议，本文主要报告以下蛋白质中心指标：
+
+（1）\textbf{$F_{\max}$}：是一个阈值依赖的指标。对于每个决策阈值$t \in [0, 1]$，计算所有蛋白质上的平均精确率$\text{Pr}(t)$和平均召回率$\text{Rc}(t)$，然后取所有阈值下F1分数的最大值：
+\begin{equation}
+    F_{\max} = \max_{t} \frac{2 \cdot \text{Pr}(t) \cdot \text{Rc}(t)}{\text{Pr}(t) + \text{Rc}(t)}
+\end{equation}
+
+（2）\textbf{AUPR}（Area Under the Precision-Recall Curve）：精确率-召回率曲线下面积，是一个阈值无关的指标。在功能注释任务固有的严重类别不平衡情况下，AUPR比AUROC更能反映模型的真实性能。
+
+\subsection{零样本评价指标}
+
+为评估模型对未见标签的推理能力，本文将标签空间划分为"已见标签集"（Seen Labels，训练集中出现过的GO术语）和"未见标签集"（Unseen Labels，训练集中未出现的GO术语），分别计算Seen AUPR和Unseen AUPR。
+
+（3）\textbf{调和均值H}：为综合评估模型在已见和未见标签上的平衡性能，采用Seen AUPR和Unseen AUPR的调和均值：
+\begin{equation}
+    H = \frac{2 \times \text{Seen AUPR} \times \text{Unseen AUPR}}{\text{Seen AUPR} + \text{Unseen AUPR}}
+\end{equation}
+只有当模型在两类标签上均表现良好时，$H$值才会较高。该指标是零样本场景下最重要的综合评价指标。
 
 \section{本章小结}
-本章主要介绍了图神经网络与对比学习的相关理论基础。在图神经网络部分，首先阐述了 GNN 的一般工作流程，包括消息构造与聚合机制，并重点介绍了若干具有代表性的模型（如 GCN、GraphSAGE、GAT 与 LightGCN），以说明不同结构在特征传播与表示学习上的差异与优势。在对比学习部分，本章系统总结了其核心思想、基本流程与典型优化目标（如 InfoNCE 损失），并分析了其在特征对齐与表示均匀性方面的理论依据。  
+
+本章系统介绍了本文工作所涉及的核心技术基础。基因本体系统提供了功能注释的标准框架，蛋白质语言模型和大语言模型文本嵌入分别为蛋白质序列和功能文本提供了强大的特征提取能力，多标签分类损失函数和Focal Loss为应对类别不平衡提供了优化工具，Transformer和注意力机制构成了本文模型的基础架构，对比学习为跨模态知识蒸馏提供了有效的训练范式，评价指标体系为模型性能的全面评估提供了可靠的依据。上述技术基础将在后续两章的具体方法设计中得到综合运用。

@@ -1,0 +1,53 @@
+{
+  "Q8TBH0": {
+    "sequence_length": 407,
+    "num_predictions": 9,
+    "predictions": [
+      {
+        "go_term": "0005575",
+        "description": "cellular_component: A location, relative to cellular compartments and structures, occupied by a macromolecular machine when it carries out a molecular function. There are two ways in which the gene ontology describes locations of gene products: (1) relative to cellular structures (e.g., cytoplasmic side of plasma membrane) or compartments (e.g., mitochondrion), and (2) the stable macromolecular complexes of which they are parts (e.g., the ribosome).",
+        "probability": 0.9906753301620483
+      },
+      {
+        "go_term": "0008372",
+        "description": "cellular_component: A location, relative to cellular compartments and structures, occupied by a macromolecular machine when it carries out a molecular function. There are two ways in which the gene ontology describes locations of gene products: (1) relative to cellular structures (e.g., cytoplasmic side of plasma membrane) or compartments (e.g., mitochondrion), and (2) the stable macromolecular complexes of which they are parts (e.g., the ribosome).",
+        "probability": 0.9906753301620483
+      },
+      {
+        "go_term": "0110165",
+        "description": "cellular anatomical entity: A part of a cellular organism that is either an immaterial entity or a material entity with granularity above the level of a protein complex but below that of an anatomical system. Or, a substance produced by a cellular organism with granularity above the level of a protein complex.",
+        "probability": 0.8557024002075195
+      },
+      {
+        "go_term": "0005622",
+        "description": "intracellular anatomical structure: A component of a cell contained within (but not including) the plasma membrane. In eukaryotes it includes the nucleus and cytoplasm.",
+        "probability": 0.5510181784629822
+      },
+      {
+        "go_term": "0016020",
+        "description": "membrane: A lipid bilayer along with all the proteins and protein complexes embedded in it and attached to it.",
+        "probability": 0.5408274531364441
+      },
+      {
+        "go_term": "0016021",
+        "description": "membrane: A lipid bilayer along with all the proteins and protein complexes embedded in it and attached to it.",
+        "probability": 0.5408274531364441
+      },
+      {
+        "go_term": "0098589",
+        "description": "membrane: A lipid bilayer along with all the proteins and protein complexes embedded in it and attached to it.",
+        "probability": 0.5408274531364441
+      },
+      {
+        "go_term": "0098805",
+        "description": "membrane: A lipid bilayer along with all the proteins and protein complexes embedded in it and attached to it.",
+        "probability": 0.5408274531364441
+      },
+      {
+        "go_term": "0005737",
+        "description": "cytoplasm: The contents of a cell excluding the plasma membrane and nucleus, but including other subcellular structures.",
+        "probability": 0.5358213782310486
+      }
+    ]
+  }
+}

@@ -16,70 +16,58 @@
   % 秘级
   %=====
   statesecrets={公开},
-  natclassifiedindex={TM301.2},
-  intclassifiedindex={62-5},
+  natclassifiedindex={TP391},
+  intclassifiedindex={68T07},
   %
   %=========
   % 中文信息
   %=========
-  ctitleone={基于图神经网络的多行为},%本科生封面使用
-  ctitletwo={去噪推荐方法研究},%本科生封面使用
-  ctitlecover={基于图神经网络的多行为去噪推荐方法研究},%放在封面中使用，自由断行
-  ctitle={基于图神经网络的多行为去噪推荐方法研究},%放在原创性声明中使用
-  csubtitle={一条副标题}, %一般情况没有，可以注释掉
+  ctitleone={基于多模态预训练},%本科生封面使用
+  ctitletwo={蛋白质功能预测研究},%本科生封面使用
+  ctitlecover={基于多模态预训练的蛋白质功能预测研究},%放在封面中使用，自由断行
+  ctitle={基于多模态预训练的蛋白质功能预测研究},%放在原创性声明中使用
+  %csubtitle={一条副标题}, %一般情况没有，可以注释掉
   cxueke={专业},
   cpostgraduatetype={专业},
   csubject={计算机技术},
-  % csubject={机械工程},
-  % caffil={计算机科学与技术学院},
   caffil={哈尔滨工业大学（深圳）},
-  cauthor={樊红雨},
-  csupervisor={马江虹副教授},
-  % cassosupervisor={某某某 教授}, % 副导师
-  % ccosupervisor={某某某 教授}, % 合作导师
+  cauthor={崔博越},
+  csupervisor={李君一教授},
   % 日期自动使用当前时间，若需指定按如下方式修改：
-  cdate={2026年1月},
+  cdate={2026年5月},
   % 指定第二页封面的日期，即答辩日期
-  cdatesecond={2026年01月},
-  cstudentid={23S151008},
+  cdatesecond={2026年05月},
+  cstudentid={23S151070},
   cstudenttype={同等学力人员}, %非全日制教育申请学位者
-  %（同等学力人员）、（工程硕士）、（工商管理硕士）、
-  %（高级管理人员工商管理硕士）、（公共管理硕士）、（中职教师）、（高校教师）等
-  %
   %
   %=========
   % 英文信息
   %=========
-  etitle={Research on Multi-Behavior Denoising Recommendation Method Based on Graph Neural Networks},
-  esubtitle={This is the sub title},
+  etitle={Research on Protein Function Prediction Based on Multimodal Pretraining},
   exueke={Engineering},
-  esubject={Electronic and Information Engineering},
+  esubject={Computer Technology},
   eaffil={Harbin Institute of Technology, Shenzhen},
-  eauthor={Hongyu Fan},
-  esupervisor={Associate Prof. Jianghong Ma},
-  % eassosupervisor={XXX},
-  % ecosupervisor={Prof. XXX}, % Co-Supervisor off Campus
+  eauthor={Boyue Cui},
+  esupervisor={Prof. Junyi Li},
   % 日期自动生成，若需指定按如下方式修改：
-  edate={January, 2026},
+  edate={May, 2026},
   estudenttype={Master of Engineering},
   %
-  % 关键词用“英文逗号”分割
-  ckeywords={推荐系统, 图神经网络, 去噪推荐, 多行为推荐},
-  ekeywords={recommender system, graph neural network, denoising recommendation, multi-behavior recommendation},
+  % 关键词用"英文逗号"分割
+  ckeywords={蛋白质功能预测, 零样本学习, 多模态融合, 蛋白质语言模型, 基因本体},
+  ekeywords={protein function prediction, zero-shot learning, multimodal fusion, protein language model, Gene Ontology},
 }
 
 % 中文摘要
 \begin{cabstract}
 
-随着用户交互行为类型的日益丰富，推荐系统在多行为场景下面临严重的噪声干扰与偏好混叠问题。用户在电商或内容平台上的点击、收藏、加购、购买等行为虽然能够反映潜在兴趣，但其中包含的随机、误触或弱相关交互会削弱模型对真实偏好的刻画能力。此外，传统多行为推荐多依赖协同信号，缺乏模态语义信息的辅助，难以在复杂语义环境下准确识别噪声行为。针对上述问题，本文围绕“多行为协同去噪”与“多模态语义引导去噪”两个方向展开研究，提出了两个具有互补性的去噪推荐模型。
+蛋白质功能预测是生物信息学领域的核心任务之一。随着高通量测序技术的飞速发展，蛋白质序列数据呈指数级增长，然而经实验验证的功能注释比例极低，序列-功能鸿沟日益加深。现有的深度学习方法通常仅依赖序列模式特征，将蛋白质域信息和基因本体（Gene Ontology, GO）功能标签视为简单的分类标识符，忽略了蕴含于文本定义中的丰富语义信息，从而限制了模型对未见标签的泛化能力。针对上述问题，本文围绕"多模态语义融合"与"预训练域感知适配"两个方向展开研究，提出了两个具有递进关系的蛋白质功能预测框架。
 
-首先，提出噪声识别与偏好提取的多行为去噪推荐方法，面向多行为推荐中的噪声干扰问题。该模型从行为间与行为内两个层面建模用户偏好关系，设计了行为加权机制与自监督约束，从多行为图结构中自动识别并抑制噪声交互的影响。同时，引入噪声感知的偏好提取模块，使模型在保留高质量辅助行为信号的同时，消除弱相关或不可靠的交互，从而获得更精确的偏好表示。
+首先，提出多模态零样本蛋白质功能注释方法MZSGO。该方法将蛋白质功能预测重新定义为蛋白质-GO匹配问题，利用蛋白质语言模型ESM2提取序列进化特征，利用大语言模型Qwen3-Embedding对蛋白质域描述和GO功能定义进行统一语义编码，通过三路特征投影将异构表示映射至共享语义空间。设计了自适应门控融合模块动态调节各模态贡献权重，并引入非对称特征丢弃策略增强模型对模态缺失的鲁棒性。实验表明，MZSGO在标准测试集上的有监督指标达到最优水平，尤其在零样本场景下显著超越现有方法。
 
-其次，为进一步扩展至多模态多行为场景，提出基于噪声识别与偏好提取的多模态多行为去噪推荐方法。该方法引入大型视觉语言模型提取物品的图像与文本语义表示，通过模态语义相似度实现硬去噪，去除语义不一致的辅助交互；在图神经网络框架中，设计语义感知注意力机制以实现软去噪，自适应调整邻居节点的信息权重，从而聚焦于语义一致的高质量交互。此外，提出跨图对比学习模块，在语义增强图与去噪图之间建立一致性约束，实现模态语义信息向结构空间的有效迁移。
+其次，为进一步提升序列表征的功能感知能力，提出基于域感知适配器预训练的端到端蛋白质功能预测方法MZSGO-DA。该方法设计了轻量级适配器模块，以即插即用方式注入蛋白质语言模型的Transformer层内部；通过对比学习预训练，将蛋白质域的语义信息蒸馏至序列编码器，使模型仅凭序列输入即可产出携带域信息的嵌入表示。在下游阶段，采用双适配器策略实现端到端训练，兼顾预训练知识保留与任务特定适配。实验结果表明，MZSGO-DA在端到端场景下进一步提升了功能预测性能。
 
-本文的创新性体现在结合协同信号建模与多模态语义理解技术，提出两种创新方法以解决多行为推荐场景中的噪声干扰与真实偏好识别问题。
-一方面，从协同信息建模与去噪机制两方面入手，设计了基于行为内与行为间双层结构的噪声感知偏好提取模型，实现对真实偏好与噪声交互的有效区分，提升了多行为推荐的精确性与鲁棒性；
-另一方面，利用大型视觉语言模型的语义理解能力与多模态特征融合机制，构建多模态多行为去噪推荐框架，通过语义一致性约束实现软、硬去噪的协同优化，从视觉与文本模态中挖掘跨模态真实偏好信号，为复杂交互场景下的鲁棒推荐提供了新的思路与方法。
+本文的创新性体现在：一方面，通过引入大语言模型构建域和标签的统一语义空间，实现了蛋白质功能预测从封闭标签集到开放标签集的范式转换，使模型具备零样本推理能力；另一方面，通过域感知对比学习预训练与双适配器端到端训练机制，在不改变蛋白质语言模型原始参数的前提下，高效地将多模态知识注入序列编码器，提升了模型的表征能力与泛化性能。
 
 
 \end{cabstract}
@@ -87,17 +75,13 @@
 % 英文摘要
 \begin{eabstract}
 
-With the increasing diversity of user interaction behaviors, recommender systems in multi-behavior scenarios face significant challenges of noise interference and preference entanglement. User actions on e-commerce or content platforms—such as clicks, favorites, add-to-cart, and purchases—can reflect potential interests, yet they often include random, accidental, or weakly related interactions that obscure true user preferences. Moreover, traditional multi-behavior recommendation methods primarily rely on collaborative signals, lacking semantic guidance from multimodal information, which limits their ability to identify noisy behaviors in complex semantic environments.
+Protein function prediction is a fundamental task in bioinformatics. With the rapid advancement of high-throughput sequencing technologies, protein sequence data has grown exponentially, yet the proportion of experimentally validated functional annotations remains extremely low, deepening the sequence-function gap. Existing deep learning methods typically rely solely on sequence pattern features, treating protein domain information and Gene Ontology (GO) functional labels as simple categorical identifiers while neglecting the rich semantic information embedded in their textual definitions. This limits model generalization to unseen labels. To address these challenges, this thesis investigates two complementary directions—multimodal semantic fusion and pretrained domain-aware adaptation—and proposes two progressively advanced protein function prediction frameworks.
 
-To address these issues, this thesis investigates two complementary directions: collaborative denoising and multimodal semantic-guided denoising, and proposes two novel denoising recommendation models.
+First, we propose MZSGO, a Multimodal Zero-Shot protein function annotation method. MZSGO redefines protein function prediction as a protein-GO matching problem. It employs the protein language model ESM2 to extract evolutionary sequence features and utilizes the large language model Qwen3-Embedding as a unified semantic encoder for both protein domain descriptions and GO functional definitions. Three independent projection modules map these heterogeneous representations into a shared latent space. An adaptive gated fusion module dynamically adjusts the contribution weights of each modality, while an asymmetric feature dropout strategy enhances robustness against modality absence. Experiments demonstrate that MZSGO achieves state-of-the-art performance on standard benchmarks, with particularly significant improvements in zero-shot scenarios.
 
-First, a Noise-aware Inter- and Intra-behavior Preference Extraction model (NIPER) is proposed to address noise interference in multi-behavior recommendation. This model captures user preference relationships at both inter-behavior and intra-behavior levels, and introduces a behavior-weighted mechanism together with a self-supervised constraint to automatically identify and suppress noisy interactions in the multi-behavior graph. Furthermore, a noise-aware preference extraction module is designed to preserve high-quality auxiliary behavioral signals while filtering out weakly relevant or unreliable interactions, thus yielding more accurate user preference representations.
+Second, to further enhance the functional awareness of sequence representations, we propose MZSGO-DA, a Domain-Aware adapter pretraining approach for end-to-end protein function prediction. This method designs lightweight adapter modules that are injected directly into the Transformer layers of the protein language model in a plug-and-play manner. Through contrastive learning pretraining, domain semantic information is distilled into the sequence encoder, enabling the model to produce domain-aware embeddings from sequence input alone. In the downstream stage, a dual-adapter strategy supports end-to-end training while preserving pretrained knowledge and enabling task-specific adaptation. Experimental results show that MZSGO-DA further improves prediction performance in the end-to-end setting.
 
-Second, to further extend the denoising framework to multimodal multi-behavior scenarios, a large-model semantic-guided multimodal denoising recommendation framework is proposed. This method leverages large vision-language models to extract semantic representations from both textual and visual modalities of items. Based on cross-modal semantic similarity, a hard-denoising mechanism removes inconsistent auxiliary interactions. Within the graph neural network (GNN) architecture, a semantic-aware attention mechanism is introduced to achieve soft denoising by adaptively adjusting neighbor weights, thereby emphasizing semantically consistent and informative interactions. In addition, a cross-graph contrastive learning module establishes consistency constraints between the denoised graph and the semantic-augmented graph, enabling effective transfer of semantic information into the structural representation space.
-
-The main contributions of this thesis are as follows:
-(1) A collaborative denoising method that distinguishes true preferences from noisy interactions through a dual-level (inter- and intra-behavior) preference extraction framework, enhancing the accuracy and robustness of multi-behavior recommendation;
-(2) A multimodal semantic-guided denoising framework that integrates large vision-language models and attention-based message passing, achieving synergistic optimization of hard and soft denoising via semantic consistency constraints. This design effectively captures cross-modal preference signals from textual and visual modalities, providing a new perspective and methodology for robust recommendation in complex multi-behavior and multimodal environments.
+The main contributions of this thesis are twofold: on one hand, by introducing large language models to construct a unified semantic space for domains and labels, we achieve a paradigm shift from closed-set to open-set protein function prediction, endowing the model with zero-shot reasoning capabilities; on the other hand, through domain-aware contrastive pretraining and a dual-adapter end-to-end training mechanism, we efficiently inject multimodal knowledge into the sequence encoder without modifying the original protein language model parameters, enhancing both representational capacity and generalization performance.
 
 
 \end{eabstract}

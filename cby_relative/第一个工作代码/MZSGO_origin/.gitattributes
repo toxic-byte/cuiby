@@ -1,0 +1,1 @@
+data/sequence/cafa5_train_in_swissprot.txt filter=lfs diff=lfs merge=lfs -text

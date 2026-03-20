@@ -1,554 +1,355 @@
 % !TEX root = ../main.tex
 
-% 中英标题：\chapter{中文标题}[英文标题]
-\chapter{噪声感知与偏好提取的多行为推荐方法}
+\chapter{多模态零样本蛋白质功能注释方法MZSGO}
 
-\section{引言}
-随着互联网平台中用户行为的多样化，\textbf{多行为推荐系统}逐渐成为解决推荐系统中\textbf{数据稀疏}和\textbf{冷启动}问题的有效工具。传统推荐算法通常依赖单一类型的用户行为（如购买行为）来推测用户偏好，在数据稀疏或冷启动场景下会面临显著挑战。为解决这些问题，多行为推荐系统通过引入辅助行为（例如点击、浏览、收藏等）增强对用户兴趣的理解，从而提高推荐精度。然而，辅助行为往往含有大量噪声信息，例如误点击、无意浏览或无效收藏，这些噪声交互可能干扰对用户真实偏好的识别。
+传统的蛋白质功能预测方法将每个GO标签视为独立的分类标识符，模型的预测能力被限制在训练集中出现过的标签范围内，无法对新出现的功能术语进行有效推理。针对这一根本性局限，本章提出多模态零样本蛋白质功能注释方法MZSGO（Multimodal Zero-Shot GO annotation），将蛋白质功能预测重新定义为开放语义空间中的"蛋白质-GO"匹配问题。MZSGO融合蛋白质语言模型提取的序列进化特征与大语言模型编码的文本语义特征，通过自适应门控融合机制实现多模态信息的动态整合，使模型既能在有监督场景下准确分类，也能通过文本语义相似性推断未见过的功能标签。
 
-尽管近年来针对多行为推荐的研究不断深入，已有方法主要集中在\textbf{行为信息融合}和\textbf{行为关系建模}上，但大多数忽视了辅助行为中的噪声问题。现有方法通常假设所有辅助行为均为有效信息，未能有效区分低质量的噪声行为与真实兴趣。此外，传统去噪方法多集中在单一行为场景，忽略了多行为场景下\textbf{行为间的关联性}以及如何利用高质量辅助行为增强目标行为的表达能力。
+\section{问题定义}
 
-针对上述问题，本章主要研究以下关键问题：如何在多行为推荐系统中识别并抑制辅助行为中的噪声?如何利用辅助行为中的有效信息增强目标行为的表示能力，从而提升推荐的准确性与鲁棒性?为了回答这些问题，本章提出了一种系统化的多行为去噪方法，并在后续小节中详细介绍其模型设计、去噪机制以及行为间信息融合策略。
+蛋白质功能预测任务的目标是：给定一个蛋白质$P$和一组GO功能标签$\mathcal{G} = \{g_1, g_2, \ldots, g_C\}$，预测该蛋白质与每个功能标签之间的关联概率$p(y=1 | P, g_c)$，其中$y=1$表示蛋白质$P$具有功能$g_c$。
 
-\section{问题定义及方法概述}
+与传统方法不同，本文不将其建模为固定标签集的多标签分类问题，而是重新定义为"蛋白质-GO"匹配问题。具体而言，每个蛋白质的特征表示与每个GO标签的文本语义嵌入配对，由模型计算二者的匹配分数。这种范式设计意味着：对于训练集中未出现过的新GO标签，只需提供其文本定义即可生成语义嵌入并参与预测，从而天然支持零样本推理。
 
-\subsection{问题定义}
+考虑到GO的三个本体（BP、MF、CC）在标签规模、语义粒度和数据分布上存在显著差异，本文对每个本体独立训练一个模型。这一策略基于如下实验观察：联合训练所有本体会导致模型难以学习各本体特有的特征模式，独立训练能够获得更好的性能。
 
-在本研究中，定义用户集合为 $U = \{u_1, u_2, ..., u_{|U|}\}$，物品集合为 $I = \{i_1, i_2, ..., i_{|I|}\}$，其中 $|U|$ 和 $|I|$ 分别表示用户和物品的数量。符号 $B$ 表示行为类型的集合。
+\section{数据集构建}
 
-首先，将用户–物品交互数据表示为\textbf{交互矩阵集合} $R = \{R_1, R_2, ..., R_K\}$，其中 $R_k \in \mathbb{R}^{|U| \times |I|}$ 表示第 $k$ 种行为下的用户–物品交互矩阵。若 $R^k_{ui} = 1$，则表示用户 $u$ 在行为 $k$ 下与物品 $i$ 发生过交互；若 $R^k_{ui} = 0$，则表示未发生交互。在数据集中，将购买行为设定为\textbf{目标行为}，其他行为（如浏览、加购、收藏等）设定为\textbf{辅助行为}。
+为严格评估模型在有监督和零样本两个场景下的性能，本文构建了基于CAFA5挑战和Swiss-Prot数据库\cite{boutet2007uniprotkb}的综合基准数据集。
 
-在此基础上，可将每种行为的交互矩阵映射为对应的行为子图 $G^R_k = (V, E^R_k), k = 1,2,...,K$，其中 $V = U \cup I$ 表示图中所有用户与物品节点的集合，边集 $E^R_k$ 表示第 $k$ 种行为下观测到的交互关系。若 $R^k_{ui}=1$，则在 $G^R_k$ 中存在一条连接用户 $u$ 与物品 $i$ 的边；若 $R^k_{ui}=0$，则不存在该边。由此可构建整体交互图 $G^R = (V, E^R)$，其中 $E^R = \bigcup_{k=1}^{K} E^R_k$，用于描述多行为交互场景下的完整用户–物品关系。
+\subsection{有监督训练集构建}
 
-为了进一步挖掘用户与物品之间潜在的相似偏好信息，构建了\textbf{用户同构图} $G^U$ 和\textbf{物品同构图} $G^I$，以捕捉用户–用户及物品–物品之间的共享交互关系。具体地，遍历各行为下的用户–物品交互记录；若一对用户 $(u, v)$ 或一对物品 $(i, j)$ 在目标行为（购买行为）下存在共同交互，则在图 $G^U$ 中连接 $u$ 与 $v$，并在图 $G^I$ 中连接 $i$ 与 $j$。
+训练语料源自CAFA5数据集，采用ProtGO\cite{wang2025protgo}使用的数据源和训练/测试划分策略，并限制数据条目为Swiss-Prot数据库中收录的蛋白质。这一子集由人工审核的蛋白质组成，确保了注释质量的高可靠性，同时为与需要结构信息的基线方法进行公平比较提供了基础。功能注释采用2023年1月1日发布的Gene Ontology版本。
 
-多行为推荐任务的形式化定义如下：
+与ProtGO不同的是，本文实施了本体特异性的数据过滤策略。对于每个本体类别，仅使用具有该特定本体注释的蛋白质进行训练，而非直接使用完整训练集。这一决策基于如下观察：完整数据集中缺乏某一本体注释的蛋白质会对基线模型的性能产生不利影响。尽管MZSGO在完整数据集上也不会出现显著性能下降，但经过裁剪的训练集有助于实现最优性能并确保与最先进基线方法的严格公平比较。
 
-\begin{itemize}
-    \item \textbf{输入}：用户在 $K$ 种行为下的交互图集合 $\{G^R_1, G^R_2, ..., G^R_K\}$；
-    \item \textbf{输出}：一个推荐模型，用于预测用户 $u$ 在第 $K$ 种行为（目标行为）下与物品 $i$ 发生交互的概率。
-\end{itemize}
+\subsection{零样本测试集构建}
 
+零样本测试集旨在评估模型对从未见过的蛋白质和新出现标签的注释能力。其设计遵循两个核心原则：
 
-\subsection{算法概述}
+（1）\textbf{蛋白质新颖性（序列层面）}：选择不在训练集中的Swiss-Prot蛋白质。为防止序列相似性导致的信息泄露，使用Diamond工具进行严格的同源性过滤，移除与训练集中任何序列的序列一致性超过30\%的测试蛋白质。
 
-\begin{figure}[h]
-\centering
-\includegraphics[width = 1.0\textwidth]{figures/model.pdf}
-\caption{NIPER整体框架示意图如图所示：图的上半部分为行为间与行为内加权去噪模块，该模块用于识别辅助行为中的噪声交互，并进行有效过滤；图的下半部分为偏好感知表征增强模块，通过构造正负样本，强化真实偏好信息在用户与物品嵌入中的传递，从而提升偏好表示的准确性和鲁棒性。}
-\label{fig:model}
-\end{figure}
-
-为有效解决多行为推荐算法中的噪声干扰问题，本文提出了\textbf{噪声感知与偏好提取的多行为推荐方法}（NIPER: Noise Identification and Preference Extraction in Multi-Behavior Recommender System）。图~\ref{fig:model} 展示了 NIPER 的整体结构，该模型主要由两个关键模块组成：\textbf{(i) 行为间与行为内加权去噪模块（Inter- and Intra-Behavior Weighted Denoising Module）}与\textbf{(ii) 偏好感知的表征增强模块（Preference-informed Representation Enhancement Module）}。
-
-\textbf{行为间与行为内加权去噪模块}旨在识别并减轻辅助行为中的噪声交互，通过跨行为与行为内加权机制提升多行为信号的可靠性。该模块包含三个子模块：\textbf{基于行为强度的行为间加权模块}、\textbf{基于共同交互的行为内加权模块}以及\textbf{去噪模块}。  
-其中，基于行为强度的行为间加权模块用于刻画不同行为类型在用户偏好表达中的固有强度差异。例如，在电商场景中，购买行为通常较加购行为更能体现真实兴趣，而加购行为的偏好强度又高于单纯的浏览行为。  
-基于共同交互的行为内加权模块则用于建模具有相似兴趣的用户之间的交互影响。若多个用户在某些物品上表现出一致的交互行为，则这些行为更可能反映其真实偏好，从而获得更高的权重。  
-通过上述两类加权机制的协同作用，可构建出带有权重的多行为交互图。随后，去噪模块根据权重分布剔除低置信度的辅助行为交互，从而生成经过降噪处理且保留关键信息的高质量多行为图，有效减弱噪声对推荐结果的负面影响。
-
-\textbf{偏好感知的表征增强模块}旨在从辅助行为中提取高置信度的真实偏好，以缓解目标行为数据的稀疏性。该模块包括两部分：\textbf{偏好感知的行为间对比学习}与\textbf{偏好感知的行为内对比学习}。  
-前者利用在去噪阶段保留的高权重辅助交互，对目标行为交互图进行增强与补充。通过对比增强前后目标行为的嵌入表示，挖掘用户在多行为数据中的潜在偏好，从而提升整体推荐性能。  
-后者依据用户与用户、物品与物品之间的相似交互偏好，对其嵌入进行区分与优化，强化具有相似兴趣实体间的表示一致性，进一步提升模型的表达能力与泛化性。
-
-\subsubsection{复杂度分析}
-本章所提出的噪声感知与偏好提取的多行为推荐方法主要针对用户—物品多行为交互图进行加权计算与噪声识别。跨行为加权阶段，对每个用户的各类行为计算对目标行为的影响强度，时间复杂度为 $O(|E|)$，其中 $|E|$ 为多行为图中的交互边数。行为内加权阶段基于相似用户的局部一致性计算权重，复杂度为 $O(|U| \cdot k \cdot d)$，其中 $|U|$ 为用户数量，$k$ 为邻居数量，$d$ 为嵌入维度。权重引导的去噪操作可在 $O(|E|)$ 时间内完成。空间复杂度主要由用户与物品嵌入以及加权图存储构成，总体为 $O((|U|+|I|) \cdot d + |E|)$，其中 $|I|$ 为物品数量。整体复杂度随用户数、物品数及交互边数线性增长，适合大规模稀疏交互数据处理。
-
-
-\section{行为间与行为内加权去噪模块}
-
-在多行为推荐系统中，传统方法通常将用户行为划分为辅助行为与目标行为 \cite{chen2021GHCF, gu2022S-MBRec, zhang2023DPT, xu2023MBSSL, jin2020MBGCN, xia2021MB-GMN}。然而，这种二元划分忽略了不同辅助行为在表达用户兴趣偏好方面的重要性差异。例如，加入购物车行为相较于浏览页面更能反映用户的潜在购买意图。若不加区分地处理所有辅助行为，可能导致关键行为信号被削弱，从而降低推荐精度。
-
-为定量刻画不同行为类型在购买转化中的作用，本文将点击与加购行为的影响建模为一个因果推断问题\cite{yao2021survey}，并采用潜在结果框架进行建模。  
-对于每个用户 $i$，设 $T \in \{1, 2\}$ 表示行为类型，其中 $T=1$ 表示点击行为，$T=2$ 表示加购行为；$Y \in \{0, 1\}$ 表示用户是否完成购买；$X$ 表示用户的行为特征，包括点击次数、加购次数及总交互次数。
-
-个体化处理效应（Individual Treatment Effect, ITE）定义为：
-\begin{equation}
-    \tau_i = \mathbb{E}[Y_i(2) - Y_i(1) \mid X_i],
-\end{equation}
-其中 $Y_i(t)$ 表示用户 $i$ 在行为类型 $T=t$ 下的潜在购买结果。由于实际数据中每个样本仅能观测到一个处理结果，因此需通过因果推断方法进行估计。
-
-本文采用因果森林模型\cite{chernozhukov2016double}对 $\tau_i$ 进行估计。该模型是一种基于随机森林的非参数方法，能够在高维协变量空间中捕捉异质性处理效应。训练完成后，模型根据用户特征 $X_i$ 计算估计的处理效应：
-\begin{equation}
-    \tau_i = \hat{\mathbb{E}}[Y_i \mid T=2, X_i] - \hat{\mathbb{E}}[Y_i \mid T=1, X_i].
-\end{equation}
-若 $\tau_i > 0$，说明对用户 $i$ 而言，加购行为相较点击行为更能促进购买转化；反之则表示点击行为更具影响力。该效应可用于刻画不同行为的相对重要性。
-
-在本研究中，估计得到的 $\tau_i$ 用于计算不同行为的个体化权重，从而区分不同辅助行为对用户的实际影响。对于用户 $i$ 的某类辅助行为 $T$，若 $\tau_i > 0$，则说明该行为相较其他行为更能促进购买转化，对应的行为权重将被赋予较高值；反之则赋予较低权重。通过这种方式，模型能够根据每个用户的特征自适应地调整辅助行为的贡献，刻画行为间的重要性差异，从而更精准地反映用户真实偏好。这一策略在本质上类似于以用户为中心的个体化加权机制，但不同于传统图结构调整方法，本方法侧重于行为权重而非直接改变邻接关系。
-
-为进一步量化各行为的强度，本文依据用户级处理效应 $\tau_i$ 构建行为权重。将其映射为点击与加购行为的响应权重如下：
-\begin{equation}
-    w_{\text{cart}, i} = \frac{\exp(\tau_i)}{\exp(\tau_i) + 1},
-\end{equation}
-相应地，点击行为的权重被定义为加购权重的补集，从而将两种行为视为互斥且完备的概率事件。
-\begin{equation}
-    w_{\text{click}, i} = 1 - w_{\text{cart}, i},
-\end{equation}
-上述形式保证了权重的平滑性与归一性，能够有效反映用户在两种行为间的相对偏好强度。
-
-基于用户级权重，定义加购行为的全局强度指标为：
-\begin{equation}
-    \rho^{\text{cart}} = \frac{1}{N} \sum_{i=1}^{N} w_{\text{cart}, i},
-\end{equation}
-相应地，点击行为的全局强度可表示为 $\rho^{\text{click}} = 1 - \rho^{\text{cart}}$。  
-上述强度值用于衡量不同行为在全局范围内对购买转化的平均促进作用。作为最终目标行为，购买行为直接反映用户的真实转化，因此其强度设为常数：
-\begin{equation}
-    \rho^{\text{buy}} = 1.
-\end{equation}
-
-基于计算得到的各行为强度值，本文构建了全局加权的跨行为交互图 $\boldsymbol{G}_{inter}$，其邻接矩阵 $\boldsymbol{w}^{inter} \in \mathbb{R}^{|U| \times |I|}$ 定义为：
-\begin{equation}
-    w^{inter}_{ui} =  \sum_{k=1}^{K}\rho^{k} \cdot R^k_{ui}.
-\end{equation}
-该公式将多种行为的贡献进行加权融合，从而更全面地刻画用户的真实偏好与意图。如图~\ref{fig:w_inter} 所示，若用户 $u_1$ 在浏览、加购与购买三种行为中均与物品 $i_1$ 发生交互，则其全局权重为：
-\begin{equation}
-    w^{inter}_{u_{1}i_{1}} = w^{pv} \times 1 + w^{cart} \times 1 + w^{buy} \times 1 = 6.
-\end{equation}
-若用户 $u_1$ 仅在浏览与购买行为中与物品 $i_2$ 交互，则权重计算为：
-\begin{equation}
-    w^{inter}_{u_{1}i_{2}} = w^{pv} \times 1 + w^{cart} \times 0 + w^{buy} \times 1 = 4.
-\end{equation}
-通过上述建模过程，跨行为加权机制能够有效捕捉不同行为类型对用户偏好的贡献，为后续去噪与特征学习奠定基础。
-
-\begin{figure}[h]
-\centering
-\includegraphics[width = 0.80\textwidth]{figures/w_inter.jpg}
-\caption{一个生成带有权重的行为间全局交互图的例子}
-\label{fig:w_inter}
-\end{figure}
-
-\textbf{基于共现交互的行为内加权：}
-除了考虑不同行为类型在偏好表达中的强度差异外，用户在同一行为下的交互偏好同样蕴含着重要信息。这些偏好能够反映交互行为的相对重要性，并在相似用户之间体现出一定的一致性。基于此，本文引入\textbf{共现交互机制}，以量化具有相似兴趣的用户在同一行为下的共同交互强度。
-
-具体而言，若相似用户在相同行为下频繁与同一物品交互，则该交互更可能代表真实偏好。为刻画这一关系，结合用户相似性交互图 $\boldsymbol{G}_U$ 与用户–物品交互图 $\boldsymbol{G}_R$，定义用户 $u$ 在行为 $k$ 下与物品 $i$ 的行为内权重如下：
-\begin{equation}
-    w^{\text{intra}, k}_{ui} = \Big( 1 + \sum_{v \in V_{u}} R^k_{vi} \Big) \cdot R^k_{ui},
-\end{equation}
-其中，$V_{u}$ 表示与用户 $u$ 相似的用户集合。该定义综合了用户相似性与共同交互频率，从而能够更全面地量化行为内交互的重要性。
-
-为统一不同层次的权重信息，本文提出一种\textbf{行为内与行为间权重融合框架}。其中，行为内权重用于刻画单一行为下用户–物品交互的重要性，而跨行为权重用于建模不同行为类型间的关联性。两者的融合能够在全局层面上平衡行为差异与局部特征，从而更准确地反映用户的真实偏好。
-
-在融合过程中，为避免权重尺度差异导致偏移，首先采用最小–最大归一化对行为内权重进行标准化。最终得到的融合权重矩阵 $\boldsymbol{w}^{com, k} \in \mathbb{R}^{|\mathcal{U}| \times |\mathcal{I}|}$ 定义如下：
-\begin{equation}
-    w^{com, k}_{ui} = \alpha w^{\text{intra}, k}_{ui} + (1 - \alpha) w^{\text{inter}}_{ui},
-    \label{eq:w-com}
-\end{equation}
-其中，$k$ 表示行为类型，$\alpha$ 为平衡系数，用于控制行为内权重与跨行为权重的贡献比例。
-
-\textbf{权重引导的去噪模块：}
-该模块旨在进一步去除辅助行为中噪声交互的影响。具体而言，仅对辅助行为中权重较低的交互进行过滤，而目标行为保持不变。设每个辅助行为的融合权重为 $w^{\text{com},k}_{ui}$，并根据超参数 $\beta_{\text{low}}$ 及行为强度 $\rho^k$ 自适应确定去噪阈值，则去噪后的交互矩阵定义为：
-\begin{equation}
-    R_{ui}^{\text{de},k} = w_{ui}^{\text{com}, k} \cdot 
-    \mathbb{I}\left(\frac{w_{ui}^{\text{com}, k}}{\max(\mathbf{w^{\text{com}, k}})} < 
-    \frac{\beta_{\text{low}}}{\rho^k}\right),
-\end{equation}
-其中，$\mathbb{I}(\cdot)$ 表示指示函数。该机制确保仅去除低权重的辅助行为交互，而目标行为矩阵 $\boldsymbol{R}^{de,K}$ 保持不变，直接令 $\boldsymbol{R}^{de,K} = \boldsymbol{w}^{com,K}$。  
-最终，对于每个辅助行为 $k$，去噪后的矩阵 $\boldsymbol{R}^{de,k}$ 保留了高置信度的交互信息，并作为相应去噪多行为图的邻接矩阵。该过程使得用户–物品交互关系能够被更准确、鲁棒地建模。
-
-在得到多行为去噪加权交互矩阵 $\boldsymbol{R}^{de,k}$ 后，采用带有消息传递机制的图神经网络（GNN）对用户和物品进行表示学习。具体而言，本文以 GHCF（Graph-based Hybrid Collaborative Filtering）\cite{chen2021GHCF} 作为主干网络。GHCF 是一种针对多行为推荐任务设计的图神经网络结构，能够联合嵌入图中节点（用户与物品）及多种行为关系的表示，并显式捕获跨行为的高阶协同信号。
-
-与原始 GHCF 在节点表示学习中对同一行为下的邻居进行等权聚合不同，本文在消息传播过程中引入了基于去噪权重的加权机制，使模型能够根据交互置信度动态调整邻居节点的重要性。其消息传播公式定义如下：
-\begin{equation}
-    \mathbf{e}^{(l+1)}_{u,k} = \text{LeakyReLU}\left(
-    \mathbf{W}^{(l)} \cdot 
-    \text{mean}\left\{
-    \mathbf{e}^{(l)}_{i,k} \odot \mathbf{e}^{(l)}_{k} : i \in N_{u,k}
-    \right\}
-    \right),
-\end{equation}
-其中，$\mathbf{e}^{(l+1)}_{u,k}$ 表示在第 $(l+1)$ 层传播后，用户 $u$ 在行为类型 $k$ 下的嵌入表示；$N_{u,k}$ 为用户 $u$ 在行为 $k$ 下的邻居物品集合；$\mathbf{W}^{(l)}$ 为第 $l$ 层的特征变换矩阵；$\odot$ 表示逐元素乘积操作；$\mathbf{e}^{(l)}_{k}$ 为第 $l$ 层行为类型 $k$ 的全局嵌入向量，用于调节不同行为语义间的表示差异。
-
-行为类型嵌入 $\mathbf{e}^{(l)}_{k}$ 在各层间通过以下线性变换进行更新：
-\begin{equation}
-    \mathbf{e}^{(l+1)}_{k} = \mathbf{W}^{(l)}_{b} \mathbf{e}^{(l)}_{k},
-\end{equation}
-其中，$\mathbf{W}^{(l)}_{b}$ 为层特定的行为类型转换矩阵，用于捕获多行为之间的语义迁移关系。
-
-经过多层消息传播后，模型最终得到用户嵌入 $\mathbf{E_{u}}$、物品嵌入 $\mathbf{E_{i}}$ 以及行为类型嵌入 $\mathbf{E_{k}}$（其中 $k \in \mathcal{B}$），为后续的偏好建模与预测提供高质量的表示基础。
-
-\section{偏好感知的表征增强模块}
-\textbf{偏好感知的行为间对比学习：}
-为缓解目标行为中的数据稀疏问题，本文利用辅助行为中高权重的交互信息对目标行为进行增强，从而构建更具代表性的交互视图。该方法通过将辅助行为中反映用户真实偏好的交互迁移至目标行为的表示空间，有效提升了目标行为的表达能力与鲁棒性。
-
-具体而言，首先将所有辅助行为的去噪加权交互矩阵进行融合，定义如下：
-\begin{equation}
-    \boldsymbol{R}^{all} = \sum_{k=1}^{K-1} \boldsymbol{R}^{de,k},
-\end{equation}
-其中，$\boldsymbol{R}^{all}$ 表示合并后的多行为交互矩阵。为控制注入目标行为的辅助数据规模，引入阈值超参数 $\beta_{\text{high}}$，从辅助行为中筛选出高置信度的交互样本，得到高权重交互矩阵：
-\begin{equation}
-    R_{ui}^{\text{high}} = R_{ui}^{\text{all}} \cdot 
-    \mathbb{I}\!\left(
-    \frac{R_{ui}^{\text{all}}}{\max(\mathbf{R^{all}})} 
-    \geq 1 - \beta_{\text{high}}
-    \right),
-    \label{eq:w-all}
-\end{equation}
-其中，$\mathbb{I}(\cdot)$ 为指示函数。将高权重矩阵 $\boldsymbol{R^{high}}$ 与目标行为的去噪矩阵 $\boldsymbol{R}^{de,K}$ 合并后，得到增强后的目标行为视图：
-\begin{equation}
-    \boldsymbol{R}^{aug} = \boldsymbol{R}^{high} + \boldsymbol{R}^{de,K}.
-\end{equation}
-该矩阵 $\boldsymbol{R}^{aug}$ 作为增强图 $\boldsymbol{G}_{R}^{aug}$ 的邻接矩阵，用于刻画用户与物品之间的强化交互关系。
-
-上述过程生成了目标行为的两个视图：原始视图与增强视图。分别对两者进行编码后，得到节点表示 $\boldsymbol{e}^{\text{ori}}_{u}$ 与 $\boldsymbol{e}^{\text{aug}}_{u}$。节点级的正样本对定义为：
-\[
-\left\{
-(\boldsymbol{e}^{\text{ori}}_{u}, \boldsymbol{e}^{\text{aug}}_{u}) \mid u \in \mathcal{U}
-\right\},
-\]
-而负样本对为：
-\[
-\left\{
-(\boldsymbol{e}^{\text{ori}}_{u}, \boldsymbol{e}^{\text{aug}}_{v}) \mid u, v \in \mathcal{U}, u \ne v
-\right\}.
-\]
-在用户侧，优化目标采用 InfoNCE 损失定义如下：
-\begin{equation}
-    \mathcal{L}_{\text{inter,user}} =
-    -\sum_{u \in \mathcal{U}}
-    \log
-    \left(
-    \frac{
-    \exp\left(\phi(\boldsymbol{e}^{\text{ori}}_{u}, \boldsymbol{e}^{\text{aug}}_{u}) / \tau\right)
-    }{
-    \sum_{v \in \mathcal{U}}
-    \exp\left(\phi(\boldsymbol{e}^{\text{ori}}_{u}, \boldsymbol{e}^{\text{aug}}_{v}) / \tau\right)
-    }
-    \right),
-\end{equation}
-其中，$\tau$ 为温度系数，$\phi(\cdot)$ 表示内积运算。物品侧的损失函数可按相同方式计算，最终跨行为对比学习的总体损失为：
-\begin{equation}
-    \mathcal{L}_{\text{inter}} = 
-    \mathcal{L}_{\text{inter,user}} + 
-    \mathcal{L}_{\text{inter,item}}.
-\end{equation}
-
-\textbf{偏好感知的行为内对比学习：}
-在多行为推荐中，具有相似交互模式的用户往往在偏好特征上表现出一致性，因此其嵌入表示也应保持高度相似。为此，本文引入了行为内对比学习机制，通过最大化相似用户嵌入之间的一致性，强化同偏好用户在表示空间中的聚合性，从而提升模型对用户真实偏好的刻画能力。
-
-具体而言，基于增强后的交互矩阵 $\boldsymbol{R}^{aug}$，重新定义用户真实偏好相似性图 $\boldsymbol{G}^{aug}_{U}$ 与物品真实偏好相似性图 $\boldsymbol{G}^{aug}_{I}$。若用户 $u$ 与 $v$（或物品 $i$ 与 $j$）在 $\boldsymbol{R}^{aug}$ 中存在相同交互，则在用户图 $\boldsymbol{G}^{aug}_{U}$ 中建立 $u$ 与 $v$ 的连接，在物品图 $\boldsymbol{G}^{aug}_{I}$ 中建立 $i$ 与 $j$ 的连接。由此可以刻画用户（或物品）间的交互一致性关系。
-
-基于上述图结构，将具有相似交互模式的用户视为正样本对 $(u, u^+)$，行为差异较大的用户视为负样本对 $(u, u^-)$。通过最大化正样本对之间的嵌入一致性并最小化负样本对之间的相似度，实现对用户嵌入空间的对比优化。设 $\boldsymbol{e}_u$ 表示用户 $u$ 的嵌入向量，行为内对比学习的目标函数定义如下：
-\begin{equation}
-    \mathcal{L}_{\text{intra,user}} = 
-    -\sum_{u \in \mathcal{U}} 
-    \log
-    \left(
-    \frac{
-    \exp\left(\phi(\boldsymbol{e}_{u}, \boldsymbol{e}_{u^{+}}) / \tau\right)
-    }{
-    \sum_{u^{-} \in \mathcal{U}} 
-    \exp\left(\phi(\boldsymbol{e}_{u}, \boldsymbol{e}_{u^{-}}) / \tau\right)
-    }
-    \right),
-\end{equation}
-其中，$u^{+}$ 表示与用户 $u$ 在图 $\boldsymbol{G}^{aug}_U$ 中相连的节点，$u^{-}$ 表示未与 $u$ 相连的节点；$\tau$ 为温度超参数，$\phi(\cdot)$ 表示内积相似度函数。物品侧的损失函数定义方式与用户侧相同，行为内对比学习的总目标为：
-\begin{equation}
-    \mathcal{L}_{\text{intra}} = 
-    \mathcal{L}_{\text{intra,user}} + 
-    \mathcal{L}_{\text{intra,item}}.
-\end{equation}
-
-\section{模型训练}
-为实现稳定高效的模型训练，本文采用一种非采样推荐目标函数 \cite{chen2020EHCF}，其在准确性与效率上均优于传统的贝叶斯个性化排序（Bayesian Personalized Ranking, BPR）损失。对于给定的用户批次 $B$ 和物品集合 $\mathcal{I}$，在行为 $k$ 下的非采样推荐损失定义为：
-\begin{equation}
-    \mathcal{L}_{\text{rec}}^k =
-    \sum_{u \in B} 
-    \sum_{i \in I_u^{k+}} 
-    \left[
-    \left(c_i^{k+} - c_i^{k-}\right)
-    \left(\hat{x}_{u,i}^k\right)^2 
-    - 2c_i^{k+}\hat{x}_{u,i}^k
-    \right],
-\end{equation}
-其中，$\hat{x}_{u,i}^k$ 表示用户 $u$ 在行为 $k$ 下对物品 $i$ 的预测交互概率；$I_u^{k+}$ 表示用户 $u$ 在行为 $k$ 下已发生交互的物品集合；$c_i^{k+}$ 和 $c_i^{k-}$ 为超参数，用于控制正负样本权重。
-
-整体推荐任务的优化目标为各行为损失的加权和，其中 $\lambda_k$ 为各行为的平衡系数：
-\begin{equation}
-    \mathcal{L}_{\text{rec}} = 
-    \sum_{k=1}^{K} 
-    \lambda_k \mathcal{L}_{\text{rec}}^k.
-\end{equation}
-
-此外，本文在训练中引入自监督对比学习损失，以进一步提升嵌入表示的判别性与鲁棒性。最终的联合优化目标定义为：
-\begin{equation}
-    \mathcal{L} = 
-    \mathcal{L}_{\text{rec}} + 
-    \mu (\mathcal{L}_{\text{inter}} + \mathcal{L}_{\text{intra}}),
-\end{equation}
-其中，$\mu$ 为控制自监督学习强度的超参数。
-
-训练完成后，目标行为下用户 $u$ 对未交互物品 $v$ 的交互概率计算如下：
-\begin{equation}
-    \hat{y}^{(k)}_{uv} = 
-    \boldsymbol{e}_u^\top 
-    \cdot 
-    \text{diag}(\boldsymbol{e}_K) 
-    \cdot 
-    \boldsymbol{e}_v,
-\end{equation}
-其中，$\boldsymbol{e}_u$ 与 $\boldsymbol{e}_v$ 分别表示用户与物品的嵌入，$K$ 表示目标行为类型，$\text{diag}(\boldsymbol{e}_K)$ 为由目标行为嵌入构成的对角矩阵。
-
-\section{实验与讨论}
-
-\subsection{评价指标}
-为了全面评估各模型在 Top-$K$ 推荐任务下的性能，本文选取了两个常用指标：召回率（Recall）和归一化折损累计增益（Normalized Discounted Cumulative Gain, NDCG）。对于测试集中的每个用户，模型首先对所有候选物品进行排序，并根据排序结果计算以下指标。
-
-\begin{equation}
-    \text{Recall@K} = 
-    \frac{|R^{K}(u) \cap T(u)|}{|T(u)|},
-\end{equation}
-
-\begin{equation}
-    \text{NDCG@K} = 
-    \frac{1}{|U|} 
-    \sum_{u \in U} 
-    \frac{
-        \sum_{k=1}^{K} 
-        \frac{
-            \mathbb{I}\left(R^K_k(u) \in T(u)\right)
-        }{
-            \log_2(k + 1)
-        }
-    }{
-        \sum_{k=1}^{K} 
-        \frac{1}{
-            \log_2(k + 1)
-        }
-    },
-\end{equation}
-其中，$R^K(u)$ 表示模型为用户 $u$ 推荐的 Top-$K$ 个物品集合，$T(u)$ 表示测试集中用户 $u$ 实际交互（或点击）的物品集合，$R^K_k(u)$ 表示推荐列表中第 $k$ 个物品。$\mathbb{I}(\cdot)$ 为指示函数，当 $R^K_k(u) \in T(u)$ 时取 1，否则为 0。
-
-Recall@K 反映模型能否成功推荐出用户真实感兴趣的物品，而 NDCG@K 则进一步关注这些物品在推荐列表中的排序位置。前者强调\textbf{推荐覆盖率}，后者衡量\textbf{推荐排序质量}。二者结合使用，可综合评估模型在多行为去噪推荐任务中的整体表现。
-
-
-\begin{table}
-\centering
-\caption{数据集的统计信息}
-\renewcommand{\arraystretch}{1.0}
-\label{tab:dataset1}
-\scalebox{0.9}{
-\begin{tabular}{ccccccc}
-\toprule
-数据集 & \#User & \#Item & \#View & \#Cart & \#Favorite & \#Buy \\
-\midrule
-Beibei & 21,716 & 7,977 & 2,412,586 & 642,622 & -- & 282,860 \\
-Taobao & 48,749 & 39,493 & 1,548,162 & 193,747 & -- & 211,022 \\
-Tmall & 31,882 & 31,232 & 1,223,372 & 293,544 & 253,619 & 135,980 \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-\subsection{数据集信息}
-本研究选用了学术界广泛使用的三个多行为推荐数据集——Beibei、Taobao 和 Tmall，以评估所提出算法在不同场景下的有效性。  
-这些数据集均包含用户与物品之间的多种交互行为（如浏览、收藏、加购与购买），能够充分反映用户在不同阶段的兴趣变化。  
-所有数据集中均不包含显式反馈信息，仅记录用户的交互行为，因此非常适合用于基于隐式反馈的多行为去噪推荐研究。  
-各数据集的详细统计信息见表~\ref{tab:dataset1}。
-
-\subsection{实验设置}
-实验在 PyTorch 框架下实现，优化器采用 Adam，学习率设为 0.001，批量大小为 256，嵌入维度为 64。  
-为防止模型过拟合，在训练过程中设置嵌入丢弃率（embedding dropout rate）为 0.3，边丢弃率（edge dropout rate）为 0.1。  
-非采样损失（non-sampling loss）中的负样本权重在 \{0.1, 0.01\} 中选择；对比学习的温度系数 $\tau$ 从 \{0.2, 0.4\} 中选取。
-
-
-
-
-\subsection{总体实验效果}
-为验证所提出模型的有效性，本文选取了三类具有代表性的先进推荐模型作为对比基线。
-
-首先，单行为推荐模型部分包含 NGCF~\cite{wang2019NGCF} 与 LightGCN~\cite{he2020lightgcn}，它们仅基于目标行为进行训练。为评估将多种行为简单融合为单一行为的影响，进一步构建了扩展版本 NGCF$_{\text{all}}$ 与 LightGCN$_{\text{all}}$，其中所有行为均被统一视为购买行为并共同用于训练。
-
-其次，本文引入具有去噪能力的推荐方法，以考察模型在噪声行为存在时的鲁棒性。单行为去噪模型采用 GraphDA~\cite{fan2023graphDA}，而多行为场景下则选用 DPT~\cite{zhang2023DPT}与DeMBR\cite{zhang2025dembr} 作为代表性方法，用于验证多源行为噪声处理机制的有效性。
-
-最后，为全面比较多行为推荐技术的整体性能，本文选取了多种典型的多行为推荐模型，包括 S-MBRec~\cite{gu2022S-MBRec}、GHCF~\cite{chen2021GHCF}、MBSSL~\cite{xu2023MBSSL} 与 POGCN~\cite{zhang2024POGCN}。这些方法覆盖了跨行为关系建模、图结构学习以及多任务优化等不同技术路线，为本文提出模型的优势验证提供了多角度的参考。
-
-表~\ref{table:Comparison1} 展示了 NIPER 与各类基线模型的实验结果，其中最佳与次优结果分别以加粗和下划线标注。综合结果显示，NIPER 在所有数据集与评价指标上均表现出显著优势。
-
-首先，NIPER 在 Recall 与 NDCG 等核心指标上均取得最优性能，其整体效果明显优于所有基线方法。其性能提升主要得益于两方面：一是跨行为与行为内的加权去噪机制能够有效识别并抑制辅助行为中的噪声干扰；二是偏好感知的表示增强模块提升了用户与物品嵌入的表达能力，使辅助行为中蕴含的真实偏好能够更准确地迁移至目标行为表示中。
-
-其次，多行为建模在三种数据集上均明显优于单行为模型，表明显式建模行为之间的关联有助于更准确地刻画用户的潜在偏好。尽管将所有行为简单合并为单一行为（如 NGCF$_{\text{all}}$ 与 LightGCN$_{\text{all}}$）能够带来一定收益，但这一策略忽略了行为差异性，因此整体效果仍显著落后于多行为推荐方法。
-
-进一步观察各数据集的实验结果可发现，辅助行为通常包含有价值的偏好信息，但也可能带来噪声。在 Beibei 和 Taobao 数据集中，引入辅助行为能够显著提升性能，说明这些行为中蕴含的偏好信号对推荐是有益的。然而在 Tmall 数据集中，直接引入辅助行为反而导致性能下降，表明该数据集中的辅助行为噪声比例较高，未经处理的行为融合会放大噪声影响。
-
-最后，与现有的去噪方法相比，NIPER 展现出更强的去噪能力。相较于 GraphDA（单行为去噪）与 DPT（独立行为去噪），NIPER 在建模行为间依赖关系的同时实现了多行为联合去噪，并结合自监督信号增强嵌入表示的鲁棒性，从而在多行为场景下取得更加优越的表现。
-
-\begin{table*}[htbp]
-\setlength{\heavyrulewidth}{1.2pt} % top/bottom粗
-\setlength{\lightrulewidth}{0.5pt}  % midrule粗细
-\setlength{\cmidrulewidth}{0.5pt}   % cmidrule粗细
-\renewcommand{\arraystretch}{1.0}
-\caption{NIPER在三个数据集上的实验结果(Beibei, Taobao, Tmall)}
-\centering
-\begin{adjustbox}{width=1\textwidth}
-\begin{tabular}{l|cccc|cccc|cccc}
-\toprule
-\multirow{2}{*}{Model} & \multicolumn{4}{c|}{Beibei} & \multicolumn{4}{c|}{Taobao} & \multicolumn{4}{c}{Tmall} \\
-& R@5 & R@10 & N@5 & N@10 & R@5 & R@10 & N@5 & N@10 & R@5 & R@10 & N@5 & N@10\\
-\midrule
-NGCF \cite{wang2019NGCF} & 0.0185 & 0.0348 & 0.0108 & 0.0161 & 0.0203 & 0.0291 & 0.0141 & 0.0169 & 0.0219 & 0.0329 & 0.0146 & 0.0182  \\
-NGCF${_{all}}$ \cite{wang2019NGCF}& 0.0316 & 0.0487 & 0.0194 & 0.0261 & 0.0254 & 0.0348 & 0.0193 & 0.0205 & 0.0024 & 0.0053 & 0.0021 & 0.0029\\
-LightGCN \cite{he2020lightgcn} & 0.0230& 0.0419 & 0.0141 & 0.0202 & 0.0300 & 0.0412 & 0.0211 & 0.0247 & 0.0363 & 0.0524 & 0.0251 & 0.0303 \\
-LightGCN${_{all}}$ \cite{he2020lightgcn}& 0.0349 & 0.0583 & 0.0222 & 0.0297 & 0.0377 & 0.0433 & 0.0284 & 0.0284 & 0.0036 & 0.0060 & 0.0023 & 0.0030\\
-GraphDA \cite{fan2023graphDA}& 0.0384 & 0.0603 & 0.0253 & 0.0312 & 0.0318 & 0.0468 & 0.0214 & 0.0253 & 0.0153 & 0.0204 & 0.0098 & 0.0143\\
-DPT \cite{zhang2023DPT}& 0.1009 & 0.1621 & 0.0545 & 0.0793 & 0.0484 & 0.1025  & 0.0375 & 0.0571 & 0.0573 & 0.0934 & 0.0353 & 0.0448\\
-S-MBRec \cite{gu2022S-MBRec}& 0.0981 & 0.1697 & 0.0613 & 0.0872 & 0.0673 & 0.0814 & 0.0348 & 0.0446 & 0.0503	& 0.0639 & 0.0301 &	0.0397\\
-GHCF \cite{chen2021GHCF}& {0.1227} & {0.1897} & {0.0783} & {0.1000} & 0.0534 & 0.0807 & 0.0361 & 0.0449 & 0.0462 & 0.0763 & 0.0287 & 0.0384\\
-MBSSL \cite{xu2023MBSSL}& 0.1034 & 0.1734 & 0.0652 & 0.0899 & {0.0688} & {0.1022} & {0.0465} & {0.0567} & {0.0507} & {0.0838} & {0.0313} & {0.0419} \\
-DeMBR \cite{zhang2025dembr}& 0.1357 & 0.2028 & 0.0805 & 0.1207 & {0.0722} & {0.0987} & {0.0457} & {0.0593} & {0.0712} & {0.1123} & {0.0428} & {0.0597} \\
-POGCN \cite{zhang2024POGCN}& 0.0854 & 0.1548 & 0.0621 & 0.0801 & 0.0519 & 0.0841 & 0.0351 & 0.0423 & 0.0458 & 0.0741 & 0.0214 & 0.0386   \\
-NIPER & \textbf{0.1679} & \textbf{0.2394} & \textbf{0.1092} & \textbf{0.1322} & \textbf{0.0829} & \textbf{0.1103} & \textbf{0.0590} & \textbf{0.0678} & \textbf{0.0884} & \textbf{0.1216} & \textbf{0.0585} & \textbf{0.0693} \\ 
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\label{table:Comparison1} 
-\end{table*}
-
-为确保实验结果的可靠性，本研究中的所有实验均重复执行 5 次，每次实验仅改变随机种子（seed），其余超参数和训练设置保持一致。对于每次实验，我们记录关键评价指标，并计算其均值与标准差。结果显示，不同随机种子对模型性能的波动较小，标准差约为指标均值的 $1.3\%$ 左右，表明方法具有较高的稳定性。
-
-针对主要指标，本文采用 Wilcoxon 符号秩检验（Wilcoxon signed-rank test）进行显著性分析，以验证本文方法相较于基线方法的性能提升是否具有统计意义。实验结果显示，关键指标的 $p$ 值远小于 $0.05$，表明性能提升具有统计显著性。通过重复实验、方差分析及显著性检验，本研究能够有效排除偶然因素的影响，为多行为推荐方法的性能评估提供可靠依据。
-
-\subsection{消融实验}
-为验证所提出模型中各个设计模块的有效性与必要性，本节进行了系统的消融实验。具体地，设计了以下六个模型变体：
-
-\begin{enumerate}
-    \item \textbf{w/o Inter-Weighting：} 移除跨行为加权机制，仅保留行为内权重进行去噪；
-    \item \textbf{w/o Causal Inference：} 去除基于因果推断的行为强度估计，采用人工设定的固定值作为行为强度，其中 $\rho^{click}=1$，$\rho^{cart}=\rho^{collect}=2$，$\rho^{buy}=3$；
-    \item \textbf{w/o Intra-Weighting：} 移除行为内加权机制，仅依赖跨行为权重进行去噪；
-    \item \textbf{w/o Denoising：} 完全取消去噪模块，直接利用原始多行为交互图进行建模；
-    \item \textbf{w/o SSL$_{\text{inter}}$：} 移除偏好增强模块中的跨行为自监督学习部分；
-    \item \textbf{w/o SSL$_{\text{intra}}$：} 移除偏好增强模块中的行为内自监督学习部分。
-\end{enumerate}
-
-消融实验结果如表~\ref{table:ablation} 所示。由于篇幅限制，本文重点报告 Beibei 与 Taobao 数据集上的 Recall@5 结果，其他数据集上亦观察到相似趋势。结果分析如下：
-
-\textbf{加权机制的重要性。}
-跨行为与行为内加权机制的结合能够有效整合多视角信息，对不同交互的重要性进行精细区分。当任意一项加权机制被移除时（如 w/o Inter-Weighting 或 w/o Intra-Weighting），模型性能均出现明显下降，说明该双层加权策略对于识别噪声交互与保持有效信号均至关重要。
-
-\textbf{去噪模块的必要性。}
-将完整模型与 w/o Denoising 变体对比可发现，去噪模块在显著提升模型精度方面发挥关键作用。如果直接使用未经筛选的原始交互，辅助行为中的噪声信号会误导用户偏好建模，导致推荐结果偏差。因此，去噪阶段对于提升推荐系统的鲁棒性和准确性具有重要意义。
-
-\textbf{自监督学习增强的有效性。}
-移除自监督学习组件（w/o SSL$_{\text{inter}}$ 或 w/o SSL$_{\text{intra}}$）都会造成显著性能退化。这表明跨行为自监督学习（inter-SSL）通过高权重辅助行为增强目标行为表示，而行为内自监督学习（intra-SSL）强化了相似用户与物品之间的嵌入一致性。二者协同作用显著提升了模型的表征能力与泛化性能。
+（2）\textbf{标签新颖性（语义层面）}：实施时间演进评估策略，引入2025年10月10日更新的GO本体版本。将"零样本标签"定义为存在于2025版本但在2023版本中不存在的GO术语。因此，最终的零样本测试集由具有这些新出现功能注释的非同源蛋白质组成。
 
+\subsection{数据集统计}
 
+数据集的统计信息如表~\ref{tab:mzsgo_dataset_stats}所示，样本按三个GO子本体分组。由于生物通路的复杂性，BP类别包含最多的零样本蛋白质数量。
 
 \begin{table}[h]
-\renewcommand{\arraystretch}{0.8}
 \centering
-\caption{消融实验结果}
-\scalebox{0.85}{
-\begin{tabular}{lcccccccc}
+\caption{MZSGO数据集统计}
+\label{tab:mzsgo_dataset_stats}
+\begin{tabular}{lccc}
 \toprule
-\multirow{2}{*}{DataSet} & \multicolumn{2}{c}{Beibei} & \multicolumn{2}{c}{Taobao} & \multicolumn{2}{c}{Tmall}\\
-\cmidrule(r){2-3} \cmidrule(r){4-5} \cmidrule(r){6-7}
-Metric & Recall@5 & NDCG@5 & Recall@5 & NDCG@5 & Recall@5 & NDCG@5\\
+数据集 & MF & CC & BP \\
 \midrule
-w/o Inter-Weighting & 0.1243 & 0.0783 & 0.0704 & 0.0487 & 0.0611 & 0.0397 \\
-w/o Casual Inference & 0.1325 & 0.0.0835 & 0.0806 & 0.0524 & 0.0691 & 0.0429 \\
-w/o Intra-Weighting & 0.1232 & 0.0746 & 0.0720 & 0.0472 & 0.0601 & 0.0383\\
-w/o Denoising & 0.1198 & 0.0758 & 0.0603 & 0.0406 & 0.0493 & 0.0318 \\
-w/o SSL$_{\text{inter}}$ & 0.1154 & 0.0775 & 0.0618 & 0.0454 & 0.0576 & 0.0381\\
-w/o SSL$_{\text{intra}}$ & 0.1163 & 0.0769 & 0.0605 & 0.0438 & 0.0549 & 0.0375 \\
-NIPER & \textbf{0.1632} & \textbf{0.1053} & \textbf{0.0812} & \textbf{0.0576} & \textbf{0.0884} & \textbf{0.0585} \\
+训练集 & 50,874 & 51,743 & 51,618 \\
+测试集 & 5,584 & 5,764 & 5,712 \\
+零样本测试集 & 555 & 17 & 3,687 \\
 \bottomrule
 \end{tabular}
-}
-\label{table:ablation} 
 \end{table}
 
-\subsection{参数实验}
-为探究模型关键超参数对整体性能的影响，本文从噪声移除比例 $\beta_{low}$、目标行为增强比例 $\beta_{high}$ 以及行为权重平衡系数 $\alpha$ 三个方面进行了系统实验分析。  
-图~\ref{fig:para} 展示了各参数变化对模型性能的影响趋势与差异。
+表~\ref{tab:mzsgo_label_stats}详细展示了标签分布情况。在测试阶段，标签被分为以下三类：共有标签（Shared Labels），即同时出现在训练集和测试集中的GO术语；未见标签（Unseen Labels），即存在于测试集但不在训练数据中的术语；零样本标签（Zero-shot Labels），特指因本体更新而新出现的术语。
 
-\textbf{去噪比例 $\beta_{low}$ 的影响。}
-如图~\ref{fig:para}(a) 所示，不同数据集在最优去噪比例上的差异反映了其噪声水平的不同。随着去噪比例的提高，模型性能呈现“先升后降”的趋势。这一现象可归因于以下两点：（i）在较低去噪比例下，适度去除噪声交互有助于减少无关信息干扰；（ii）当比例过高时，部分有效交互被误删，导致模型无法充分学习用户真实偏好，从而造成性能下降。
+\begin{table}[h]
+\centering
+\caption{标签分布统计}
+\label{tab:mzsgo_label_stats}
+\begin{tabular}{lccc}
+\toprule
+标签类别 & MF & CC & BP \\
+\midrule
+标签总数 & 7,007 & 2,803 & 20,639 \\
+未见标签 & 191 & 26 & 328 \\
+共有标签 & 2,983 & 1,581 & 11,691 \\
+仅训练标签 & 3,833 & 1,196 & 8,620 \\
+零样本标签 & 35 & 6 & 34 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\textbf{辅助行为增强比例 $\beta_{high}$ 的影响。}
-增强比例 $\beta_{high}$ 控制辅助行为对目标行为的补充程度。如图~\ref{fig:para}(b) 所示，随着 $\beta_{high}$ 的增大，模型性能初期逐步提升，但在超过最优值后出现下降。适量引入辅助行为能够有效传递真实偏好信息，而过高的增强比例则可能带来噪声或无效信号，从而削弱推荐效果。因此，合理设定 $\beta_{high}$ 对充分利用辅助行为、提升模型准确性至关重要。
+这种严格的区分确保了零样本测试集上的评估指标真正反映模型的推理能力，而非记忆效应。
 
-\textbf{平衡系数 $\alpha$ 的影响。}
-参数 $\alpha$ 用于平衡行为间权重与行为内权重的重要性。如图~\ref{fig:para}(c) 所示，当 $\alpha$ 取值过小或过大时，模型分别会过度依赖跨行为或行为内权重，从而导致性能下降。尽管不同数据集的最优 $\alpha$ 略有差异，但整体结果表明，在两类权重之间保持适当平衡能够获得最佳模型表现。
+\section{MZSGO方法设计}
 
-\begin{figure}[htbp]
-    \centering
-    % 第一行
-    \begin{minipage}[t]{0.4\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/low.pdf}
-        \caption*{\small (a) 去噪比例 $\beta_{low}$}
-    \end{minipage}
-    \hspace{0.05\textwidth}
-    \begin{minipage}[t]{0.4\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/high.pdf}
-        \caption*{\small (b) 辅助行为增强比例 $\beta_{high}$}
-    \end{minipage}
-    % 第二行
-    \begin{minipage}[t]{0.4\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{figures/alpha.pdf}
-        \caption*{\small (c) 平衡系数 $\alpha$}
-    \end{minipage}
-    \hspace{0.05\textwidth}
-    \caption{超参数实验}
-    \label{fig:para}
-\end{figure}
+\subsection{总体框架}
 
-\subsection{案例研究}
-\textbf{(1)去噪模块通用性分析}
-
-为进一步验证所提出去噪模块的通用性与可迁移性，本节将 NIPER 的跨行为与行为内加权去噪模块集成至三种当前最先进的多行为推荐模型中——GHCF~\cite{chen2021GHCF}、MBSSL~\cite{xu2023MBSSL} 和 POGCN~\cite{zhang2024POGCN}，以评估其对不同框架的性能提升效果。  
-实验采用 Recall@10 与 NDCG@10 两项指标，对集成去噪模块前后的性能差异进行对比分析，从而量化该模块在提升推荐精度方面的贡献。
+MZSGO的总体架构如图~\ref{fig:mzsgo_architecture}所示。系统由四个紧密联结的组件构成：（1）多模态特征编码，提取蛋白质序列、域描述和GO标签定义的嵌入表示；（2）特征投影与非对称特征丢弃，将异构表示映射至共享语义空间并增强训练鲁棒性；（3）自适应门控融合，动态整合多模态特征；（4）分类预测，输出蛋白质与GO功能的匹配概率。
 
 \begin{figure}[h]
-  \centering
-  \begin{minipage}[t]{0.35\textwidth}
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/case_study1-Recall.pdf}
-    \caption*{(a) Recall@10 提升效果}
-    \label{fig:case1-Recall}
-  \end{minipage}
-  \hspace{0.05\textwidth}
-  \begin{minipage}[t]{0.35\textwidth}
-    \centering
-    \includegraphics[width=0.9\linewidth]{figures/case_study1-NDCG.pdf}
-    \caption*{(b) NDCG@10 提升效果}
-    \label{fig:case1-NDCG}
-  \end{minipage}
-  \caption{在不同模型中集成 NIPER 去噪模块后的性能增益}
-  \label{fig:case1}
+\centering
+\includegraphics[width=1\textwidth]{figures/model.pdf}
+\caption{MZSGO框架总体架构。流程包含四个集成阶段：（1）多模态特征投影；（2）训练阶段的蛋白质模态丢弃，虚线表示以概率$p=0.15$随机丢弃蛋白质特征，实线表示保留的模态；（3）门控融合模块实现自适应特征整合；（4）二分类头进行GO功能预测。}
+\label{fig:mzsgo_architecture}
 \end{figure}
 
+\subsection{多模态特征编码}
 
-\begin{figure}[h]
+MZSGO利用两种预训练模型提取三个模态的特征表示：
+
+（1）\textbf{蛋白质序列表示}：使用ESM2-650M\cite{lin2023evolutionary}蛋白质语言模型对蛋白质序列进行编码，提取最后一层隐藏状态，通过平均池化获得蛋白质级别的全局进化特征表示$\mathbf{E}_{seq} \in \mathbb{R}^{1280}$。
+
+（2）\textbf{GO标签语义表示}：使用Qwen3-Embedding-4B\cite{zhang2025qwen3}对每个GO术语的名称和定义文本进行编码。输入文本格式为"名称: 定义"（如"protein kinase activity: Catalysis of the phosphorylation of an amino acid residue..."），通过平均池化获得标签级别的语义嵌入$\mathbf{E}_{label} \in \mathbb{R}^{2560}$。
+
+（3）\textbf{蛋白质域语义表示}：使用同一Qwen3-Embedding-4B模型对蛋白质各个域的InterPro\cite{blum2025interpro}描述文本进行编码，采用两级平均池化（token级和域级）获得蛋白质级别的域特征表示$\mathbf{E}_{dom} \in \mathbb{R}^{2560}$。
+
+以上三种特征分别捕获了蛋白质的进化信号、功能标签的语义内涵和蛋白质域的结构功能信息，为后续的多模态融合提供了互补的信息来源。
+
+\subsection{特征投影与模态特异性丢弃}
+
+由于三种模态的原始嵌入具有不同的维度和分布特性（ESM嵌入为1280维，文本嵌入为2560维），需要将它们映射至统一的隐空间。为此，设计三个独立的多层感知机（MLP）投影模块，每个模块由线性变换、层归一化\cite{ba2016layer}、GELU激活\cite{hendrycks2016gaussian}和Dropout组成：
+\begin{equation}
+    \mathbf{h}_m = \text{Dropout}(\text{GELU}(\text{LN}(\mathbf{W}_m \mathbf{E}_m + \mathbf{b}_m)))
+\end{equation}
+其中$m \in \{seq, dom, label\}$表示模态类型，$\mathbf{h}_m \in \mathbb{R}^{d_{model}}$为投影后的特征向量，$d_{model} = 512$。
+
+\textbf{模态特异性丢弃策略}。为防止模型过度依赖单一蛋白质模态，并模拟真实场景中域信息缺失的情况，本文设计了一种非对称的特征丢弃机制。在训练阶段，定义二值掩码$\mathbf{M} = [m_{seq}, m_{dom}]$，其中每个蛋白质模态以概率$p = 0.15$被独立丢弃：
+\begin{equation}
+    m_{seq} = \mathbb{I}[r_{seq} > p], \quad m_{dom} = \mathbb{I}[r_{dom} > p]
+\end{equation}
+其中$r_{seq}, r_{dom} \sim \text{Uniform}(0, 1)$。掩码后的特征为$\hat{\mathbf{h}}_{seq} = \mathbf{h}_{seq} \cdot m_{seq}$和$\hat{\mathbf{h}}_{dom} = \mathbf{h}_{dom} \cdot m_{dom}$。
+
+关键设计在于其"非对称性"：GO标签的文本嵌入$\mathbf{h}_{label}$始终保留，不参与丢弃。这迫使模型学会在部分蛋白质信息缺失的情况下，仍能通过GO标签的文本语义进行有效预测，从而为零样本泛化奠定基础。
+
+为确保至少有一个蛋白质模态可用，设计了强制保留机制：
+\begin{equation}
+    \text{若 } m_{seq} = m_{dom} = 0: \quad m_k \leftarrow 1, \quad k \sim \text{Uniform}\{seq, dom\}
+\end{equation}
+推理阶段不施加任何丢弃，模型可利用完整的多模态信息进行预测。
+
+\subsection{自适应门控融合机制}
+
+为有效整合多模态特征，本文设计了门控融合模块（Gated Fusion Module），学习为每个信息来源分配自适应的重要性权重。首先，拼接三个模态的特征构建全局上下文向量，输入门控网络生成注意力分数：
+\begin{equation}
+    \mathbf{S} = [\hat{\mathbf{h}}_{dom} \parallel \hat{\mathbf{h}}_{seq} \parallel \mathbf{h}_{label}]
+\end{equation}
+\begin{equation}
+    \boldsymbol{\alpha} = \text{Softmax}(\mathbf{W}_{gate} \cdot \text{ReLU}(\text{LN}(\mathbf{W}_{ctx}\mathbf{S})))
+\end{equation}
+其中$\parallel$表示拼接操作，$\boldsymbol{\alpha} \in \mathbb{R}^{3}$为归一化的门控权重，$\mathbf{W}_{ctx} \in \mathbb{R}^{d_{model} \times 3d_{model}}$和$\mathbf{W}_{gate} \in \mathbb{R}^{3 \times d_{model}}$为可学习参数。
+
+同时，每个模态的特征通过各自的变换层$\phi(\cdot)$进行非线性映射。最终的融合表示通过加权求和获得：
+\begin{equation}
+    \mathbf{H}_{fused} = \sum_{k=1}^{3} \alpha_k \cdot \phi(\mathbf{h}_k)
+\end{equation}
+其中$k$索引三个模态（序列、域、标签），$\phi(\cdot)$包含线性变换、层归一化、ReLU激活和Dropout。
+
+该机制的核心优势在于：门控权重是\textbf{逐样本动态计算}的，即每个蛋白质-GO对的融合比例不同。例如，当蛋白质的域信息丰富且与功能高度相关时，模型倾向于分配更高的权重给域特征；当域信息稀疏时，模型则更依赖序列特征和标签文本语义。
+
+\subsection{优化目标}
+
+融合表示$\mathbf{H}_{fused}$通过分类MLP生成标量逻辑值，再经sigmoid激活函数获得预测概率：
+\begin{equation}
+    \hat{y} = \sigma(\mathbf{W}_{out}\mathbf{H}_{fused} + b_{out})
+\end{equation}
+
+为应对不同GO子本体在类别不平衡程度上的差异，本文对不同本体采用不同的损失函数策略：
+
+对于BP和MF子本体，使用标准的二分类交叉熵损失：
+\begin{equation}
+    \mathcal{L}_{\text{BCE}} = -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \log(\hat{y}_i) + (1 - y_i) \log(1 - \hat{y}_i) \right]
+\end{equation}
+
+对于CC子本体，采用Focal Loss以聚焦于难样本的学习：
+\begin{equation}
+    \mathcal{L}_{\text{Focal}} = -\frac{1}{N} \sum_{i=1}^{N} \left[ \alpha (1 - \hat{y}_i)^\gamma y_i \log(\hat{y}_i) + (1 - \alpha) \hat{y}_i^\gamma (1 - y_i) \log(1 - \hat{y}_i) \right]
+\end{equation}
+其中$\gamma = 2$为聚焦参数。
+
+\section{实验设置}
+
+\subsection{实现细节}
+
+MZSGO基于PyTorch\cite{paszke2019pytorch}框架实现。为对齐异构模态，将1280维ESM嵌入和2560维文本/域特征投影至统一的隐空间（$d_{model} = 512$）。这些特征经拼接后输入门控融合网络——一个两层MLP——计算自适应模态权重，随后通过变换层进行非线性映射。融合表示最终被压缩至256维用于分类。
+
+训练在单块NVIDIA A6000 GPU（48GB显存）上进行，使用Adam优化器\cite{kingma2014adam}，学习率为$5 \times 10^{-4}$，批次大小为16。为缓解过拟合，施加0.5的神经元级Dropout率。考虑到各子本体的复杂度差异，BP训练30个epoch，MF和CC各训练20个epoch。
+
+\subsection{基线方法}
+
+本文选择十种先进的基线方法进行对比，涵盖三大类别：
+
+（1）\textbf{传统方法}：Naive（基于标签频率预测）、Diamond\cite{diamond}（基于序列同源性传递）。
+
+（2）\textbf{深度学习方法}：DeepGOCNN\cite{kulmanov2020deepgoplus}（卷积神经网络）、DeepGOZero\cite{kulmanov2022deepgozero}（本体公理约束）、Struct2GO\cite{jiao2023struct2go}（图神经网络+结构信息）、PO2GO\cite{li2024partial}（偏序嵌入）、DeepGO-SE\cite{kulmanov2024protein}（神经符号推理）。
+
+（3）\textbf{多模态/LLM方法}：ProtGO\cite{wang2025protgo}（四模态融合）、DPFunc\cite{wang2025dpfunc}（域信息增强）、ProtNote\cite{char2025protnote}（LLM功能描述）。
+
+\section{实验结果与分析}
+
+\subsection{标准测试集上的性能对比}
+
+表~\ref{tab:mzsgo_comparison}汇总了MZSGO与所有基线方法在三个本体上的性能对比结果。
+
+\begin{table*}[htbp]
+\centering
+\caption{MZSGO与最先进方法在测试集上的性能对比。最优结果加粗，次优结果加下划线。}
+\label{tab:mzsgo_comparison}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llccccc}
+\toprule
+\textbf{本体} & \textbf{模型} & \textbf{Fmax}$\uparrow$ & \textbf{AUPR}$\uparrow$ & \textbf{Unseen AUPR}$\uparrow$ & \textbf{Seen AUPR}$\uparrow$ & \textbf{H}$\uparrow$ \\
+\midrule
+\multirow{11}{*}{\textbf{BP}} 
+ & Naive & 0.2991 & 0.2073 & 0.0025 & 0.2076 & 0.0049 \\
+ & Diamond & 0.4703 & 0.2913 & 0.0025 & 0.2934 & 0.0050 \\
+ & DeepGOCNN & 0.3964 & 0.3676 & 0.0025 & 0.3684 & 0.0050 \\
+ & DeepGOZero & 0.4888 & 0.4535 & 0.0025 & 0.4558 & 0.0050 \\
+ & Struct2GO & 0.4022 & 0.3744 & 0.0025 & 0.3747 & 0.0050 \\
+ & PO2GO & 0.2975 & 0.2303 & 0.0025 & 0.2307 & 0.0049 \\
+ & DeepGO-SE & \underline{0.5006} & 0.4373 & 0.0025 & 0.4404 & 0.0050 \\
+ & ProtGO & 0.4636 & 0.4377 & 0.0025 & 0.4410 & 0.0050 \\
+ & DPFunc & 0.4984 & \underline{0.4902} & 0.0069 & \underline{0.4936} & 0.0136 \\
+ & ProtNote & 0.3555 & 0.2993 & \underline{0.0303} & 0.2997 & \underline{0.0550} \\
+ & \textbf{MZSGO} & \textbf{0.5045} & \textbf{0.5008} & \textbf{0.2393} & \textbf{0.5021} & \textbf{0.3241} \\
+\midrule
+\multirow{11}{*}{\textbf{MF}} 
+ & Naive & 0.5496 & 0.3318 & 0.0032 & 0.3327 & 0.0063 \\
+ & Diamond & 0.6727 & 0.3330 & 0.0032 & 0.3366 & 0.0063 \\
+ & DeepGOCNN & 0.6603 & 0.5225 & 0.0032 & 0.5242 & 0.0064 \\
+ & DeepGOZero & 0.7441 & 0.6333 & 0.0032 & 0.6380 & 0.0064 \\
+ & Struct2GO & 0.6564 & 0.5940 & 0.0032 & 0.5962 & 0.0064 \\
+ & PO2GO & 0.5496 & 0.4136 & 0.0032 & 0.4148 & 0.0064 \\
+ & DeepGO-SE & 0.7481 & 0.6332 & 0.0032 & 0.6376 & 0.0064 \\
+ & ProtGO & 0.7262 & \underline{0.7399} & 0.0032 & \underline{0.7453} & 0.0064 \\
+ & DPFunc & \underline{0.7495} & \textbf{0.7416} & 0.0051 & \textbf{0.7480} & 0.0101 \\
+ & ProtNote & 0.6140 & 0.5283 & \underline{0.0490} & 0.5301 & \underline{0.0897} \\
+ & \textbf{MZSGO} & \textbf{0.7611} & 0.7337 & \textbf{0.4806} & 0.7380 & \textbf{0.5821} \\
+\midrule
+\multirow{11}{*}{\textbf{CC}} 
+ & Naive & 0.6143 & 0.0793 & 0.0207 & 0.5270 & 0.0398 \\
+ & Diamond & 0.6331 & 0.3076 & 0.0207 & 0.3093 & 0.0388 \\
+ & DeepGOCNN & 0.6918 & 0.5284 & 0.0207 & 0.5292 & 0.0398 \\
+ & DeepGOZero & 0.7075 & 0.6598 & 0.0207 & 0.6612 & 0.0401 \\
+ & Struct2GO & 0.6989 & 0.7380 & 0.0207 & 0.7382 & 0.0403 \\
+ & PO2GO & 0.6143 & 0.5828 & 0.0207 & 0.5830 & 0.0400 \\
+ & DeepGO-SE & 0.7379 & 0.6991 & 0.0207 & 0.7003 & 0.0402 \\
+ & ProtGO & 0.7209 & \underline{0.7717} & 0.0207 & \underline{0.7727} & 0.0403 \\
+ & DPFunc & \underline{0.7386} & 0.7709 & 0.0274 & 0.7722 & 0.0529 \\
+ & ProtNote & 0.6636 & 0.6605 & \underline{0.2530} & 0.6607 & \underline{0.3659} \\
+ & \textbf{MZSGO} & \textbf{0.7470} & \textbf{0.7726} & \textbf{0.5862} & \textbf{0.7733} & \textbf{0.6669} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+\subsubsection{有监督性能分析}
+
+在常规分类指标（Fmax和AUPR）方面，MZSGO在三个本体上均取得了最优或极具竞争力的结果，凸显了多模态融合方法的有效性。
+
+在最具挑战性的BP本体中，MZSGO以0.5045的Fmax超过了域感知方法DPFunc（0.4984）和神经符号推理方法DeepGO-SE（0.5006）。在MF和CC本体上，MZSGO分别以0.7611和0.7470的Fmax保持领先。值得注意的是，MZSGO在CC本体上的AUPR达到0.7726，刷新了该本体的最优记录。
+
+与仅依赖单一模态的方法相比，MZSGO通过自适应门控融合机制有效整合了蛋白质序列特征（ESM）与域描述语义，使模型能够综合利用互补的语义线索，产生更强的特征表示。
+
+\subsubsection{零样本性能分析}
+
+MZSGO的核心优势在于其对未见标签的推理能力。表~\ref{tab:mzsgo_comparison}中的Unseen AUPR和调和均值H直观地反映了这一点。
+
+传统比对方法和标准深度学习模型在零样本场景中表现出极为有限的泛化能力。这主要是因为这些模型将标签视为独立的one-hot标识符，在训练过程中，优化目标自然地抑制了未见标签对应的权重，迫使模型对训练集中未出现的类别预测接近零的概率。值得注意的是，尽管DeepGOZero理论上能够通过逻辑约束实现零样本预测，但它在缺乏显式GO公理的罕见类别上预测失效，Unseen AUPR接近0。
+
+ProtNote利用LLM展示了一定的零样本能力（如BP上的0.0303），但MZSGO大幅超越了它。具体而言，MZSGO在BP本体上实现了0.2393的Unseen AUPR——相较ProtNote提升了约\textbf{8倍}。在MF和CC本体上同样观察到一致的趋势，MZSGO分别实现了0.4806和0.5862的Unseen AUPR。
+
+综合平衡已见和未见标签性能的调和均值H进一步凸显了模型的全面优势。MZSGO在BP、MF、CC上分别获得0.3241、0.5821和0.6669的H值，大幅超越亚军ProtNote的0.0550、0.0897和0.3659。这一结果证实MZSGO不仅仅是记忆训练标签，而是学到了蛋白质特征与功能描述之间的泛化性语义对齐。
+
+\subsection{纯零样本测试集上的评估}
+
+为进一步严格验证泛化能力，本文在专门构建的纯零样本测试集上将MZSGO与零样本能力最强的基线方法ProtNote进行直接对比。结果如表~\ref{tab:mzsgo_zeroshot}所示。
+
+\begin{table}[htbp]
+\centering
+\caption{纯零样本测试集上的性能对比。该评估集通过时间演进方式构建，评估模型对2025版本中新出现但训练截止日期前不存在的GO功能标签的预测能力。}
+\label{tab:mzsgo_zeroshot}
+\begin{tabular}{llcccc}
+\toprule
+\textbf{本体} & \textbf{模型} & \textbf{Fmax} & \textbf{AUPR} & \textbf{Precision} & \textbf{Recall} \\
+\midrule
+\multirow{2}{*}{BP} 
+ & ProtNote & 0.3763 & 0.2705 & 0.2580 & \textbf{0.6951} \\
+ & \textbf{MZSGO} & \textbf{0.4881} & \textbf{0.4546} & \textbf{0.4475} & 0.5369 \\
+\midrule
+\multirow{2}{*}{MF} 
+ & ProtNote & 0.3599 & 0.3393 & 0.4545 & 0.2979 \\
+ & \textbf{MZSGO} & \textbf{0.5982} & \textbf{0.5435} & \textbf{0.6261} & \textbf{0.5727} \\
+\midrule
+\multirow{2}{*}{CC} 
+ & ProtNote & 0.2983 & 0.1652 & 0.1853 & 0.7647 \\
+ & \textbf{MZSGO} & \textbf{0.6610} & \textbf{0.6291} & \textbf{0.5521} & \textbf{0.8235} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+MZSGO在所有三个本体的Fmax和AUPR上均一致超越ProtNote。对精确率和召回率的精细分析揭示了两种方法的行为差异和改进方向：
+
+（1）\textbf{BP本体的平衡精确率-召回率权衡}：ProtNote展现了较高的召回率（0.6951）但精确率低下（0.2580），表明其倾向于过度预测功能标签。相比之下，MZSGO实现了更均衡的权衡，将精确率提升至0.4475的同时保持了0.5369的竞争性召回率，从而获得了显著更高的Fmax（0.4881 vs. 0.3763）。
+
+（2）\textbf{MF和CC本体的全面优势}：在MF本体上，MZSGO获得0.5982的Fmax（ProtNote为0.3599），精确率（0.6261 vs. 0.4545）和召回率（0.5727 vs. 0.2979）双双领先。在CC本体上，性能差距最为显著：ProtNote的精确率仅为0.1853，可能是由于广泛文本匹配导致的"功能幻觉"；而MZSGO达到0.5521的精确率，同时召回率也优于ProtNote（0.8235 vs. 0.7647），实现了Fmax从0.2983到0.6610的翻倍提升。
+
+这一对比结果表明，MZSGO通过将预测锚定在域特异性的语义空间中，有效避免了其他基于文本的模型中常见的噪声和假阳性问题，为蛋白质新功能注释提供了高度可靠的预测能力。
+
+\subsection{消融实验}
+
+为评估各组件的贡献——特别是多模态特征、融合模块和优化策略，本文在CC本体上进行了系统的消融实验。消融变体分为五组：（1）单模态编码器；（2）特征表示变化；（3）架构变化；（4）编码器替换；（5）损失函数变体。结果如表~\ref{tab:mzsgo_ablation}所示。
+
+\begin{table}[htbp]
   \centering
-  \includegraphics[width=0.75\linewidth]{figures/noise_robustness_absolute.pdf}
-  \caption{不同噪声比例下各模型的 Recall@10 性能对比}
-  \label{fig:noise_robustness}
-\end{figure}
+  \caption{CC本体上的消融实验结果。报告指标包括总体Fmax和AUPR，以及零样本相关指标。H为已见与未见标签性能的调和均值。}
+  \label{tab:mzsgo_ablation}
+  \resizebox{\linewidth}{!}{
+    \begin{tabular}{lccccc}
+    \toprule
+    \textbf{方法} & \textbf{Fmax} & \textbf{AUPR} & \textbf{Unseen AUPR} & \textbf{Unseen Fmax} & \textbf{H} \\
+    \midrule
+    \multicolumn{6}{l}{\textit{模态消融}} \\
+    仅ESM特征 & 0.7319 & 0.7344 & 0.5203 & 0.0793 & 0.6094 \\
+    仅域特征 & 0.7311 & 0.7052 & 0.5187 & 0.2322 & 0.6012 \\
+    \midrule
+    \multicolumn{6}{l}{\textit{特征与架构消融}} \\
+    域信息One-hot编码 & 0.7203 & 0.6731 & 0.5047 & 0.2000 & 0.5889 \\
+    使用PO2Vec标签嵌入 & 0.7406 & 0.7196 & 0.3193 & 0.1818 & 0.4423 \\
+    去除特征丢弃 & \textbf{0.7544} & 0.6857 & 0.4898 & 0.2500 & 0.5714 \\
+    简单拼接替代门控融合 & 0.7381 & 0.7009 & 0.5245 & 0.2469 & 0.6000 \\
+    \midrule
+    \multicolumn{6}{l}{\textit{编码器变体}} \\
+    BioGPT & 0.7419 & 0.7198 & 0.4258 & 0.1935 & 0.5351 \\
+    BiomedBERT & 0.7406 & 0.7218 & 0.5647 & 0.2000 & 0.6337 \\
+    Qwen3-0.6B & 0.7406 & 0.7282 & 0.5469 & 0.1379 & 0.6247 \\
+    ESM-150M & 0.7385 & 0.7310 & 0.3864 & 0.1333 & 0.5056 \\
+    \midrule
+    \multicolumn{6}{l}{\textit{损失函数变体}} \\
+    BCE损失 & 0.7501 & 0.7143 & 0.5824 & 0.2581 & 0.6421 \\
+    加权BCE损失 & 0.7199 & 0.7450 & 0.5127 & 0.4444 & 0.6095 \\
+    \midrule
+    \textbf{MZSGO} & 0.7470 & \textbf{0.7726} & \textbf{0.5862} & \textbf{0.5665} & \textbf{0.6669} \\
+    \bottomrule
+    \end{tabular}%
+  }
+\end{table}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=1.0\linewidth]{figures/case_study2.pdf}
-  \caption{辅助行为与目标行为相似性案例分析}
-  \label{fig:case2}
-\end{figure}
+从消融结果中可以得出以下关键结论：
 
-如图~\ref{fig:case1} 所示，在 Beibei、Taobao 和 Tmall 数据集上，三种基线模型在 Recall@10 与 NDCG@10 指标上均取得显著提升。  
-该结果表明，NIPER 的去噪机制能够有效降低多行为交互中的噪声干扰，同时具备良好的通用性与可扩展性，可作为提升现有多行为推荐框架性能的独立模块。
+（1）\textbf{域语义信息是零样本能力的关键}。移除域语义信息造成最严重的性能退化：仅使用ESM特征时，Unseen Fmax从0.5665骤降至0.0793，表明序列特征本身难以泛化到未见标签。仅使用域特征时Unseen Fmax为0.2322，远优于仅用ESM；而将域信息退化为One-hot编码后Unseen Fmax降至0.2000，证实零样本迁移依赖于域描述的语义内容而非简单标识符。
 
-\textbf{(2)去噪模块有效性分析}
-为验证 NPIER 去噪模块的有效性，本实验在 Beibei 数据集的辅助行为中人工注入 0$\%$–30$\%$ 梯度的噪声，并对比 NPIER 与 GHCF、MBSSL 在 Recall@10 指标上的表现。如图 \ref{fig:noise_robustness} 所示，无论是否添加人工噪声，NPIER 的 Recall@10 绝对值在所有噪声水平下均显著高于两个基线模型：无噪声时达 0.2394，30$\%$ 噪声下仍保持 0.1857，而 GHCF 与 MBSSL 在相同条件下分别仅为 0.1530 与 0.1483。该结果清晰表明，NPIER 的去噪机制不仅有效抑制噪声干扰，同时在无噪声场景下亦能优化用户偏好建模，从而在各类条件下均稳定输出更优的推荐性能，充分验证了该模块的普适性与实用价值。
+（2）\textbf{门控融合机制不可或缺}。将门控融合替换为简单拼接使H从0.6669降至0.6000，说明朴素拼接无法有效整合异构模态。使用PO2Vec标签嵌入替代文本嵌入更是导致H降至0.4423，这是因为基于图拓扑的PO2Vec嵌入与序列和文本模态的语义对齐度较低。
 
+（3）\textbf{特征丢弃策略增强泛化能力}。去除特征丢弃后，已见标签准确度略有提升（Fmax达0.7544），但零样本泛化显著下降（H从0.6669降至0.5714），验证了其作为正则化手段的重要性。
 
-\textbf{(3)去噪模块的局部效果分析}
-为进一步验证 NIPER 在辅助行为分类中的有效性，本节从局部视角对其进行分析。我们选取 Taobao 数据集中的一位典型用户作为研究对象，该用户在辅助行为下与 12 个物品发生过交互。依据模型在最优参数设置下的权重分布，我们根据去噪阈值 $\beta_{low}$ 和增强阈值 $\beta_{high}$ 对该用户的辅助行为进行了分类。其中，权重低于 $\beta_{low}$ 的交互被视为噪声样本，而权重高于 $(1 - \beta_{high})$ 的交互则被认为更能反映用户的真实偏好。随后，我们计算辅助行为交互与用户实际购买物品之间的余弦相似度，以验证分类结果的合理性。
+（4）\textbf{编码器选择的合理性}。各替代编码器的性能均不及当前组合，证实MZSGO选择的编码器（ESM2-650M + Qwen3-Embedding-4B）最能捕获跨模态的互补结构信息。
 
-\textbf{分析：}如图~\ref{fig:case2} 所示，辅助行为中被识别为真实偏好的高权重交互，其与目标行为（购买行为）物品的相似度显著高于被识别为噪声的交互。这表明，NIPER 能够精准地区分噪声与真实偏好，在去除无效交互的同时，有效保留对用户真实兴趣具有代表性的交互信息，从而提升模型的整体推荐性能。
+（5）\textbf{Focal Loss在CC本体上的优势}。标准BCE获得较高的Fmax（0.7501）但总体AUPR偏低（0.7143）；加权BCE虽改善了Unseen Fmax（0.4444）但损害了总体AUPR和H值。Focal Loss（MZSGO）通过有效平衡困难样本的学习，实现了最优的综合权衡。
+
+\subsection{参数敏感性分析}
+
+为评估模型的鲁棒性，本文考察了两个关键超参数的影响：Dropout率和隐藏向量维度。采用控制变量法，每次仅变动一个参数，在CC和MF本体上观察AUPR的波动。
+
+\subsubsection{Dropout率的影响}
+
+Dropout率应用于特征提取后的神经元级丢弃，取值范围为0.3至0.7。模型在Dropout率为0.5时表现最佳，CC本体AUPR达0.7726，MF本体达0.7377。较低的Dropout率（如0.3）导致过拟合和泛化能力下降；较高的Dropout率（如0.7）因过度信息丢失使性能退化（CC降至0.7610，MF降至0.7228）。因此，0.5被选为最优配置。
+
+\subsubsection{隐藏向量维度的影响}
+
+隐藏维度从128变化至1024。随着维度从128扩展至512，两个本体的性能持续提升。CC本体在512维时达到峰值（AUPR为0.7726），此后随维度增大而退化。MF本体在1024维时仍有提升（AUPR达0.8133），但CC本体在该维度下显著下降至0.7371。为构建跨GO类别通用的模型架构而无需针对特定任务进行调整，最终将隐藏维度设定为512，在表征能力和计算成本之间取得了良好的平衡。
 
 \section{本章小结}
 
-本章针对多行为推荐系统中存在的噪声交互问题，提出了一种新颖的多行为推荐框架——NIPER（Noise Identification and Preference Extraction in Multi-Behavior Recommender System）。该框架旨在解决多行为推荐系统中噪声交互与真实偏好提取的核心问题，与以往将所有辅助行为直接融合到目标行为模型的方法不同，NIPER能够有效区分辅助行为中的噪声与真实偏好。
+本章提出了多模态零样本蛋白质功能注释方法MZSGO，其核心创新在于三个方面：（1）将蛋白质功能预测从封闭标签集分类重新定义为开放语义空间中的蛋白质-GO匹配问题，通过大语言模型构建域和标签的统一语义空间，从根本上赋予模型零样本推理能力；（2）设计了自适应门控融合模块，实现逐样本动态的多模态特征整合，克服了传统简单拼接方式的局限；（3）引入非对称特征丢弃策略，在训练阶段增强模型对模态缺失的鲁棒性。
 
-具体而言，\textbf{跨行为与行为内加权去噪模块}通过为多行为交互分配不同权重，削弱噪声交互的影响，确保无关或偶然行为被过滤；\textbf{基于偏好的表征增强模块}则利用自监督学习机制，从辅助行为中提取真实偏好信息，增强模型对目标行为的表达能力。通过这两个模块的协同作用，NIPER能够在多源行为融合的同时抑制噪声影响，从而提升推荐系统的准确性与鲁棒性。
-
-在多个公开数据集上的实验结果表明，NIPER 在推荐精度和模型稳定性方面均显著优于现有最先进方法，验证了该框架在提升多行为推荐系统性能方面的有效性，同时为多行为推荐系统中的噪声处理提供了新的思路。
+实验结果表明，MZSGO在三个GO本体的有监督指标上均达到最优或极具竞争力的水平，在零样本场景下则以压倒性优势超越所有现有方法。其中，在最具挑战性的CC本体零样本场景下，MZSGO的调和均值H达到0.6669，是亚军方法ProtNote（0.3659）的近两倍。消融实验验证了域语义信息、门控融合机制和特征丢弃策略各自的有效性。MZSGO为蛋白质功能注释，特别是新功能标签的预测，提供了可靠且有效的计算工具。
