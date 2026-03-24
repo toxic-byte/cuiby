@@ -4,21 +4,15 @@
 
 \section{引言}
 
-蛋白质功能预测（Protein Function Prediction, PFP）是生物信息学领域的重要研究方向，其目标是利用计算方法为尚未充分注释的蛋白质自动分配功能标签。随着高通量测序、结构预测和数据库建设的快速发展，蛋白质序列、结构、互作网络以及文本知识等多种类型的数据正以前所未有的速度积累，但实验功能注释的增长速度远远滞后于原始数据的生成速度\cite{friedberg2006automated,lin2024comprehensive}。在这一背景下，如何从多源异构数据中提取有效信息，并构建具有良好泛化能力的预测模型，已经成为该领域的核心问题。
+蛋白质功能预测是生物信息学领域的一项重要研究任务，其核心目标是利用计算方法为尚未充分注释的蛋白质自动分配功能标签。完成这一目标不仅需要计算模型相关理论的支持，还需要来自生物学上的可靠分析。本文的实验主要围绕蛋白质语言模型、文本语义嵌入、对比学习与知识蒸馏以及参数高效微调等技术展开，因此本章在定义蛋白质功能预测问题的基础上，分别介绍上述基础技术的研究内容与原理，为之后的工作做铺垫。
 
-从研究范式演进来看，蛋白质功能预测经历了从同源比对、浅层机器学习、深度神经网络到基础预训练模型的持续发展。早期方法更多依赖序列相似性和人工构造特征，其性能在存在近缘同源蛋白时较为稳定，但对远同源蛋白、稀有功能类别以及新出现的GO术语缺乏足够的适应能力。近年来，随着AlphaFold2\cite{jumper2021highly}和ESM-2\cite{lin2023evolutionary}等模型的出现，研究者开始利用蛋白质结构、蛋白质语言模型表示和文本语义知识提升功能预测性能，问题本身也逐渐从封闭标签分类拓展到开放语义推理和跨模态表示学习。
-
-尤其值得关注的是，\textbf{零样本预测}与\textbf{多模态预训练}已经成为当前蛋白质功能预测中最具代表性的两条研究主线。前者关注模型如何在训练过程中从未见过某些功能标签的情况下，仍能对其做出合理预测；后者则关注如何在预训练阶段联合利用序列、结构、网络和文本等多种模态，构建更具迁移性和生物学语义的蛋白质表示。这两条主线与本文第三章和第四章的方法设计高度相关，因此有必要在本章中对其进行系统梳理。
-
-从已公开的相关学位论文结构来看，第二章通常承担两项任务：一是对研究问题本身进行规范定义，明确后续方法与实验所依赖的任务设定和评价口径；二是对与本文关系最紧密的研究方向进行归纳总结，而不是简单罗列所有相关技术。基于这一思路，本章不再按单个基础模型或单个数学工具逐项展开，而是围绕本文真正关注的“问题定义—零样本预测—多模态预训练”三条主线组织内容，使第二章更贴近后续章节的研究需求，也更符合综述型章节的写作方式。
-
-基于此，本章首先从任务本身出发，介绍蛋白质功能预测问题的定义及常用评价指标；随后总结零样本预测相关研究的发展脉络；接着讨论多模态预训练相关研究的主要技术路线及其局限性；最后给出本章小结，为后续章节的方法设计与实验分析奠定理论和问题背景基础。
+本章的组织结构为：2.2节介绍蛋白质功能预测问题的定义和常用评价指标；2.3节介绍表征学习的基础技术，包括Transformer架构、ESM-2蛋白质语言模型和文本语义嵌入；2.4节介绍对比学习、知识蒸馏与参数高效微调方法；2.5节对本章内容进行总结。
 
 \section{蛋白质功能预测问题}
 
 \subsection{蛋白质功能预测问题的定义}
 
-蛋白质功能预测通常以基因本体（Gene Ontology, GO）\cite{ashburner2000gene}作为标准化注释体系。GO将蛋白质功能划分为生物过程（Biological Process, BP）、分子功能（Molecular Function, MF）和细胞组分（Cellular Component, CC）三个相互独立但内部结构复杂的子本体。每个GO术语不仅具有标准化名称和文本定义，还通过“is\_a”和“part\_of”等关系组织成有向无环图（Directed Acyclic Graph, DAG）\cite{goeman2008multiple}。这种层级结构使蛋白质功能预测区别于普通的多标签分类任务：不同标签之间存在明确的祖先—后代依赖关系，且越接近叶节点的术语语义越具体、样本越稀疏。
+蛋白质功能预测通常以基因本体（Gene Ontology, GO）\cite{ashburner2000gene}作为标准化注释体系。GO将蛋白质功能划分为生物过程（Biological Process, BP）、分子功能（Molecular Function, MF）和细胞组分（Cellular Component, CC）三个相互独立但内部结构复杂的子本体。每个GO术语不仅具有标准化名称和文本定义，还通过"is\_a"和"part\_of"等关系组织成有向无环图（Directed Acyclic Graph, DAG）\cite{goeman2008multiple}。如图~\ref{fig:go_dag}所示，GO系统以有向无环图的形式组织功能术语之间的层级关系，子节点是父节点的具体化。这种层级结构使蛋白质功能预测区别于普通的多标签分类任务：不同标签之间存在明确的祖先—后代依赖关系，且越接近叶节点的术语语义越具体、样本越稀疏。
 
 \begin{figure}[htbp]
 \centering
@@ -27,135 +21,409 @@
 \label{fig:go_dag}
 \end{figure}
 
-在GO体系下，一个蛋白质通常对应多个功能标签，因此蛋白质功能预测首先是一个典型的多标签学习问题。设蛋白质样本集合为$\mathcal{P}=\{P_1,P_2,\ldots,P_N\}$，某一GO子本体对应的候选功能标签集合为$\mathcal{G} = \{g_1, g_2, \ldots, g_C\}$，其中$C$表示该子本体中候选GO术语的总数，则传统蛋白质功能预测任务可表示为：对于每个蛋白质$P_i$，预测其对应的标签向量
+在GO体系下，蛋白质功能预测可以形式化为多标签分类问题。设蛋白质集合$\mathcal{P}=\{P_1,P_2,\ldots,P_N\}$包含$N$个蛋白质，$\mathcal{X} = \{X_1, X_2, \ldots, X_N\}$表示蛋白质的特征向量，特征可以是单一数据源提取的，也可以是多数据源提取的。某一GO子本体对应的候选功能术语集合为$\mathcal{G} = \{g_1, g_2, \ldots, g_C\}$，其中$C$表示该子本体中候选GO术语的总数。蛋白质$P_i$的功能注释用二元向量表示：
 \begin{equation}
-\hat{\mathbf{y}}_i = [\hat{y}_{i1}, \hat{y}_{i2}, \ldots, \hat{y}_{iC}] \in [0,1]^C,
+\mathbf{y}_i \in \{0,1\}^C, \quad y_{ic} =
+\begin{cases}
+1 & \text{当蛋白质}P_i\text{具有功能}g_c \\
+0 & \text{否则}
+\end{cases}
 \end{equation}
-其中$\hat{y}_{ic}$表示蛋白质$P_i$具有功能术语$g_c$的预测概率。若训练集和测试集共享同一组功能标签，则该问题可被视为封闭标签空间下的多标签分类问题。
-
-然而，与自然图像或普通文本分类不同，蛋白质功能预测还具有四个鲜明特点。第一，GO标签呈现显著的长尾分布，大量细粒度术语仅对应极少数样本，导致模型容易偏向高频标签。第二，GO本体本身处于持续更新之中，新术语不断被引入而旧术语可能被合并或废弃，这意味着真实应用场景中的标签空间并非静态不变。第三，蛋白质功能并不完全由单一模态决定，而往往需要综合序列保守性、结构折叠、蛋白质域组成、互作关系及功能文本知识等多种因素进行判断。第四，现有数据库中的功能标注本身具有不完全性，即“未被标注”并不总等价于“真实不存在该功能”，这使得蛋白质功能预测还隐含着弱监督和标签噪声问题。因此，简单地将问题理解为固定标签集合上的分类任务，已难以充分刻画其本质。
-
-在GO数据处理中，真实路径规则（True Path Rule）具有关键作用。若一个蛋白质被标注了某个GO术语，则按照本体层级关系，它也应被视为具有该术语所有祖先节点所代表的更一般功能。这意味着训练数据和评估标签通常需要进行向上传播，以避免标签不一致问题；同时，这也要求模型在预测时不仅要判断单一标签是否成立，还要兼顾标签之间的层级一致性。对零样本预测任务而言，标签的层级结构和文本语义更是模型推理未见类别的重要基础。
-
-从任务建模视角出发，现有蛋白质功能预测方法大致可分为两类。第一类是\textbf{封闭标签空间的多标签分类}，即将每个GO术语视为固定输出维度中的一个二分类单元，模型直接学习从蛋白质输入到标签概率的映射。这类方法结构清晰、训练方便，在标签空间稳定时表现较好，但天然难以处理训练中从未出现的功能术语。第二类是\textbf{开放语义空间中的蛋白质—标签匹配}，即将标签也作为可编码对象，学习蛋白质表示与标签语义表示之间的匹配函数。显然，第二类建模方式更适合零样本预测和时间演进场景，也是近年来零样本预测与多模态预训练研究重点发展的方向。
-
-随着文本语义建模和多模态表示学习的发展，越来越多的研究开始将蛋白质功能预测重新定义为“蛋白质—功能标签”匹配问题，而不仅仅是对固定输出维度进行分类。设$P$表示蛋白质输入，$g_c$表示第$c$个GO术语的文本定义或语义表示，则模型可以直接学习二者之间的匹配分数：
+给定训练集$\mathcal{D} = \{(P_i, \mathbf{y}_i)\}_{i=1}^{N}$，学习映射函数$f_\theta: \mathcal{X} \to [0,1]^C$，通过最小化多标签损失函数优化参数：
 \begin{equation}
-s(P, g_c) = p(y=1 \mid P, g_c).
+\mathcal{L}(\theta) = -\sum_{i=1}^{N}\sum_{c=1}^{C}\left[y_{ic}\log f_\theta(P_i)_c + (1-y_{ic})\log(1-f_\theta(P_i)_c)\right]
 \end{equation}
-这种建模方式能够自然支持开放标签空间推理：即使某个GO术语在训练阶段从未出现过，只要其文本定义可用，模型就有机会依据语义相似性为其生成预测结果。这一思想构成了零样本蛋白质功能预测和本文第三章方法设计的基本出发点。
 
-进一步地，在广义零样本场景下，通常将标签空间划分为已见标签集合$\mathcal{G}_s$与未见标签集合$\mathcal{G}_u$，其中$\mathcal{G}_s \cap \mathcal{G}_u = \varnothing$。模型需要同时在$\mathcal{G}_s$和$\mathcal{G}_u$上完成预测，而不仅仅在未见标签子集上单独推理。这种设定比“纯零样本”更接近真实应用环境，因为真实数据库中已知标签和新增标签总是同时存在。对本文而言，这也意味着所提出的方法既要在已见标签上维持有监督预测性能，又要对新增或稀有术语表现出足够的泛化能力。
+值得注意的是，GO标签满足真实路径规则（True Path Rule）：若一个蛋白质被标注了某个GO术语，则按照本体层级关系，它也应被视为具有该术语所有祖先节点所代表的更一般功能。这意味着训练数据和评估标签通常需要进行向上传播，以避免标签不一致问题。同时，这也要求模型在预测时不仅要判断单一标签是否成立，还要兼顾标签之间的层级一致性。
 
-从输入数据形态看，蛋白质功能预测也已经从单一序列输入逐步扩展为多模态建模问题。传统模型多依赖蛋白质序列或PPI网络，而当前研究越来越强调整合三维结构、蛋白质域描述、GO文本定义、知识图谱和自然语言注释等异构信息。不同模态之间具有显著的互补性：序列提供进化和局部模式，结构体现空间约束，功能文本提供显式语义，本体结构提供概念层级约束，蛋白质域描述则在蛋白质侧和功能侧之间起到天然桥梁作用。如何在问题定义层面同时兼顾多标签预测、开放标签推理与多模态融合，已经成为当前蛋白质功能预测研究的重要方向。
+除封闭标签空间下的多标签分类建模外，近年来越来越多的研究将蛋白质功能预测重新定义为"蛋白质—功能标签"匹配问题。设$P$表示蛋白质输入，$g_c$表示第$c$个GO术语的文本定义或语义表示，则模型可以直接学习二者之间的匹配分数：
+\begin{equation}
+s(P, g_c) = p(y=1 \mid P, g_c)
+\end{equation}
+这种建模方式能够自然支持开放标签空间推理：即使某个GO术语在训练阶段从未出现过，只要其文本定义可用，模型就有机会依据语义相似性为其生成预测结果。在广义零样本场景下，标签空间被划分为已见标签集合$\mathcal{G}_s$与未见标签集合$\mathcal{G}_u$，其中$\mathcal{G}_s \cap \mathcal{G}_u = \varnothing$，模型需要同时在$\mathcal{G}_s$和$\mathcal{G}_u$上完成预测。这一思想构成了本文第三章方法设计的基本出发点。
 
 \subsection{蛋白质功能预测的评价指标}
 
-由于蛋白质功能预测具有多标签、类别不平衡和零样本泛化等特点，其评价指标不能简单照搬普通分类任务中的准确率。当前研究中最常用的评估方案，主要遵循CAFA（Critical Assessment of Function Annotation）挑战赛\cite{zhou2019cafa}的蛋白质中心评价协议，并结合零样本场景引入针对已见和未见标签的细化指标。
+由于蛋白质功能预测具有多标签、类别不平衡和零样本泛化等特点，其评价指标不能简单照搬普通分类任务中的准确率。当前研究中最常用的评估方案，主要遵循CAFA（Critical Assessment of Function Annotation）挑战赛\cite{zhou2019cafa}的蛋白质中心评价协议。
 
 对于任意给定阈值$t \in [0,1]$，设模型为每个蛋白质输出一组GO术语预测概率，经阈值化后得到预测标签集合$\hat{Y}_i(t)$，真实标签集合记为$Y_i$。在蛋白质中心评价下，可分别定义平均精确率和平均召回率为：
 \begin{equation}
-\text{Pr}(t)=\frac{1}{N}\sum_{i=1}^{N}\frac{|Y_i \cap \hat{Y}_i(t)|}{|\hat{Y}_i(t)|},
+\text{Pr}(t)=\frac{1}{N}\sum_{i=1}^{N}\frac{|Y_i \cap \hat{Y}_i(t)|}{|\hat{Y}_i(t)|}
 \end{equation}
 \begin{equation}
-\text{Rc}(t)=\frac{1}{N}\sum_{i=1}^{N}\frac{|Y_i \cap \hat{Y}_i(t)|}{|Y_i|}.
+\text{Rc}(t)=\frac{1}{N}\sum_{i=1}^{N}\frac{|Y_i \cap \hat{Y}_i(t)|}{|Y_i|}
 \end{equation}
 在此基础上，蛋白质功能预测中最常用的指标之一是$F_{\max}$，即在所有阈值下F1分数的最大值：
 \begin{equation}
-F_{\max} = \max_t \frac{2 \cdot \text{Pr}(t) \cdot \text{Rc}(t)}{\text{Pr}(t) + \text{Rc}(t)}.
+F_{\max} = \max_t \frac{2 \cdot \text{Pr}(t) \cdot \text{Rc}(t)}{\text{Pr}(t) + \text{Rc}(t)}
 \end{equation}
 $F_{\max}$能够综合反映模型在精确率与召回率之间的平衡能力，因此长期作为CAFA等标准评测中的核心指标。
 
-另一项常用指标是AUPR（Area Under the Precision-Recall Curve），即精确率—召回率曲线下面积。与阈值依赖的$F_{\max}$不同，AUPR是阈值无关指标，能够从整体上衡量模型在不同阈值下的排序和区分能力。由于蛋白质功能预测中正负样本比例往往高度失衡，AUPR通常比AUROC更能反映模型的真实性能，尤其适合评估稀有功能类别和长尾标签上的表现。因此，在近年来的蛋白质功能预测研究中，AUPR已成为与$F_{\max}$并列的重要指标。
+另一项常用指标是AUPR（Area Under the Precision-Recall Curve），即精确率—召回率曲线下面积。与阈值依赖的$F_{\max}$不同，AUPR是阈值无关指标，能够从整体上衡量模型在不同阈值下的排序和区分能力。由于蛋白质功能预测中正负样本比例往往高度失衡，AUPR通常比AUROC更能反映模型的真实性能，尤其适合评估稀有功能类别和长尾标签上的表现。
 
-除蛋白质中心评价外，文献中还存在术语中心（term-centric）评价视角，即分别考察每一个GO术语在所有蛋白质样本上的区分能力，再对术语层面的结果进行统计汇总。术语中心指标更适合分析某些具体功能类别的识别效果，但当研究重点在于比较模型对单个蛋白质的整体注释质量时，蛋白质中心指标更符合实际需求。因此，CAFA及后续大量工作仍以蛋白质中心指标作为主报告口径。本文后续实验也遵循这一原则，以保证与已有研究的可比性。
-
-对于零样本预测任务，仅依赖整体AUPR或$F_{\max}$还不足以刻画模型的泛化能力。为此，研究者通常将测试阶段的标签划分为“已见标签”（Seen Labels）与“未见标签”（Unseen Labels），分别计算Seen AUPR和Unseen AUPR。Seen AUPR反映模型在训练中出现过的功能术语上的识别能力，Unseen AUPR则反映模型对训练阶段从未见过的新功能术语的推理能力。显然，一个真正具有开放语义泛化能力的模型，不应只在Seen标签上维持高性能，而应同时在Unseen标签上给出有竞争力的结果。
-
-为了综合衡量模型在已见和未见标签上的平衡表现，许多零样本研究进一步采用Seen AUPR与Unseen AUPR的调和均值：
+对于零样本预测任务，仅依赖整体AUPR或$F_{\max}$还不足以刻画模型的泛化能力。为此，研究者通常将测试阶段的标签划分为"已见标签"（Seen Labels）与"未见标签"（Unseen Labels），分别计算Seen AUPR和Unseen AUPR。为综合衡量模型在已见和未见标签上的平衡表现，许多零样本研究进一步采用调和均值：
 \begin{equation}
-H = \frac{2 \times \text{Seen AUPR} \times \text{Unseen AUPR}}{\text{Seen AUPR} + \text{Unseen AUPR}}.
+H = \frac{2 \times \text{Seen AUPR} \times \text{Unseen AUPR}}{\text{Seen AUPR} + \text{Unseen AUPR}}
 \end{equation}
 当模型只偏向已见标签而忽视未见标签时，$H$值会受到明显抑制；只有当模型在两类标签上都取得较好表现时，$H$值才会较高。因此，$H$指标在广义零样本功能预测场景中具有重要意义，也是本文第三章实验部分的主要评价指标之一。
 
-此外，评价指标的选择还会受到层级结构和任务目标的影响。由于GO标签满足真实路径规则，因此一个模型即使预测到了语义上相关但层级稍有偏差的父节点或子节点，也不应被与完全无关的错误等同看待。正因如此，一些研究尝试引入语义距离、层级一致性或时间演进评估等分析手段，以更细致地考察模型是否真正学习了功能语义而不仅是标签共现统计规律。对于基于GO文本定义的开放标签模型，研究者还常关注跨版本GO本体上的表现变化，以验证模型面对新增术语时是否具备稳定迁移能力。这些趋势说明，评价指标体系本身也在随着蛋白质功能预测任务的开放化和多模态化而不断演进。
+\section{表征学习基础技术}
 
-\section{零样本预测相关研究}
+表征学习旨在从原始数据中自动学习有效的特征表示，是本文方法的核心技术基础。本节首先介绍作为深度序列建模基础的Transformer架构，随后介绍基于该架构的ESM-2蛋白质语言模型和文本语义嵌入技术。
 
-零样本预测（Zero-shot Prediction）是指模型在训练阶段从未见过某些目标标签的正样本，但在测试阶段仍能够根据标签语义、标签结构或其他先验知识对这些标签进行有效预测。在蛋白质功能预测任务中，零样本问题具有天然现实意义：一方面，GO本体持续扩展，新功能术语不断出现；另一方面，大量稀有功能标签在现有训练集中几乎没有或完全没有标注样本。换言之，零样本预测并非人为附加的困难设定，而是自动功能注释系统在真实应用中必须面对的问题。
+\subsection{Transformer架构}
 
-早期蛋白质功能预测方法主要建立在同源比对和封闭标签分类基础上，通常只能在训练集中出现过的标签范围内进行预测，因此很难直接支持零样本推理。随着本体建模和知识表示学习的发展，研究者开始尝试利用GO术语之间的逻辑关系和层级结构，为未见标签提供额外先验。DeepGOZero\cite{kulmanov2022deepgozero}是这一方向中的代表性工作。该方法通过EL Embedding将GO公理映射到几何空间中，使模型能够利用本体逻辑约束推断训练集中未出现过的功能术语。其核心贡献在于证明：即使某一标签没有直接训练样本，只要其与其他术语之间存在可利用的本体结构关系，模型仍有可能借助逻辑推理进行预测。
+Transformer\cite{vaswani2017attention}是一种完全基于注意力机制的序列建模架构，自提出以来已成为自然语言处理和蛋白质表示学习领域的核心基础。与传统的循环神经网络（RNN）不同，Transformer通过自注意力机制实现了对序列中任意位置之间依赖关系的直接建模，有效解决了长距离依赖问题，其整体架构如图~\ref{fig:transformer}所示。
 
-在DeepGOZero的基础上，后续研究进一步强化了标签空间结构的建模能力。PO2GO\cite{li2024partial}利用偏序嵌入方式刻画GO术语之间的层级依赖，通过更符合有向无环图结构的表示空间设计增强了对标签语义关系的建模。DeepGO-SE\cite{kulmanov2024protein}则在本体约束基础上引入预训练蛋白质语言模型和神经符号推理机制，将功能预测建模为蛋白质表示与术语语义空间之间的近似蕴涵判断。与仅使用逻辑公理的方法相比，DeepGO-SE在融合序列预训练表示后具有更强的表达能力，体现出“本体结构+预训练表示”联合建模的优势。
-
-从方法论上看，基于本体结构的零样本预测路线具有较强可解释性，因为其推理依据直接来自GO术语间的逻辑关系和层级约束。然而，这类方法也存在明显局限。首先，本体逻辑公理的覆盖范围有限，无法完整表达术语文本定义中的细粒度语义差异。其次，本体约束通常更擅长处理标签之间的关系，却未必能够充分增强蛋白质侧表示能力。换言之，仅有“懂标签”的能力，并不保证模型“懂蛋白质”。因此，后续研究逐渐开始将零样本问题与预训练表示学习、文本语义建模和多模态融合相结合。
-
-除了依赖本体逻辑和层级结构的路线，文本语义建模为零样本蛋白质功能预测提供了新的解决思路。该思路的基本假设是：即使某个GO术语在训练中未出现过，只要模型能够理解其文本定义，并将该定义与蛋白质表示映射到同一语义空间，就能够通过语义匹配完成预测。DeepText2GO\cite{you2018deeptext2go}较早表明了文本语义在功能预测中的价值，它通过深层文本表示增强传统功能分类器的表现，为后续更彻底的开放语义建模提供了启发。OntoProtein\cite{zhang2022ontoprotein}进一步将GO结构和文本信息纳入蛋白质预训练过程，借助知识图谱和知识感知负采样联合学习蛋白质与GO概念表示，说明本体知识可以在预训练阶段就参与蛋白质表征构建。
-
-在序列—文本联合学习方面，ProtST\cite{xu2023protst}是近年来具有代表性的工作。该方法通过联合建模蛋白质序列和生物医学文本，设计单模态掩码预测、多模态表示对齐和多模态掩码预测等任务，使蛋白质语言模型在保留原有序列建模能力的同时获得更强的功能语义理解能力。ProtST不仅支持传统下游分类任务，也支持基于文本的零样本分类和蛋白质检索，这表明文本语义不再只是辅助解释，而可以直接作为零样本推断的核心支撑。
-
-大语言模型的发展进一步推动了零样本功能预测研究的进展。ProtNote\cite{char2025protnote}尝试将蛋白质序列与文本化功能描述直接对齐，从而实现对未见功能术语的开放标签预测。该类方法的重要启发在于：当功能标签不再被视为离散编号，而是被表示为具有自然语言语义的描述对象时，模型便具备了跨标签迁移和开放空间泛化的可能性。此外，生成式模型和匹配式模型的边界也正在变得模糊：前者越来越强调通过语义表示支持未见标签预测，后者也越来越关注更自然的功能表达和标签语义解释。
-
-若从研究脉络梳理，现有零样本功能预测研究大致可以分为三个阶段。第一阶段以本体逻辑和层级约束为核心，重点解决“训练集未见标签是否可以借助GO结构被推断”的问题；第二阶段开始引入预训练蛋白质表示和知识图谱嵌入，尝试同时提升蛋白质侧和标签侧的表达能力；第三阶段则更强调文本语义和跨模态对齐，将GO术语、蛋白质域描述及自然语言知识视为零样本推理的核心资源。可以看出，零样本研究正逐步从“规则辅助预测”转向“语义驱动预测”。
-
-总体来看，现有零样本预测研究大致形成了三条技术路线：第一类是利用GO逻辑公理和层级结构开展基于本体约束的推理；第二类是通过预训练蛋白质表示与本体嵌入的联合建模，增强模型对标签语义的理解；第三类是借助文本描述和跨模态对齐，将功能预测从封闭分类提升为开放语义匹配。三类方法分别从结构知识、预训练表示和文本语义三个层面推进了零样本功能预测的发展。
-
-但从当前研究结果看，零样本蛋白质功能预测仍面临若干关键挑战。首先，仅依赖本体逻辑约束往往受限于GO公理覆盖范围，难以充分捕捉术语定义中的细粒度语义差异。其次，仅依赖文本定义进行开放标签预测时，若蛋白质侧表示不够强，模型容易出现“懂标签、不懂蛋白质”的问题。再次，现实场景中的零样本往往同时伴随非同源序列、标签稀疏和模态缺失，这要求模型不仅能理解未见标签，还能在蛋白质表征侧具有足够鲁棒性。最后，在广义零样本场景下，模型常常会偏向已见标签，从而造成Seen性能较高但Unseen性能不足的失衡现象。正是基于这些问题，本文第三章进一步引入蛋白质域描述和GO定义的统一语义编码，并通过多模态融合机制提升零样本功能预测能力。
-
-\section{多模态预训练相关研究}
-
-多模态预训练（Multimodal Pretraining）是近年来蛋白质表示学习和功能预测研究中的重要趋势，其核心目标是在大规模弱监督或自监督数据上联合学习多种模态之间的共享表示，从而使模型在下游任务中具备更强的迁移能力、泛化能力和语义理解能力。对于蛋白质功能预测而言，多模态预训练尤其具有吸引力，因为蛋白质功能本身就是由序列、结构、相互作用网络、功能文本和知识本体等多方面因素共同决定的，单一模态很难完整刻画其复杂性。
-
-多模态预训练的出现，首先建立在蛋白质语言模型快速发展的基础之上。以ESM-2\cite{lin2023evolutionary}为代表的大规模蛋白质语言模型通过掩码语言建模在海量序列数据上进行自监督训练，学习到蕴含进化信息和潜在结构偏好的蛋白质表示。虽然这类模型本质上属于单模态预训练，但它们为后续多模态研究提供了强大的序列编码器基础。与此同时，AlphaFold2\cite{jumper2021highly}的突破使高质量结构预测可以大规模获得，结构模态得以更广泛地参与蛋白质表示学习和功能建模。序列预训练与结构预测能力的提升，共同为多模态预训练奠定了现实基础。
-
-从研究路线看，多模态预训练首先体现在多源属性的联合建模上。CFAGO\cite{wu2023cfago}采用预训练—微调两阶段策略，将PPI网络和蛋白质属性信息进行交叉融合，并通过注意力机制实现更有效的多模态交互。该方法的重要意义在于表明：预训练不仅适用于单纯的序列表征学习，同样可以用于网络信息与属性信息的联合建模，而且预训练阶段学习到的共享表示对下游功能预测具有明显促进作用。
-
-在更系统的多模态统一预训练框架方面，MASSA\cite{hu2023multimodal}构建了整合蛋白质序列、结构和功能注释的多模态预训练体系，通过设计多任务训练目标，使模型能够从不同模态中共同学习蛋白质的生物学属性。与传统在单一任务上直接监督训练的方法相比，MASSA更强调预训练阶段跨模态共享知识的形成，体现出“先学表示、后做任务”的基础模型思路。对于蛋白质功能预测而言，这类方法的价值在于：下游预测性能不再仅依赖目标数据集规模，而可以从更大范围的多模态知识中获益。
-
-在结构感知和知识蒸馏方向，S-PLM\cite{wang2025splm}提出了具有代表性的技术路线。该方法在蛋白质语言模型内部注入轻量级适配器模块，并利用对比学习将蛋白质三维结构信息蒸馏到序列编码器中，使模型在下游推理时仅凭序列输入即可产生具有结构感知能力的表示。与直接将结构作为额外输入拼接到模型不同，S-PLM更强调通过预训练将结构知识“内化”到序列模型内部，这对于兼顾模型性能与部署效率具有重要意义。该思路对本文第四章的设计具有直接启发，即蒸馏目标不仅可以是结构信息，也可以扩展为蛋白质域功能语义。
-
-文本模态和知识本体的引入，则进一步丰富了多模态预训练的研究图景。OntoProtein\cite{zhang2022ontoprotein}构建蛋白质—GO知识图谱，将GO嵌入和蛋白质预训练统一到同一框架中，并通过知识感知负采样实现蛋白质表示与本体知识的联合优化。这说明多模态预训练并不局限于“序列+结构”的物理模态组合，也可以扩展到“序列+知识图谱+文本语义”的知识增强型组合。ProtST\cite{xu2023protst}则通过联合建模蛋白质序列和生物医学文本，在对齐和重建任务中同时利用两种模态的信息，展示了文本驱动的蛋白质预训练能够增强模型对功能语义和下游任务的适应能力。
-
-近年来，文本监督进一步从“辅助模态”发展为“核心训练信号”。PAIR\cite{duan2025pair}利用UniProt中的19类文本注释对蛋白质模型进行微调，显著增强了蛋白质表示的预测能力，并在部分功能相关任务上超越了BLAST。这表明，文本注释不仅可以用来解释蛋白质功能，还可以作为高价值监督信号改善蛋白质表示学习质量。相较于传统只关注序列恢复或结构拟合的预训练目标，这类工作更直接地将功能语义引入模型训练之中，从而缩短了预训练目标与下游功能预测目标之间的距离。
-
-在生成式多模态方向，Prot2Text\cite{abdine2024prot2text}提出将蛋白质功能预测从传统标签分类任务扩展为自由文本生成功能描述，通过图神经网络与Transformer联合建模蛋白质序列、结构和文本信息，使模型能够以自然语言形式输出更细粒度的功能说明。Prot2Text-V2\cite{fei2025prot2textv2}进一步引入多模态对比对齐机制，并结合更强的蛋白质语言模型和大语言模型解码器，在低同源性设定下展示出更好的泛化能力。与基于固定标签的分类框架相比，这类生成式方法更能体现多模态预训练与开放语义推理的结合趋势，也说明蛋白质功能预测正在从“判定是否属于某标签”逐步走向“生成对功能的语义化描述”。
-
-如果从技术形态归纳，多模态预训练相关研究大致形成了四类代表性路线。第一类是\textbf{多源特征联合预训练}，重点在于把网络、结构和属性信息引入统一编码框架，代表方法如CFAGO和MASSA。第二类是\textbf{跨模态对比学习与知识蒸馏}，核心目标是在共享空间中对齐不同模态，并将附加模态知识压缩到更易部署的主干编码器中，代表方法如S-PLM。第三类是\textbf{知识增强与文本驱动预训练}，强调将GO定义、知识图谱、生物医学文本和UniProt注释作为预训练资源，代表方法如OntoProtein、ProtST和PAIR。第四类是\textbf{生成式多模态建模}，关注从判别式标签预测走向自由文本描述生成，代表方法如Prot2Text及其后续版本。四类路线虽然侧重点不同，但都在尝试解决同一个根本问题：如何让蛋白质编码器获得比纯序列更丰富、更接近生物学语义的知识。
-
-为更直观地概括相关工作的主要特点，表~\ref{tab:related_methods_compare}对零样本预测与多模态预训练方向中的代表性方法进行了总结。
-
-\begin{table}[htbp]
+\begin{figure}[htbp]
 \centering
-\small
-\caption{零样本预测与多模态预训练相关代表性方法比较}
-\label{tab:related_methods_compare}
-\begin{tabular}{|p{2.4cm}|p{2.8cm}|p{4.2cm}|p{4.1cm}|}
-\hline
-方法 & 主要输入模态 & 核心思想 & 主要局限 \\
-\hline
-DeepGOZero\cite{kulmanov2022deepgozero} & 序列、本体公理 & 利用EL Embedding编码GO逻辑公理，支持未见标签推理 & 对术语文本语义利用不足，蛋白质侧表示能力有限 \\
-\hline
-DeepGO-SE\cite{kulmanov2024protein} & 序列、本体结构 & 结合预训练蛋白质表示与神经符号推理增强零样本预测 & 仍主要依赖本体结构先验，对多模态语义利用有限 \\
-\hline
-OntoProtein\cite{zhang2022ontoprotein} & 序列、GO文本、知识图谱 & 通过知识图谱和知识感知负采样联合预训练蛋白质与GO表示 & 更偏知识增强预训练，面向下游功能预测仍需额外适配 \\
-\hline
-ProtST\cite{xu2023protst} & 序列、生物医学文本 & 通过序列—文本对齐与掩码任务学习可迁移的多模态表示 & 与具体功能预测场景之间仍存在任务适配差异 \\
-\hline
-MASSA\cite{hu2023multimodal} & 序列、结构、功能注释 & 多任务多模态预训练，提升多种下游任务迁移性能 & 框架较复杂，对多模态数据完整性要求较高 \\
-\hline
-S-PLM\cite{wang2025splm} & 序列、结构 & 通过适配器和对比学习将结构知识蒸馏到序列编码器 & 蒸馏目标主要为结构信息，对功能语义挖掘不足 \\
-\hline
-Prot2Text-V2\cite{fei2025prot2textv2} & 序列、文本 & 通过多模态对比对齐和生成式建模生成功能描述 & 生成式框架开销较大，评价口径与传统GO分类不完全一致 \\
-\hline
-\end{tabular}
-\end{table}
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, fill=blue!8, minimum width=3.2cm, minimum height=0.7cm, align=center, rounded corners=2pt, font=\small},
+    addnorm/.style={rectangle, draw, fill=orange!12, minimum width=3.2cm, minimum height=0.5cm, align=center, rounded corners=2pt, font=\small},
+    arrow/.style={->, >=stealth, thick},
+    brace/.style={decorate, decoration={brace, amplitude=5pt}},
+]
+% Input
+\node[font=\small] (input) at (0, 0) {输入序列 $\mathbf{X} \in \mathbb{R}^{L\times d}$};
 
-总体来看，当前多模态预训练相关研究推动蛋白质功能预测从特定数据集上的监督学习，逐步演进为面向开放知识、开放标签和多模态融合的基础模型研究。与师兄师姐论文中“先定义问题、再分别归纳相关路线”的写法类似，这些工作也表明第二章不应仅停留在工具层面的介绍，而应围绕“哪些研究思路真正服务于本文问题”进行综述。对本文而言，多模态预训练的价值并不只体现在提高常规分类指标，更在于为开放语义空间中的蛋白质功能推理提供更强的蛋白质表示基础。
+% Multi-Head Self-Attention
+\node[block] (mha) at (0, 1.2) {多头自注意力 (MHA)};
 
-尽管多模态预训练已取得显著进展，但现有研究仍存在一些共性不足。其一，不少方法虽然引入多种模态，却仍以特征拼接或浅层交互为主，尚未充分利用不同模态之间的深层互补关系。其二，许多方法高度依赖结构或网络等附加模态，而在实际应用中这些模态可能不完整或成本较高，影响模型的可用性。其三，现有方法对蛋白质域描述、GO文本定义等功能语义知识的利用仍不充分，尤其缺乏将这些知识稳定蒸馏到序列编码器内部的有效机制。其四，多模态预训练与零样本预测虽然在研究目标上高度相关，但很多工作仍将二者分开处理，未能形成围绕开放语义功能预测的统一建模框架。基于这些不足，本文第四章进一步探索基于域感知适配器的多模态预训练方法，以增强蛋白质序列编码器对功能语义知识的吸收能力。
+% Add & Norm 1
+\node[addnorm] (an1) at (0, 2.2) {残差连接 \& 层归一化};
+
+% FFN
+\node[block] (ffn) at (0, 3.4) {前馈网络 (FFN)};
+
+% Add & Norm 2
+\node[addnorm] (an2) at (0, 4.4) {残差连接 \& 层归一化};
+
+% Output
+\node[font=\small] (output) at (0, 5.5) {输出 $\mathbf{X}'' \in \mathbb{R}^{L\times d}$};
+
+% Arrows
+\draw[arrow] (input) -- (mha);
+\draw[arrow] (mha) -- (an1);
+\draw[arrow] (an1) -- (ffn);
+\draw[arrow] (ffn) -- (an2);
+\draw[arrow] (an2) -- (output);
+
+% Residual connections
+\draw[arrow, dashed, gray] (input.east) -- ++(1.2, 0) |- (an1.east);
+\draw[arrow, dashed, gray] (an1.east) -- ++(1.2, 0) |- (an2.east);
+
+% Brace for one Transformer layer
+\draw[brace] (2.8, 0.7) -- (2.8, 4.8) node[midway, right=5pt, font=\small] {$\times N$ 层};
+
+% Detail box for MHA
+\node[rectangle, draw, fill=green!6, minimum width=4.5cm, minimum height=3.2cm, rounded corners=3pt] (mhabox) at (-5.2, 2.8) {};
+\node[font=\small\bfseries] at (-5.2, 4.1) {自注意力计算};
+\node[font=\small, align=left] at (-5.2, 3.3) {$\mathbf{Q}=\mathbf{X}\mathbf{W}_Q$, $\mathbf{K}=\mathbf{X}\mathbf{W}_K$, $\mathbf{V}=\mathbf{X}\mathbf{W}_V$};
+\node[font=\small, align=left] at (-5.2, 2.5) {$\mathrm{Attn}=\mathrm{softmax}\!\left(\frac{\mathbf{QK}^\top}{\sqrt{d_k}}\right)\mathbf{V}$};
+\node[font=\small, align=left] at (-5.2, 1.7) {$\mathrm{MHA}=\mathrm{Concat}(\mathrm{head}_1,...,\mathrm{head}_h)\mathbf{W}_O$};
+
+% Arrow from detail to MHA
+\draw[arrow, gray, dashed] (-3.0, 2.8) -- (mha.west);
+
+\end{tikzpicture}
+\caption{Transformer编码器单层结构示意图。每一层由多头自注意力子层和前馈网络子层组成，每个子层后均采用残差连接和层归一化。左侧展示了自注意力的核心计算过程。$N$层Transformer层堆叠构成完整的编码器。}
+\label{fig:transformer}
+\end{figure}
+
+Transformer的核心是多头自注意力（Multi-Head Self-Attention, MHA）机制。给定输入序列$\mathbf{X} \in \mathbb{R}^{L \times d}$（$L$为序列长度，$d$为隐藏维度），自注意力首先通过三个线性变换生成查询矩阵$\mathbf{Q}$、键矩阵$\mathbf{K}$和值矩阵$\mathbf{V}$：
+\begin{equation}
+\mathbf{Q} = \mathbf{X}\mathbf{W}_Q, \quad \mathbf{K} = \mathbf{X}\mathbf{W}_K, \quad \mathbf{V} = \mathbf{X}\mathbf{W}_V
+\end{equation}
+其中$\mathbf{W}_Q, \mathbf{W}_K \in \mathbb{R}^{d \times d_k}$，$\mathbf{W}_V \in \mathbb{R}^{d \times d_v}$为可学习参数。自注意力通过缩放点积计算序列中各位置之间的相关性：
+\begin{equation}
+\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{d_k}}\right)\mathbf{V}
+\end{equation}
+其中$\sqrt{d_k}$为缩放因子，用于防止点积过大导致梯度消失。
+
+多头注意力机制将输入投影到$h$个不同的子空间中并行计算注意力，然后拼接各头的输出：
+\begin{equation}
+\text{MHA}(\mathbf{X}) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)\mathbf{W}_O
+\end{equation}
+其中每个注意力头$\text{head}_i = \text{Attention}(\mathbf{Q}_i, \mathbf{K}_i, \mathbf{V}_i)$，$\mathbf{W}_O \in \mathbb{R}^{hd_v \times d}$为输出投影矩阵。多头机制使模型能够同时关注不同位置的不同表示子空间，增强了模型对复杂依赖关系的捕获能力。
+
+Transformer的每一层由多头自注意力子层和前馈网络（Feed-Forward Network, FFN）子层组成，每个子层后均采用残差连接\cite{ba2016layer}和层归一化（Layer Normalization, LN）：
+\begin{align}
+\mathbf{X}' &= \text{LN}(\mathbf{X} + \text{MHA}(\mathbf{X})) \\
+\mathbf{X}'' &= \text{LN}(\mathbf{X}' + \text{FFN}(\mathbf{X}'))
+\end{align}
+其中前馈网络由两层线性变换和激活函数组成：
+\begin{equation}
+\text{FFN}(\mathbf{x}) = \mathbf{W}_2 \cdot \sigma(\mathbf{W}_1 \cdot \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2
+\end{equation}
+$\sigma$为激活函数（如GELU\cite{hendrycks2016gaussian}）。Transformer通过堆叠多个这样的层构成深层网络，能够有效建模长距离依赖关系。
+
+\subsection{ESM-2蛋白质语言模型}
+
+蛋白质序列可以类比于自然语言中的句子：20种标准氨基酸构成"词汇表"，氨基酸序列构成"语句"。基于这一类比，蛋白质语言模型借鉴自然语言处理中的预训练范式，在海量蛋白质序列上进行自监督训练，学习蕴含进化信息和潜在结构偏好的蛋白质表示。
+
+ESM-2\cite{lin2023evolutionary}是目前最具代表性的蛋白质语言模型之一，其预训练流程如图~\ref{fig:esm2}所示。ESM-2的核心训练目标为掩码语言建模（Masked Language Modeling, MLM）：在输入序列中随机遮掩一定比例的氨基酸位置，模型通过上下文信息预测被遮掩的氨基酸。设蛋白质序列为$\mathbf{s} = (s_1, s_2, \ldots, s_L)$，遮掩位置集合为$\mathcal{M}$，则MLM的训练目标为：
+\begin{equation}
+\mathcal{L}_{\text{MLM}} = -\sum_{j \in \mathcal{M}} \log p(s_j \mid \mathbf{s}_{\setminus \mathcal{M}})
+\end{equation}
+其中$\mathbf{s}_{\setminus \mathcal{M}}$表示未被遮掩的序列部分。通过在UniRef数据库中约2.5亿条蛋白质序列上训练，ESM-2学习到的表示能够隐式编码氨基酸的共进化模式、接触关系和保守性特征。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    seqbox/.style={rectangle, draw, minimum width=0.6cm, minimum height=0.6cm, font=\small},
+    maskbox/.style={rectangle, draw, fill=red!20, minimum width=0.6cm, minimum height=0.6cm, font=\small},
+    predbox/.style={rectangle, draw, fill=green!20, minimum width=0.6cm, minimum height=0.6cm, font=\small},
+    transblock/.style={rectangle, draw, fill=blue!10, minimum width=5.5cm, minimum height=1.0cm, align=center, rounded corners=3pt, font=\small},
+    poolblock/.style={rectangle, draw, fill=purple!10, minimum width=3.5cm, minimum height=0.7cm, align=center, rounded corners=3pt, font=\small},
+    arrow/.style={->, >=stealth, thick},
+]
+% Input sequence
+\node[font=\small] at (-2.5, 0) {输入序列:};
+\foreach \x/\aa in {0/M, 1/K, 2/L, 3/V, 4/F, 5/A, 6/E, 7/D} {
+    \node[seqbox] (s\x) at (\x*0.8, 0) {\aa};
+}
+
+% Masked sequence
+\node[font=\small] at (-2.5, -1.2) {掩码后:};
+\foreach \x/\aa in {0/M, 1/K, 3/V, 5/A, 6/E, 7/D} {
+    \node[seqbox] (m\x) at (\x*0.8, -1.2) {\aa};
+}
+\node[maskbox] (m2) at (2*0.8, -1.2) {?};
+\node[maskbox] (m4) at (4*0.8, -1.2) {?};
+
+% Transformer encoder
+\node[transblock] (enc) at (2.8, -2.8) {ESM-2 Transformer编码器 (33层)};
+
+% Arrows from masked to encoder
+\draw[arrow] (2.8, -1.6) -- (enc.north);
+
+% Output embeddings
+\node[font=\small] at (-2.5, -4.4) {输出嵌入:};
+\foreach \x in {0, 1, 2, 3, 4, 5, 6, 7} {
+    \node[seqbox, fill=blue!8] (r\x) at (\x*0.8, -4.4) {$\mathbf{r}_{\the\numexpr\x+1}$};
+}
+\draw[arrow] (enc.south) -- (2.8, -3.8);
+
+% Prediction heads for masked positions
+\node[predbox] (p2) at (2*0.8, -5.7) {L};
+\node[predbox] (p4) at (4*0.8, -5.7) {F};
+\draw[arrow] (r2.south) -- (p2.north);
+\draw[arrow] (r4.south) -- (p4.north);
+\node[font=\footnotesize, gray] at (2.4, -6.3) {预测被遮掩的氨基酸};
+
+% Average pooling
+\node[poolblock] (pool) at (5.6, -5.7) {平均池化};
+\draw[arrow] (5.6, -4.8) -- (pool.north);
+\node[font=\small] (hseq) at (5.6, -6.7) {$\mathbf{h}_{seq} \in \mathbb{R}^{1280}$};
+\draw[arrow] (pool.south) -- (hseq.north);
+
+\end{tikzpicture}
+\caption{ESM-2蛋白质语言模型预训练与特征提取示意图。模型通过掩码语言建模（MLM）在大规模蛋白质序列数据上进行预训练，学习氨基酸上下文的共进化模式。预训练完成后，通过平均池化可以获得蛋白质级别的全局表示$\mathbf{h}_{seq}$。}
+\label{fig:esm2}
+\end{figure}
+
+ESM-2采用标准的Transformer编码器架构，具有多个规模变体，其中ESM2-650M包含33层Transformer层、隐藏维度为1280。给定蛋白质序列$P$，ESM-2输出每个残基位置的上下文嵌入$\mathbf{r}_j$，通过平均池化可获得蛋白质级别的全局表示：
+\begin{equation}
+\mathbf{h}_{seq} = \frac{1}{L}\sum_{j=1}^{L}\mathbf{r}_j \in \mathbb{R}^{1280}
+\end{equation}
+
+ESM-2为后续蛋白质功能预测提供了强大的序列编码器基础。在本文中，第三章使用ESM2-650M作为静态特征提取器提取蛋白质序列的进化特征，第四章则在ESM-2的Transformer层中注入适配器模块实现端到端训练。
+
+\subsection{文本语义嵌入}
+
+在蛋白质功能预测中，GO术语的名称和文本定义、蛋白质域的功能描述等文本信息蕴含丰富的语义知识。将这些文本信息编码为稠密向量表示，是实现零样本功能预测和多模态融合的关键环节。
+
+文本嵌入（Text Embedding）旨在将自然语言文本映射为固定长度的稠密向量，使得语义相近的文本在向量空间中距离较近。现代文本嵌入模型通常基于Transformer编码器架构，通过大规模文本语料的预训练获得通用的语义表示能力。给定输入文本序列$(w_1, w_2, \ldots, w_T)$，Transformer编码器输出每个token位置的上下文表示$(\mathbf{t}_1, \mathbf{t}_2, \ldots, \mathbf{t}_T)$。常用的句子级表示获取方式包括：使用特殊标记[CLS]的输出作为全局表示，或对所有token的输出进行平均池化：
+\begin{equation}
+\mathbf{e}_{text} = \frac{1}{T}\sum_{j=1}^{T}\mathbf{t}_j
+\end{equation}
+输出的文本嵌入向量可用于语义相似度计算、文本检索和跨模态对齐等下游任务。
+
+本文使用Qwen3-Embedding-4B\cite{zhang2025qwen3}作为文本编码器。Qwen3-Embedding是一种基于大语言模型的文本嵌入模型，具有40亿参数规模，在多种文本嵌入基准上表现优异。相比传统的BERT规模编码器，Qwen3-Embedding具有更强的语义理解能力，能够更准确地捕捉生物医学领域专业术语的细粒度语义差异。
+
+在本文的应用中，Qwen3-Embedding承担两种文本的编码任务。其一是GO标签语义编码：将每个GO术语的名称和定义文本（如"protein kinase activity: Catalysis of the phosphorylation of an amino acid residue..."）编码为标签语义嵌入$\mathbf{E}_{label} \in \mathbb{R}^{2560}$，使模型能够基于文本相似性泛化到未见标签，这是零样本推理的核心基础。其二是蛋白质域语义编码：将蛋白质各个域的InterPro\cite{blum2025interpro}描述文本编码为域语义嵌入$\mathbf{E}_{dom} \in \mathbb{R}^{2560}$，蛋白质域作为独立的功能和结构单元，其自然语言描述蕴含丰富的功能先验知识。
+
+\section{对比学习、知识蒸馏与参数高效微调}
+
+本节介绍对比学习、知识蒸馏和适配器等技术的基本原理，这些技术构成了本文第四章域感知适配器预训练和端到端功能预测的核心方法基础。
+
+\subsection{对比学习}
+
+对比学习（Contrastive Learning）是一种通过构造正负样本对来学习数据表示的自监督学习范式\cite{chen2020simple}。其核心思想是：在表示空间中拉近语义相似的正样本对，同时推远语义不相关的负样本对。图~\ref{fig:contrastive}展示了对比学习的基本原理。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    sample/.style={circle, draw, minimum size=0.8cm, font=\small},
+    possample/.style={circle, draw, fill=green!25, minimum size=0.8cm, font=\small},
+    negsample/.style={circle, draw, fill=red!15, minimum size=0.8cm, font=\small},
+    anchorsample/.style={circle, draw, fill=blue!25, minimum size=0.8cm, font=\small},
+    encoder/.style={rectangle, draw, fill=gray!12, minimum width=1.8cm, minimum height=0.7cm, align=center, rounded corners=2pt, font=\small},
+    arrow/.style={->, >=stealth, thick},
+    pullclose/.style={<->, >=stealth, thick, green!60!black},
+    pushaway/.style={<->, >=stealth, thick, red!60!black},
+]
+% Left side: input pairs
+\node[font=\small\bfseries] at (-4.5, 3.5) {输入空间};
+
+% Protein sequence
+\node[rectangle, draw, fill=blue!8, minimum width=2cm, minimum height=0.5cm, font=\small] (prot) at (-4.5, 2.5) {蛋白质序列};
+\node[rectangle, draw, fill=green!8, minimum width=2cm, minimum height=0.5cm, font=\small] (text_pos) at (-4.5, 1.5) {匹配域文本};
+\node[rectangle, draw, fill=red!8, minimum width=2cm, minimum height=0.5cm, font=\small] (text_neg) at (-4.5, 0.3) {不匹配域文本};
+
+% Encoders
+\node[encoder] (enc_a) at (-1.2, 2.5) {序列编码器};
+\node[encoder] (enc_b) at (-1.2, 1.0) {文本编码器};
+
+\draw[arrow] (prot) -- (enc_a);
+\draw[arrow] (text_pos) -- (enc_b);
+\draw[arrow, gray] (text_neg.east) -- ++(0.8,0) |- (enc_b.south west);
+
+% Right side: representation space
+\node[font=\small\bfseries] at (3.5, 3.5) {表示空间};
+
+% Draw a circle region
+\draw[gray, dashed] (3.5, 1.5) circle (2.0cm);
+
+% Anchor point
+\node[anchorsample] (anc) at (3.5, 1.5) {$\mathbf{z}^a_i$};
+
+% Positive (close)
+\node[possample] (p1) at (4.2, 2.3) {$\mathbf{z}^b_i$};
+
+% Negatives (far)
+\node[negsample] (n1) at (1.8, 0.7) {$\mathbf{z}^b_j$};
+\node[negsample] (n2) at (5.0, 0.3) {$\mathbf{z}^b_k$};
+\node[negsample] (n3) at (2.5, 2.8) {$\mathbf{z}^b_l$};
+
+% Pull close arrow
+\draw[pullclose] (anc) -- (p1) node[midway, right, font=\footnotesize, green!60!black] {拉近};
+
+% Push away arrows
+\draw[pushaway] (anc) -- (n1) node[midway, below, font=\footnotesize, red!60!black] {推远};
+\draw[pushaway] (anc) -- (n2);
+
+% Connection from encoders to space
+\draw[arrow, dashed, gray] (enc_a.east) -- ++(0.8,0) |- (anc.west);
+\draw[arrow, dashed, gray] (enc_b.east) -- ++(0.4,0) |- (p1.west);
+
+\end{tikzpicture}
+\caption{对比学习原理示意图。在表示空间中，对比学习通过InfoNCE损失拉近语义匹配的正样本对（如蛋白质序列与其匹配的域文本描述），同时推远不匹配的负样本对，从而实现跨模态语义对齐。}
+\label{fig:contrastive}
+\end{figure}
+
+对比学习中最具代表性的损失函数是InfoNCE\cite{oord2018representation}损失。给定一批$B$个样本，每个样本$i$对应两种模态的表示$\mathbf{z}_i^a$和$\mathbf{z}_i^b$，同一样本的两种模态表示构成正样本对，不同样本的表示构成负样本对。InfoNCE损失定义为：
+\begin{equation}
+\mathcal{L}_{\text{InfoNCE}} = -\frac{1}{B}\sum_{i=1}^{B}\log\frac{\exp(\text{sim}(\mathbf{z}_i^a, \mathbf{z}_i^b)/\tau)}{\sum_{j=1}^{B}\exp(\text{sim}(\mathbf{z}_i^a, \mathbf{z}_j^b)/\tau)}
+\end{equation}
+其中$\text{sim}(\cdot, \cdot)$为余弦相似度，$\tau$为温度超参数。温度参数控制分布的集中程度：较小的$\tau$使模型更关注困难负样本，较大的$\tau$则使分布更加平滑。
+
+在跨模态学习中，对比学习可以有效地将不同模态的表示对齐到共享语义空间中。对于蛋白质功能预测任务，这种对齐机制使得蛋白质序列表示能够与功能文本描述在同一空间中进行语义匹配。本文第四章利用双向InfoNCE对比损失，将蛋白质序列表示与域文本嵌入进行对齐，实现域语义信息向序列编码器的蒸馏。
+
+\subsection{知识蒸馏}
+
+知识蒸馏（Knowledge Distillation）\cite{hinton2015distilling}最初被提出用于模型压缩，即将大型教师模型中的知识转移到小型学生模型中。其基本思想是：让学生模型不仅学习真实标签，还学习教师模型输出的软标签分布，从而获得教师模型中蕴含的更丰富的知识。图~\ref{fig:distill_adapter}（左）展示了知识蒸馏的基本框架。
+
+在经典的知识蒸馏框架中，设教师模型的输出logits为$\mathbf{z}_T$，学生模型的输出logits为$\mathbf{z}_S$，则蒸馏损失通过KL散度衡量软标签分布之间的差异：
+\begin{equation}
+\mathcal{L}_{\text{KD}} = T^2 \cdot \text{KL}\left(\text{softmax}\left(\frac{\mathbf{z}_T}{T}\right) \middle\| \text{softmax}\left(\frac{\mathbf{z}_S}{T}\right)\right)
+\end{equation}
+其中$T$为蒸馏温度，较高的温度使输出分布更加平滑，有助于传递更多类间关系信息。
+
+在更广义的框架下，知识蒸馏可以理解为一种跨模态或跨表示的知识转移机制：将某种信息源中蕴含的知识"内化"到目标模型的参数中，使目标模型在推理时无需显式访问原始信息源，仍能从其参数中恢复相关知识。这种思想在蛋白质表示学习领域已有成功应用，如S-PLM\cite{wang2025splm}通过对比学习将蛋白质三维结构信息蒸馏到序列编码器的适配器参数中，使模型仅凭序列输入即可产生包含结构感知的表示。
+
+在本文第四章中，知识蒸馏的思想被进一步拓展：蒸馏目标从三维结构信息替换为蛋白质域的功能语义信息。通过对比学习预训练，域文本描述中蕴含的功能先验知识被蒸馏至ESM-2适配器的参数中。预训练完成后，序列编码器即使不显式输入域信息，也能在其输出表示中隐式包含域的功能语义先验。
+
+\subsection{适配器与参数高效微调}
+
+大规模预训练模型（如ESM-2）通常包含数亿甚至数十亿参数。在将其应用于特定下游任务时，全参数微调不仅计算成本高昂，还容易导致灾难性遗忘。参数高效微调（Parameter-Efficient Fine-Tuning, PEFT）通过仅训练少量额外参数来适配下游任务，在保持预训练知识的同时实现高效迁移。
+
+适配器（Adapter）\cite{houlsby2019adapter}是参数高效微调中最具代表性的方法之一。其基本思想是在预训练模型的每一层中插入轻量级的瓶颈结构模块，冻结预训练模型的原始参数，仅训练新插入的适配器参数。如图~\ref{fig:distill_adapter}（右）所示，标准的适配器模块采用瓶颈结构，由降维线性层、非线性激活函数和升维线性层组成，并通过残差连接保留原始信息流：
+\begin{equation}
+\text{Adapter}(\mathbf{x}) = \mathbf{W}_{up} \cdot \sigma(\mathbf{W}_{down} \cdot \mathbf{x}) + \mathbf{x}
+\end{equation}
+其中$\mathbf{W}_{down} \in \mathbb{R}^{d_b \times d}$为降维矩阵，$\mathbf{W}_{up} \in \mathbb{R}^{d \times d_b}$为升维矩阵，$d$为隐藏维度，$d_b \ll d$为瓶颈维度，$\sigma$为激活函数。适配器模块通常被注入Transformer层的自注意力输出之后和前馈网络输出之后两个位置。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, fill=blue!8, minimum width=2.2cm, minimum height=0.6cm, align=center, rounded corners=2pt, font=\small},
+    frozenblock/.style={rectangle, draw, fill=gray!15, minimum width=2.2cm, minimum height=0.6cm, align=center, rounded corners=2pt, font=\small},
+    adapterblock/.style={rectangle, draw, fill=orange!15, minimum width=1.8cm, minimum height=0.6cm, align=center, rounded corners=2pt, font=\small},
+    arrow/.style={->, >=stealth, thick},
+    dottedbox/.style={rectangle, draw, dashed, rounded corners=5pt},
+]
+
+% === Left: Knowledge Distillation ===
+\node[font=\small\bfseries] at (-4.5, 5.5) {知识蒸馏};
+
+% Teacher model
+\node[block, fill=red!10] (teacher) at (-6.0, 4.2) {教师模型};
+\node[font=\small] (tsoft) at (-6.0, 3.2) {软标签 $p_T$};
+\draw[arrow] (teacher) -- (tsoft);
+
+% Student model
+\node[block, fill=green!10] (student) at (-3.0, 4.2) {学生模型};
+\node[font=\small] (ssoft) at (-3.0, 3.2) {预测 $p_S$};
+\draw[arrow] (student) -- (ssoft);
+
+% KL divergence
+\node[block, fill=yellow!15, minimum width=3.0cm] (kl) at (-4.5, 2.0) {$\mathcal{L}_{\text{KD}} = \text{KL}(p_T \| p_S)$};
+\draw[arrow] (tsoft) -- (kl);
+\draw[arrow] (ssoft) -- (kl);
+
+% Input
+\node[font=\small] (input_kd) at (-4.5, 5.0) {输入数据};
+\draw[arrow] (input_kd) -| (teacher);
+\draw[arrow] (input_kd) -| (student);
+
+% === Right: Adapter Architecture ===
+\node[font=\small\bfseries] at (4.0, 5.5) {适配器瓶颈结构};
+
+% Input
+\node[font=\small] (adp_in) at (4.0, 4.8) {输入 $\mathbf{x} \in \mathbb{R}^d$};
+
+% Down projection
+\node[adapterblock] (down) at (4.0, 3.8) {降维 $\mathbf{W}_{down}$};
+\node[font=\footnotesize, gray] at (6.2, 3.8) {$d \to d_b$};
+
+% Activation
+\node[adapterblock, fill=green!12] (act) at (4.0, 2.8) {激活函数 $\sigma$};
+
+% Up projection
+\node[adapterblock] (up) at (4.0, 1.8) {升维 $\mathbf{W}_{up}$};
+\node[font=\footnotesize, gray] at (6.2, 1.8) {$d_b \to d$};
+
+% Output
+\node[font=\small] (adp_out) at (4.0, 0.5) {输出 $\in \mathbb{R}^d$};
+
+% Arrows
+\draw[arrow] (adp_in) -- (down);
+\draw[arrow] (down) -- (act);
+\draw[arrow] (act) -- (up);
+\draw[arrow] (up) -- (adp_out);
+
+% Residual connection
+\draw[arrow, dashed, gray] (adp_in.east) -- ++(1.0,0) |- (adp_out.east);
+\node[font=\footnotesize, gray] at (5.7, 2.6) {残差连接};
+
+% Dashed box around adapter
+\node[dottedbox, fit=(down)(act)(up), inner sep=5pt, orange!60] {};
+\node[font=\footnotesize, orange!80!black] at (4.0, 4.3) {瓶颈维度 $d_b \ll d$};
+
+\end{tikzpicture}
+\caption{知识蒸馏与适配器结构示意图。左：知识蒸馏框架，教师模型的软标签通过KL散度指导学生模型学习。右：适配器瓶颈结构，通过降维—激活—升维和残差连接实现轻量级的参数高效微调。}
+\label{fig:distill_adapter}
+\end{figure}
+
+适配器的参数量远小于原始模型。以ESM2-650M为例，其隐藏维度$d=1280$，若设瓶颈维度$d_b=640$，则每个适配器模块的参数量约为$2 \times d \times d_b \approx 1.6 \times 10^6$，仅占原始模型参数量的极小比例。通过这种设计，适配器能够在保留预训练模型通用表示能力的同时，以较低的计算和存储成本实现任务特定的适配。
+
+在蛋白质功能预测领域，适配器技术已经开始被用于增强蛋白质语言模型的下游迁移能力。S-PLM\cite{wang2025splm}在ESM-2的Transformer层中注入基于残差多层感知机的适配器模块，通过对比学习将蛋白质三维结构信息蒸馏到适配器参数中，使序列编码器仅凭序列输入即可产生包含结构感知的表示。这一工作证明了适配器不仅可以用于任务适配，还可以作为跨模态知识蒸馏的载体。
+
+在本文第四章中，适配器技术被进一步拓展为双适配器策略：第一组适配器通过对比学习预训练编码域语义先验，预训练后冻结其参数；第二组适配器在端到端训练中学习任务特定的适配信息。两组适配器并行运行、输出取平均，实现了预训练知识保留与下游任务优化的有效平衡。
 
 \section{本章小结}
 
-本章围绕本文研究主题，对蛋白质功能预测的相关研究进行了概述。首先，从任务层面对蛋白质功能预测问题进行了形式化说明，介绍了GO层级体系、多标签预测特性、广义零样本设定以及开放标签空间下的“蛋白质—功能”匹配建模思路，并总结了$F_{\max}$、AUPR和调和均值$H$等常用评价指标。随后，系统梳理了零样本预测相关研究，说明该方向已从依赖本体逻辑约束逐步发展到结合预训练表示和文本语义的开放标签推理。接着，总结了多模态预训练相关研究的发展脉络，重点讨论了多源联合预训练、结构知识蒸馏、知识增强预训练、文本监督增强以及生成式多模态方法等技术路线。
+本章围绕蛋白质功能预测的相关研究进行了概述。首先，从任务层面对蛋白质功能预测问题进行了形式化定义，介绍了GO层级体系、多标签预测特性、广义零样本设定以及开放标签空间下的"蛋白质—功能"匹配建模思路，并总结了$F_{\max}$、AUPR和调和均值$H$等常用评价指标。随后，在表征学习基础技术方面，介绍了Transformer架构的自注意力机制、ESM-2蛋白质语言模型的掩码语言建模训练范式，以及文本语义嵌入技术和Qwen3-Embedding模型。之后，阐述了对比学习的InfoNCE损失、知识蒸馏的基本框架及其在蛋白质功能预测中的拓展应用，以及适配器与参数高效微调方法的瓶颈结构设计。
 
-总体而言，现有研究已经为蛋白质功能预测提供了丰富的方法基础，但在开放语义推理、多模态知识深层融合以及功能先验向序列编码器内部蒸馏等方面仍有进一步提升空间。本文后续两章的工作正是在这一背景下展开：第三章重点研究多模态零样本蛋白质功能注释问题，第四章则重点研究基于域感知适配器的多模态预训练方法。
+本章介绍的各项技术构成了后续研究的理论基础：第三章利用ESM-2提取蛋白质序列特征、Qwen3-Embedding编码文本语义，通过多模态融合实现零样本功能预测；第四章在此基础上进一步利用对比学习、知识蒸馏和适配器技术，将域功能语义先验蒸馏至蛋白质语言模型中，实现端到端的功能预测。
