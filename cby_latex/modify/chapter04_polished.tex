@@ -1,0 +1,396 @@
+% !TEX root = ../main.tex
+
+\chapter{基于多源语义对比学习的域功能感知适配器预训练模型}
+
+\section{引言}
+
+第三章提出的MZSGO方法通过融合蛋白质序列、域语义和GO标签文本特征，在蛋白质功能预测任务上取得了较好的性能。然而，该方法仍存在两方面局限：其一，蛋白质语言模型ESM2仅作为静态特征提取器使用，所得序列嵌入主要保留通用的进化与上下文信息，尚未针对蛋白质功能预测任务进行充分适配；其二，模型在推理阶段需要显式输入域嵌入，这不仅增加了特征准备成本，也使缺乏域注释的蛋白质样本难以充分受益于域信息。
+
+针对上述问题，本章提出一种基于多源语义对比学习的域功能感知适配器预训练模型MZSGO-DA（MZSGO with Domain-Aware Adapter pretraining）。该方法在ESM2的部分Transformer层中注入轻量级适配器模块，在冻结主干参数的前提下，通过对比学习将两类与蛋白质功能密切相关的语义信息——InterPro域文本语义和GO功能定义语义——引入序列编码过程，从而增强序列表征与功能预测任务之间的关联。
+
+本章方法借鉴了S-PLM\cite{wang2025splm}中“通过适配器实现跨表示知识迁移”的基本思想，但蒸馏目标和下游适配方式有所不同。S-PLM主要利用结构信息增强序列表征，而本文进一步引入与蛋白质功能相关的域语义和功能语义两条通道，构建“序列-域”和“序列-功能”双通道对比学习框架。在下游训练阶段，本文保留预训练适配器参数，并额外引入一组可训练适配器用于任务适配，以在保留预训练语义先验的同时提升对具体功能预测任务的适应能力。相较于第三章方法，MZSGO-DA的目标并非完全替代多模态输入，而是在减少对实例级域特征显式依赖的同时，提升模型对蛋白质功能语义的表征能力和泛化能力。
+
+本章的组织结构如下：首先介绍域功能感知适配器预训练任务的构建过程；随后给出MZSGO-DA的总体框架、适配器注入机制及端到端下游训练策略；最后通过对比实验和消融实验分析各组成模块的作用。
+
+\section{域功能感知适配器预训练任务构建}
+
+\subsection{问题动机与设计目标}
+
+MZSGO采用静态嵌入策略，即先利用冻结的ESM2提取蛋白质序列嵌入并进行缓存，在训练阶段直接读取预计算表示。该策略虽然具有较高的计算效率，但也带来两个问题。首先，ESM2的原始预训练目标主要服务于序列建模，其表示虽包含丰富的进化与上下文信息，但与蛋白质功能预测直接相关的域功能先验并未被显式注入。其次，由于序列表征在下游训练阶段保持固定，监督信号难以反向作用于序列编码器，从而限制了模型对任务特异性语义的适应能力。
+
+此外，MZSGO在推理时需要显式输入域嵌入。当蛋白质缺乏可靠的域注释时，模型无法充分利用该信息源，这在一定程度上影响了方法的适用范围。基于此，本文尝试通过适配器预训练的方式，将域相关语义知识以参数化形式迁移到序列编码路径中，并在下游阶段进一步结合任务监督进行适配。
+
+因此，本章的设计目标可以概括为两个方面：其一，利用域文本语义和GO功能语义对序列编码器进行面向功能预测的预训练增强；其二，在保持预训练知识相对稳定的前提下，引入少量可训练参数以适配下游功能预测任务。通过这一两阶段策略，期望模型在不依赖显式实例级域输入的情况下，仍能学习到更具功能判别性的序列表征。
+
+\subsection{预训练数据集构建}
+
+域功能感知预训练的数据集基于Swiss-Prot数据库构建。为严格防止信息泄露，从Swiss-Prot完整数据库中排除第三章下游任务使用的所有测试集蛋白质，包括标准测试集和零样本测试集，剩余蛋白质构成预训练语料。
+
+经过上述过滤，最终获得约42万条蛋白质用于预训练。每条蛋白质样本包含三类信息：氨基酸序列、InterPro域文本描述，以及该蛋白质在Swiss-Prot中的GO功能注释所对应的GO标签文本定义。其中文本侧表示均由Qwen3-Embedding模型预计算获得。对于拥有多个域的蛋白质，域嵌入通过两级平均池化聚合为蛋白质级表示；对于拥有多个GO注释的蛋白质，GO功能嵌入同样通过平均池化聚合为蛋白质级表示。
+
+对于缺乏InterPro域注释的蛋白质样本，仅保留其序列信息和GO功能语义信息参与预训练，不构造“序列-域”对比项，仅参与“序列-功能”通道的损失计算。该设计避免了因域信息缺失而直接丢弃样本，同时有助于提升预训练语料的覆盖范围。
+
+\subsection{双通道多源语义对比学习任务}
+
+基于上述预训练数据，本文将域文本描述和GO功能文本描述视为两类功能相关的语义监督信号，构建“序列—域”和“序列—功能”双通道对比学习预训练任务。该任务以蛋白质序列为核心输入，以域文本嵌入和GO功能文本嵌入为语义锚点，通过跨表示空间的对齐学习增强序列编码器对功能相关信息的感知能力。考虑到两类语义信息来源不同且粒度互补，本文将其作为多源语义监督共同作用于适配器参数学习，而不将其机械地视作彼此独立的异构模态。
+
+\section{基于双适配器机制的模型架构设计}
+
+\subsection{总体框架}
+
+MZSGO-DA的训练流程分为两个阶段，如图~\ref{fig:mzsgo_da_pipeline}所示。
+
+第一阶段为域功能感知对比学习预训练。在ESM2的Transformer层中注入一组轻量级适配器模块，记为adapter$_0$，冻结ESM2原始参数，仅训练适配器参数。通过双通道InfoNCE对比学习损失，同时将蛋白质序列的适配器增强表示与对应的域文本嵌入和GO功能文本嵌入进行对齐。预训练完成后，adapter$_0$获得了与蛋白质功能相关的语义先验。
+
+第二阶段为双适配器端到端下游训练。本文冻结adapter$_0$的参数，并在同一ESM2模型中注入第二组适配器adapter$_1$以参与下游任务训练。两组适配器在每个Transformer层内并行运行，其输出通过简单的均值融合进行组合。之所以采用均值融合，主要是考虑到其结构简洁且训练过程较为稳定：其中adapter$_0$侧重保留预训练阶段获得的功能相关先验，adapter$_1$则负责学习面向下游任务的补充适配信息。经ESM2与双适配器编码后的序列表示，再与GO标签文本嵌入进行融合，以输出最终的功能预测概率。推理阶段仅需输入蛋白质序列和候选GO标签文本，无需显式提供实例级域嵌入。
+
+\begin{figure}[h]
+\centering
+\scalebox{0.88}{
+\begin{tikzpicture}[
+    frozen/.style={rectangle, draw, fill=gray!15, minimum width=2.0cm, minimum height=0.55cm, align=center, rounded corners=2pt, font=\footnotesize},
+    trainable/.style={rectangle, draw, fill=orange!15, minimum width=2.0cm, minimum height=0.55cm, align=center, rounded corners=2pt, font=\footnotesize},
+    embed/.style={rectangle, draw, fill=blue!10, minimum width=1.8cm, minimum height=0.55cm, align=center, rounded corners=2pt, font=\footnotesize},
+    loss/.style={rectangle, draw, fill=red!10, minimum width=1.6cm, minimum height=0.55cm, align=center, rounded corners=2pt, font=\footnotesize},
+    proj/.style={rectangle, draw, fill=green!10, minimum width=1.5cm, minimum height=0.55cm, align=center, rounded corners=2pt, font=\footnotesize},
+    cls/.style={rectangle, draw, fill=purple!10, minimum width=1.8cm, minimum height=0.55cm, align=center, rounded corners=2pt, font=\footnotesize},
+    arrow/.style={->, >=stealth, thick},
+    dasharrow/.style={->, >=stealth, thick, dashed},
+    phasebox/.style={rectangle, draw, dashed, rounded corners=5pt, inner sep=6pt},
+]
+
+\node[font=\small\bfseries] at (-4.2, 7.3) {第一阶段：对比学习预训练};
+
+\node[font=\footnotesize] (seq1) at (-4.2, 6.5) {蛋白质序列};
+\node[frozen] (esm1) at (-4.2, 5.6) {ESM2 (冻结)};
+\node[trainable] (ada0) at (-4.2, 4.7) {adapter$_0$ (可训练)};
+\node[proj] (pseq) at (-4.2, 3.7) {序列投影头};
+
+\node[embed] (dom) at (-7.0, 5.6) {域文本嵌入};
+\node[proj] (pdom) at (-7.0, 3.7) {域投影头};
+
+\node[embed] (func) at (-1.4, 5.6) {GO功能嵌入};
+\node[proj] (pfunc) at (-1.4, 3.7) {功能投影头};
+
+\node[loss] (cl1) at (-5.6, 2.6) {$\mathcal{L}_{CL}^{dom}$};
+\node[loss] (cl2) at (-2.8, 2.6) {$\mathcal{L}_{CL}^{func}$};
+\node[loss] (total) at (-4.2, 1.7) {$\mathcal{L}_{pretrain}$};
+
+\draw[arrow] (seq1) -- (esm1);
+\draw[arrow] (esm1) -- (ada0);
+\draw[arrow] (ada0) -- (pseq);
+\draw[arrow] (dom) -- (pdom);
+\draw[arrow] (func) -- (pfunc);
+\draw[arrow] (pseq) -- (cl1);
+\draw[arrow] (pdom) -- (cl1);
+\draw[arrow] (pseq) -- (cl2);
+\draw[arrow] (pfunc) -- (cl2);
+\draw[arrow] (cl1) -- (total);
+\draw[arrow] (cl2) -- (total);
+
+\node[phasebox, fit=(seq1)(dom)(func)(total), inner sep=8pt, blue!40] {};
+
+\node[font=\small\bfseries] at (4.5, 7.3) {第二阶段：端到端下游训练};
+
+\node[font=\footnotesize] (seq2) at (4.5, 6.5) {蛋白质序列};
+\node[frozen] (esm2) at (4.5, 5.6) {ESM2 (冻结)};
+
+\node[frozen] (ada0f) at (3.1, 4.7) {adapter$_0$ (冻结)};
+\node[trainable] (ada1) at (5.9, 4.7) {adapter$_1$ (可训练)};
+
+\node[font=\footnotesize] (avg) at (4.5, 3.9) {平均};
+
+\node[embed] (label) at (7.0, 5.6) {GO标签嵌入};
+
+\node[cls] (gate) at (4.5, 3.0) {门控融合};
+\node[cls] (mlp) at (4.5, 2.1) {分类MLP};
+\node[loss] (ltask) at (4.5, 1.2) {$\mathcal{L}_{task}$};
+
+\draw[arrow] (seq2) -- (esm2);
+\draw[arrow] (esm2) -| (ada0f);
+\draw[arrow] (esm2) -| (ada1);
+\draw[arrow] (ada0f) |- (avg);
+\draw[arrow] (ada1) |- (avg);
+\draw[arrow] (avg) -- (gate);
+\draw[arrow] (label) |- (gate);
+\draw[arrow] (gate) -- (mlp);
+\draw[arrow] (mlp) -- (ltask);
+
+\node[phasebox, fit=(seq2)(label)(ltask)(ada0f), inner sep=8pt, orange!40] {};
+
+\draw[dasharrow, blue!60, line width=1.2pt] (-2.2, 4.7) -- node[above, font=\footnotesize, blue!70] {迁移} (1.5, 4.7);
+
+\node[frozen, minimum width=1.2cm] (lg1) at (-6.8, 0.5) {冻结};
+\node[trainable, minimum width=1.2cm] (lg2) at (-4.8, 0.5) {可训练};
+\node[embed, minimum width=1.2cm] (lg3) at (-2.8, 0.5) {预计算嵌入};
+\node[loss, minimum width=1.2cm] (lg4) at (-0.8, 0.5) {损失函数};
+
+\end{tikzpicture}
+}
+\caption{MZSGO-DA两阶段训练流程。第一阶段通过序列-域和序列-功能双通道对比学习将域功能语义信息蒸馏至适配器；第二阶段冻结预训练适配器，引入新适配器进行端到端功能预测训练。}
+\label{fig:mzsgo_da_pipeline}
+\end{figure}
+
+\subsection{适配器模块与注入机制}
+
+本文设计了基于残差多层感知机（ResMLP）的轻量级适配器模块。每个适配器由降维线性层、ReLU激活函数、升维线性层和层归一化组成，并通过残差连接保留原始信息流：
+\begin{equation}
+    \text{Adapter}(\mathbf{x}) = \text{LN}(\mathbf{W}_{up} \cdot \text{ReLU}(\mathbf{W}_{down} \cdot \mathbf{x})) + \mathbf{x}
+\end{equation}
+其中$\mathbf{W}_{down} \in \mathbb{R}^{d_b \times d}$为降维矩阵，$\mathbf{W}_{up} \in \mathbb{R}^{d \times d_b}$为升维矩阵，$d=1280$为ESM2的隐藏维度，$d_b=d/2=640$为瓶颈维度，LN为层归一化。
+
+适配器模块被注入ESM2 Transformer层的两个关键位置。第一个位置是自注意力输出之后，在多头自注意力的输出后插入适配器，使其能够调制注意力模式：
+\begin{align}
+    \mathbf{X}_{attn} &= \text{MHA}(\text{LN}(\mathbf{X})) \\
+    \mathbf{X}_{attn}' &= \text{Adapter}_{attn}(\mathbf{X}_{attn}) \\
+    \mathbf{X}' &= \mathbf{X} + \mathbf{X}_{attn}'
+\end{align}
+
+第二个位置是前馈网络输出之后，在FFN输出后插入适配器，使其能够调制特征变换：
+\begin{align}
+    \mathbf{X}_{ffn} &= \text{FFN}(\text{LN}(\mathbf{X}')) \\
+    \mathbf{X}_{ffn}' &= \text{Adapter}_{ffn}(\mathbf{X}_{ffn}) \\
+    \mathbf{X}'' &= \mathbf{X}' + \mathbf{X}_{ffn}'
+\end{align}
+
+因此，每个Transformer层包含两个适配器实例，一组适配器共包含$2N_{layer}$个ResMLP模块。本文默认仅对ESM2最后$N_{adapter}=16$层注入适配器，以在保留浅层通用序列表示能力的同时提升深层表示的任务相关性。
+
+当存在多组适配器时，各组适配器在同一层内并行计算，输出通过均值方式融合：
+\begin{equation}
+    \mathbf{X}_{adapter} = \frac{1}{G}\sum_{g=1}^{G}\text{Adapter}^{(g)}(\mathbf{X})
+\end{equation}
+其中$G$为适配器组数，预训练阶段$G=1$，下游训练阶段$G=2$。
+
+\subsection{双通道对比学习预训练}
+
+预训练阶段的目标是通过双通道对比学习，将蛋白质域的功能语义和GO标签的文本语义共同注入序列编码器的适配器参数中。
+
+序列编码方面，将蛋白质序列$P$输入注入adapter$_0$的ESM2模型，获得每个残基位置的上下文嵌入，并通过平均池化得到蛋白质级表示：
+\begin{equation}
+    \mathbf{h}_{seq} = \text{MeanPool}(\text{ESM2}_{adapter_0}(P)) \in \mathbb{R}^{1280}
+\end{equation}
+
+域嵌入方面，蛋白质域的文本嵌入$\mathbf{h}_{dom} \in \mathbb{R}^{2560}$由Qwen3-Embedding预计算并缓存。
+
+功能嵌入方面，蛋白质对应的GO功能标签文本嵌入$\mathbf{h}_{func} \in \mathbb{R}^{2560}$同样由Qwen3-Embedding预计算。对于拥有多个GO注释的蛋白质，将各GO标签的文本嵌入通过平均池化聚合为蛋白质级功能表示。
+
+为将不同来源的表示映射到共享对比空间，设计三个独立投影头：
+\begin{equation}
+    \mathbf{z}_{seq} = \text{ProjHead}_{seq}(\mathbf{h}_{seq}) \in \mathbb{R}^{d_p}
+\end{equation}
+\begin{equation}
+    \mathbf{z}_{dom} = \text{ProjHead}_{dom}(\mathbf{h}_{dom}) \in \mathbb{R}^{d_p}
+\end{equation}
+\begin{equation}
+    \mathbf{z}_{func} = \text{ProjHead}_{func}(\mathbf{h}_{func}) \in \mathbb{R}^{d_p}
+\end{equation}
+其中$d_p=256$为投影维度。每个投影头均由两层MLP组成：
+\begin{equation}
+    \text{ProjHead}(\mathbf{x}) = \text{LN}\!\left(\mathbf{W}_2 \cdot \text{Dropout}\!\left(\text{GELU}\!\left(\text{LN}(\mathbf{W}_1 \cdot \mathbf{x})\right)\right)\right)
+\end{equation}
+中间隐藏维度为512。输出向量经L2归一化后用于计算余弦相似度。
+
+给定一批$B$个蛋白质样本，构建两个对比学习通道。
+
+对于“序列-域”通道，每个样本$i$对应的序列投影$\mathbf{z}_{seq}^i$与域投影$\mathbf{z}_{dom}^i$构成正样本对，同一批次中其他样本构成负样本对：
+\begin{equation}
+    \mathcal{L}_{seq \to dom} = -\frac{1}{B}\sum_{i=1}^{B}
+    \log
+    \frac{\exp(\text{sim}(\mathbf{z}_{seq}^i,\mathbf{z}_{dom}^i)/\tau)}
+    {\sum_{j=1}^{B}\exp(\text{sim}(\mathbf{z}_{seq}^i,\mathbf{z}_{dom}^j)/\tau)}
+\end{equation}
+\begin{equation}
+    \mathcal{L}_{dom \to seq} = -\frac{1}{B}\sum_{i=1}^{B}
+    \log
+    \frac{\exp(\text{sim}(\mathbf{z}_{dom}^i,\mathbf{z}_{seq}^i)/\tau)}
+    {\sum_{j=1}^{B}\exp(\text{sim}(\mathbf{z}_{dom}^i,\mathbf{z}_{seq}^j)/\tau)}
+\end{equation}
+\begin{equation}
+    \mathcal{L}_{CL}^{dom} = \frac{1}{2}\left(\mathcal{L}_{seq \to dom} + \mathcal{L}_{dom \to seq}\right)
+\end{equation}
+
+对于“序列-功能”通道，每个样本$i$对应的序列投影$\mathbf{z}_{seq}^i$与功能投影$\mathbf{z}_{func}^i$构成正样本对：
+\begin{equation}
+    \mathcal{L}_{seq \to func} = -\frac{1}{B}\sum_{i=1}^{B}
+    \log
+    \frac{\exp(\text{sim}(\mathbf{z}_{seq}^i,\mathbf{z}_{func}^i)/\tau)}
+    {\sum_{j=1}^{B}\exp(\text{sim}(\mathbf{z}_{seq}^i,\mathbf{z}_{func}^j)/\tau)}
+\end{equation}
+\begin{equation}
+    \mathcal{L}_{func \to seq} = -\frac{1}{B}\sum_{i=1}^{B}
+    \log
+    \frac{\exp(\text{sim}(\mathbf{z}_{func}^i,\mathbf{z}_{seq}^i)/\tau)}
+    {\sum_{j=1}^{B}\exp(\text{sim}(\mathbf{z}_{func}^i,\mathbf{z}_{seq}^j)/\tau)}
+\end{equation}
+\begin{equation}
+    \mathcal{L}_{CL}^{func} = \frac{1}{2}\left(\mathcal{L}_{seq \to func} + \mathcal{L}_{func \to seq}\right)
+\end{equation}
+
+总预训练损失为两个通道的加权和：
+\begin{equation}
+    \mathcal{L}_{pretrain} = \lambda_{dom}\mathcal{L}_{CL}^{dom} + \lambda_{func}\mathcal{L}_{CL}^{func}
+\end{equation}
+其中$\lambda_{dom}=\lambda_{func}=0.5$，$\text{sim}(\cdot,\cdot)$为余弦相似度，$\tau=0.07$为温度超参数。
+
+通过这种双通道对比学习，adapter$_0$被训练为能够在一定程度上将序列表示调制到与域语义和功能语义更一致的表示空间。相较于S-PLM\cite{wang2025splm}仅蒸馏结构信息的单通道策略，本文的双通道设计为序列编码器提供了更直接的功能相关监督。预训练完成后，即使下游阶段不再显式输入实例级域嵌入，序列编码路径仍有望保留部分由预训练引入的功能相关先验。
+
+\subsection{双适配器端到端下游训练}
+
+预训练完成后，进入端到端的下游功能预测阶段。
+
+本文采用双适配器策略，目的在于适度解耦“预训练知识保留”和“下游任务适配”这两个目标。冻结的adapter$_0$用于保留预训练阶段获得的功能相关语义信息，新增的adapter$_1$则提供面向下游任务的可学习自由度。两组适配器的输出采用均值融合，这是一种实现简单且训练稳定的组合方式；其有效性将在后续消融实验中进一步分析。
+
+与MZSGO不同，MZSGO-DA在下游训练时不使用预计算的静态嵌入，而是在每个训练迭代中实时运行ESM2与双适配器前向传播：
+\begin{equation}
+    \mathbf{h}_{seq} = \text{MeanPool}(\text{ESM2}_{adapter_0+adapter_1}(P)) \in \mathbb{R}^{1280}
+\end{equation}
+
+下游阶段的分类架构使用序列特征与GO标签文本嵌入进行双分支融合。序列特征和GO标签嵌入分别经过投影后，得到：
+\begin{equation}
+    \mathbf{h}_{seq}' = \text{Dropout}(\text{GELU}(\text{LN}(\mathbf{W}_{seq}\mathbf{h}_{seq}))) \in \mathbb{R}^{512}
+\end{equation}
+\begin{equation}
+    \mathbf{h}_{label}' = \text{Dropout}(\text{GELU}(\text{LN}(\mathbf{W}_{label}\mathbf{E}_{label}))) \in \mathbb{R}^{512}
+\end{equation}
+
+在训练阶段，对序列特征施加模态丢弃策略，丢弃率设为$p=0.15$，以增强模型对序列侧噪声和缺失扰动的鲁棒性。门控融合模块根据上下文信息计算自适应权重并生成融合表示：
+\begin{equation}
+    \boldsymbol{\alpha} =
+    \text{Softmax}
+    \left(
+    \mathbf{W}_{gate}\cdot
+    \text{ReLU}
+    \left(
+    \text{LN}\big(\mathbf{W}_{ctx}[\hat{\mathbf{h}}_{seq}' \parallel \mathbf{h}_{label}']\big)
+    \right)
+    \right)
+\end{equation}
+\begin{equation}
+    \mathbf{H}_{fused} = \alpha_1 \cdot \phi_{seq}(\hat{\mathbf{h}}_{seq}') + \alpha_2 \cdot \phi_{label}(\mathbf{h}_{label}')
+\end{equation}
+其中$\boldsymbol{\alpha}\in\mathbb{R}^{2}$为归一化门控权重。
+
+融合表示经过分类MLP后输出预测概率：
+\begin{equation}
+    \hat{y} = \sigma\left(\mathbf{W}_{out}\cdot \text{Dropout}\left(\text{GELU}\left(\text{LN}(\mathbf{W}_{cls}\mathbf{H}_{fused})\right)\right)\right)
+\end{equation}
+
+下游训练使用与第三章一致的本体特异性损失函数策略。对于BP和MF本体，采用二分类交叉熵损失：
+\begin{equation}
+    \mathcal{L}_{BCE} = -\frac{1}{N}\sum_{i=1}^{N}
+    \left[
+    y_i\log(\hat{y}_i) + (1-y_i)\log(1-\hat{y}_i)
+    \right]
+\end{equation}
+
+对于CC本体，为缓解类别不平衡问题，采用Focal Loss：
+\begin{equation}
+    \mathcal{L}_{FL} = -\frac{1}{N}\sum_{i=1}^{N}
+    \left[
+    \alpha y_i(1-\hat{y}_i)^{\gamma}\log(\hat{y}_i)
+    + (1-\alpha)(1-y_i)\hat{y}_i^{\gamma}\log(1-\hat{y}_i)
+    \right]
+\end{equation}
+其中$\alpha$为类别平衡系数，$\gamma$为聚焦参数。
+
+下游阶段的可训练参数包括adapter$_1$、特征投影层、门控融合模块和分类头，而ESM2原始参数与adapter$_0$保持冻结。
+
+\section{实验结果及分析}
+
+\subsection{对比实验结果与分析}
+
+为全面评估MZSGO-DA的有效性，本节介绍数据集、实现细节、基线方法和评价指标，随后对实验结果进行分析。
+
+数据集方面，下游任务使用与第三章MZSGO相同的数据集，包括训练集、标准测试集和零样本测试集。预训练使用Swiss-Prot数据库中排除下游测试集后的约42万条蛋白质。数据集统计信息详见第三章表~\ref{tab:mzsgo_dataset_stats}和表~\ref{tab:mzsgo_label_stats}。
+
+实现细节方面，ESM2选用esm2\_t33\_650M\_UR50D变体，包含33层Transformer，隐藏维度为1280。适配器注入最后16层，瓶颈维度为640。预训练阶段使用AdamW\cite{loshchilov2019decoupled}优化器，学习率设为$1\times10^{-4}$，权重衰减为$1\times10^{-4}$，采用余弦退火学习率调度，预热比例为0.1，有效批次大小为96。训练最多50个epoch，使用早停策略，耐心值为5，温度超参数$\tau=0.07$，双通道损失权重$\lambda_{dom}=\lambda_{func}=0.5$。
+
+下游训练阶段加载预训练的adapter$_0$参数并冻结，初始化adapter$_1$并设为可训练，有效批次大小同样为96。学习率为$1\times10^{-4}$，隐藏维度为512，分类Dropout率为0.3，特征丢弃率为0.15。BP训练30个epoch，MF和CC各训练20个epoch，均使用早停策略。
+
+基线方法方面，本文重点与以下方法进行对比。S-PLM\cite{wang2025splm}在ESM2中注入适配器，通过对比学习将三维结构信息蒸馏至序列编码器；PAIR\cite{duan2025pair}利用UniProt中的文本注释对蛋白质语言模型进行微调；MZSGO为第三章提出的多模态零样本方法，在推理时需要显式输入域嵌入。
+
+评价指标方面，本文采用与第二章2.2节一致的评价指标体系，包括$F_{\max}$、AUPR、Seen AUPR、Unseen AUPR、调和均值$H$以及加权评价指标（$wF_{max}$、$wAUPR$、$S_{min}$）。
+
+表~\ref{tab:mzsgo_da_comparison}展示了MZSGO-DA与预训练基线方法及MZSGO在三个GO本体上的性能对比。
+
+\begin{table}[htbp]
+\centering
+\caption{MZSGO-DA与预训练基线及MZSGO在测试集上的性能对比。最优结果加粗，次优结果加下划线。}
+\label{tab:mzsgo_da_comparison}
+\small
+\begin{tabular}{llccccc}
+\toprule
+本体 & 模型 & Fmax$\uparrow$ & AUPR$\uparrow$ & U-AUPR$\uparrow$ & S-AUPR$\uparrow$ & H$\uparrow$ \\
+\midrule
+\multirow{4}{*}{BP}
+ & S-PLM & 0.4921 & 0.4813 & 0.1847 & 0.4831 & 0.2665 \\
+ & PAIR & 0.4956 & 0.4876 & 0.2014 & 0.4894 & 0.2878 \\
+ & MZSGO & \underline{0.5045} & \underline{0.5008} & \underline{0.2393} & \underline{0.5021} & \underline{0.3241} \\
+ & MZSGO-DA & \textbf{0.5098} & \textbf{0.5071} & \textbf{0.2531} & \textbf{0.5086} & \textbf{0.3383} \\
+\midrule
+\multirow{4}{*}{MF}
+ & S-PLM & 0.7508 & 0.7256 & 0.4203 & 0.7300 & 0.5283 \\
+ & PAIR & 0.7534 & 0.7289 & 0.4417 & 0.7334 & 0.5461 \\
+ & MZSGO & \underline{0.7611} & \underline{0.7337} & \underline{0.4806} & \underline{0.7380} & \underline{0.5821} \\
+ & MZSGO-DA & \textbf{0.7673} & \textbf{0.7432} & \textbf{0.4981} & \textbf{0.7476} & \textbf{0.5975} \\
+\midrule
+\multirow{4}{*}{CC}
+ & S-PLM & 0.7402 & 0.7618 & 0.5391 & 0.7628 & 0.6322 \\
+ & PAIR & 0.7428 & 0.7656 & 0.5542 & 0.7667 & 0.6428 \\
+ & MZSGO & \underline{0.7470} & \underline{0.7726} & \underline{0.5862} & \underline{0.7733} & \underline{0.6669} \\
+ & MZSGO-DA & \textbf{0.7541} & \textbf{0.7812} & \textbf{0.6068} & \textbf{0.7820} & \textbf{0.6837} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+从表~\ref{tab:mzsgo_da_comparison}可以看出，MZSGO-DA在BP、MF和CC三个GO本体上均取得了较好的整体性能，并在$F_{\max}$、AUPR、Unseen AUPR和调和均值$H$等指标上整体优于对比方法。这表明，引入基于适配器的预训练增强后，序列编码器能够学习到与功能预测更相关的表示。
+
+与MZSGO相比，MZSGO-DA在不显式输入实例级域嵌入的情况下仍取得了更优结果，说明通过预训练将域相关语义作为监督信号注入序列编码过程是可行的。这并不意味着域信息被完全替代，而更可能说明模型在序列表示中保留了部分与域功能相关的先验，从而降低了对下游阶段显式域输入的依赖。
+
+从零样本相关指标来看，MZSGO-DA在三个本体上的Unseen AUPR和$H$值均有提升，说明该方法对未见标签具有更好的泛化趋势。其中，CC本体上的提升更为明显，这可能与CC标签空间相对集中、文本定义更容易与序列表示形成稳定对齐有关。
+
+与S-PLM和PAIR的比较也表明，面向蛋白质功能预测任务构造的语义监督，相较于仅利用结构蒸馏或通用文本微调，更有利于提升下游功能预测表现。需要指出的是，这里的结论主要说明本文预训练策略与当前任务具有较好的匹配性，而非证明其在所有蛋白质表示学习任务上都具有普遍优势。
+
+\subsection{消融实验结果与分析}
+
+为分析MZSGO-DA各组成模块对最终性能的影响，本文在CC本体上进行了系统的消融实验，结果如表~\ref{tab:mzsgo_da_ablation}所示。
+
+\begin{table}[htbp]
+\centering
+\caption{MZSGO-DA在CC本体上的消融实验结果。}
+\label{tab:mzsgo_da_ablation}
+\small
+\begin{tabular}{lccccc}
+\toprule
+变体 & Fmax & AUPR & U-AUPR & S-AUPR & H \\
+\midrule
+\multicolumn{6}{l}{\textit{预训练通道消融}} \\
+无预训练（随机初始化） & 0.7421 & 0.7654 & 0.5713 & 0.7662 & 0.6561 \\
+仅序列-域对比学习 & 0.7498 & 0.7762 & 0.5921 & 0.7770 & 0.6720 \\
+仅序列-功能对比学习 & 0.7486 & 0.7748 & 0.5885 & 0.7756 & 0.6689 \\
+\midrule
+\multicolumn{6}{l}{\textit{适配器策略消融}} \\
+adapter$_0$不冻结 & 0.7509 & 0.7723 & 0.5706 & 0.7730 & 0.6586 \\
+仅adapter$_0$（冻结） & 0.7388 & 0.7602 & 0.5937 & 0.7610 & 0.6674 \\
+单adapter端到端 & 0.7452 & 0.7695 & 0.5801 & 0.7703 & 0.6628 \\
+\midrule
+MZSGO-DA & \textbf{0.7541} & \textbf{0.7812} & \textbf{0.6068} & \textbf{0.7820} & \textbf{0.6837} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+消融实验结果进一步说明了各组成模块对最终性能的影响。
+
+在预训练通道消融方面，仅使用“序列-域”或“序列-功能”任一单通道时，模型性能均低于双通道联合训练结果，说明两类语义监督具有一定互补性。其中，域语义更接近蛋白质局部结构单元与功能模块信息，而GO定义语义则提供了更直接的标签层面功能描述，二者联合有助于提升序列表征的功能相关性。
+
+在适配器策略消融方面，冻结adapter$_0$后再引入adapter$_1$的双适配器方案取得了最佳结果。相比之下，若直接解冻adapter$_0$参与联合训练，模型在零样本相关指标上出现下降，说明预训练阶段获得的语义先验在下游训练中可能受到覆盖。另一方面，仅使用冻结的adapter$_0$虽然保留了较多预训练信息，但缺乏足够的任务适配能力，因此总体性能也不及双适配器方案。上述结果表明，将知识保留与任务适配分配给不同适配器处理，是一种较为合理的设计。
+
+在参数规模方面，MZSGO-DA相较于全参数微调仍保持了较好的参数效率。尽管下游阶段仍需训练新增适配器及少量分类参数，但冻结ESM2主干参数能够有效控制训练开销，并降低灾难性遗忘风险。
+
+\section{本章小结}
+
+本章提出了一种基于多源语义对比学习的域功能感知适配器预训练方法MZSGO-DA。该方法围绕“如何在保持蛋白质语言模型主体参数冻结的前提下，引入与功能预测相关的语义监督”这一问题展开，通过在ESM2中注入适配器模块，并构建“序列-域”和“序列-功能”双通道对比学习任务，对序列编码路径进行功能相关增强。
+
+在方法设计上，本文采用两阶段训练策略：第一阶段利用域文本语义与GO功能定义语义对适配器进行预训练；第二阶段冻结预训练适配器，并引入新的可训练适配器进行下游任务适配。该设计在一定程度上兼顾了预训练知识保留与任务特定优化的需求。与第三章MZSGO相比，本文方法弱化了对下游阶段显式实例级域输入的依赖，并通过端到端训练提升了序列表征与功能预测目标之间的匹配程度。
+
+实验结果表明，MZSGO-DA在三个GO本体上均取得了较好的性能表现，尤其在零样本相关指标上表现出更优的泛化趋势。消融实验进一步说明，双通道预训练和双适配器策略均对模型性能提升具有积极作用。总体而言，本文为蛋白质功能预测任务中的预训练-微调建模提供了一种可行的参数高效实现思路。

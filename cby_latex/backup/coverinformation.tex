@@ -1,0 +1,81 @@
+% !TEX root = ../main.tex
+
+% 专硕请取消下面注释
+\makeatletter
+  \def\hitsz@csubjecttitle{类别}
+\makeatother
+
+\hitszsetup{
+  %******************************
+  % 注意：
+  %   1. 配置里面不要出现空行
+  %   2. 不需要的配置信息可以删除
+  %******************************
+  %
+  %=====
+  % 秘级
+  %=====
+  statesecrets={公开},
+  natclassifiedindex={TP391},
+  intclassifiedindex={68T07},
+  %
+  %=========
+  % 中文信息
+  %=========
+  ctitleone={基于多模态预训练},%本科生封面使用
+  ctitletwo={蛋白质功能预测研究},%本科生封面使用
+  ctitlecover={基于多模态预训练的蛋白质功能预测研究},%放在封面中使用，自由断行
+  ctitle={基于多模态预训练的蛋白质功能预测研究},%放在原创性声明中使用
+  %csubtitle={一条副标题}, %一般情况没有，可以注释掉
+  cxueke={专业},
+  cpostgraduatetype={专业},
+  csubject={计算机技术},
+  caffil={哈尔滨工业大学（深圳）},
+  cauthor={崔博越},
+  csupervisor={李君一教授},
+  % 日期自动使用当前时间，若需指定按如下方式修改：
+  cdate={2026年5月},
+  % 指定第二页封面的日期，即答辩日期
+  cdatesecond={2026年05月},
+  cstudentid={23S151070},
+  cstudenttype={同等学力人员}, %非全日制教育申请学位者
+  %
+  %=========
+  % 英文信息
+  %=========
+  etitle={Research on Protein Function Prediction Based on Multimodal Pretraining},
+  exueke={Engineering},
+  esubject={Computer Technology},
+  eaffil={Harbin Institute of Technology, Shenzhen},
+  eauthor={Boyue Cui},
+  esupervisor={Prof. Junyi Li},
+  % 日期自动生成，若需指定按如下方式修改：
+  edate={May, 2026},
+  estudenttype={Master of Engineering},
+  %
+  % 关键词用"英文逗号"分割
+  ckeywords={蛋白质功能预测, 零样本学习, 多模态融合, 蛋白质语言模型, 基因本体},
+  ekeywords={protein function prediction, zero-shot learning, multimodal fusion, protein language model, Gene Ontology},
+}
+
+% 中文摘要
+\begin{cabstract}
+
+蛋白质功能预测是生物信息学领域的核心任务之一，旨在揭示蛋白质序列与生物学功能之间的映射关系。随着高通量测序技术的飞速发展，蛋白质序列数据呈指数级增长，然而经实验验证的功能注释比例极低，序列-功能鸿沟日益加深，计算预测方法成为填补注释缺口的关键手段。现有的深度学习方法通常将基因本体（Gene Ontology, GO）功能标签视为简单的分类标识符，仅依赖序列模式特征进行固定标签集上的分类，忽略了蕴含于蛋白质域文本和GO定义中的丰富语义信息，导致模型对训练集中未见标签和长尾类别的泛化能力严重不足。
+
+针对现有方法语义利用不充分、无法预测未见功能标签的问题，本文提出了一种多模态零样本蛋白质功能注释方法MZSGO。MZSGO将蛋白质功能预测重新定义为蛋白质-GO匹配问题，利用蛋白质语言模型ESM2提取序列进化特征，并引入大语言模型对蛋白质域描述和GO功能定义进行统一的语义编码。通过设计自适应门控融合模块，MZSGO动态调节各模态的贡献权重，实现了异构特征在共享潜在空间中的有效整合，同时引入非对称特征丢弃策略增强了模型对模态缺失的鲁棒性。实验表明，MZSGO在标准测试集的有监督指标上达到极具竞争力的水平，并在零样本场景下以显著优势超越现有方法，验证了多模态语义融合对开放标签预测的有效性。
+
+虽然MZSGO通过语义对齐实现了零样本推理，但其采用的静态嵌入策略存在信息瓶颈和梯度断裂问题，导致序列编码器本身缺乏对功能先验的感知能力。针对这一问题，本文进一步提出了基于域感知适配器预训练的端到端蛋白质功能预测方法MZSGO-DA。MZSGO-DA设计了轻量级适配器模块并注入序列模型的Transformer层内部，通过序列-域和序列-功能双通道InfoNCE对比学习预训练，将域功能语义信息直接蒸馏至适配器中。在下游阶段，MZSGO-DA采用冻结与可训练双适配器并行的策略进行端到端训练，实现了预训练功能知识保留与任务特定适配的平衡。实验结果显示，MZSGO-DA仅凭序列输入即在三个GO本体上全面超越了MZSGO，显著提升了端到端场景下的功能预测性能与部署效率。
+
+\end{cabstract}
+
+% 英文摘要
+\begin{eabstract}
+
+Protein function prediction is a core task in bioinformatics, aiming to reveal the mapping between protein sequences and biological functions. With the rapid development of high-throughput sequencing technologies, protein sequence data has grown exponentially, yet the proportion of experimentally validated functional annotations remains extremely low. Computational prediction methods have become a crucial means to bridge this sequence-function gap. Existing deep learning methods typically treat Gene Ontology (GO) functional labels as simple categorical identifiers, relying solely on sequence pattern features for classification within fixed label sets. This neglects the rich semantic information embedded in protein domain texts and GO definitions, leading to a severe lack of generalization capability for unseen labels and long-tail categories.
+
+To address the issues of insufficient semantic utilization and the inability to predict unseen functional labels, this thesis proposes a Multimodal Zero-Shot protein function annotation method, MZSGO. MZSGO redefines protein function prediction as a protein-GO semantic matching problem. It utilizes the protein language model ESM2 to extract evolutionary sequence features and introduces a large language model to encode protein domain descriptions and GO functional definitions uniformly. By designing an adaptive gated fusion module, MZSGO dynamically adjusts the contribution weights of each modality, achieving effective integration of heterogeneous features in a shared latent space. Meanwhile, an asymmetric feature dropout strategy is introduced to enhance the model's robustness against missing modalities. Experiments show that MZSGO achieves highly competitive performance on supervised metrics and significantly outperforms existing methods in zero-shot scenarios, validating the effectiveness of multimodal semantic fusion for open-label prediction.
+
+Although MZSGO achieves zero-shot reasoning through semantic alignment, its static embedding strategy suffers from information bottlenecks and gradient truncation, leaving the sequence encoder itself lacking awareness of functional priors. To solve this problem, this thesis further proposes MZSGO-DA, an end-to-end protein function prediction method based on domain-aware adapter pretraining. MZSGO-DA injects lightweight adapter modules into the Transformer layers of the sequence model. Through dual-channel InfoNCE contrastive pretraining on sequence-domain and sequence-function pairs, domain functional semantic information is directly distilled into the adapters. In the downstream stage, MZSGO-DA employs a parallel dual-adapter strategy (one frozen and one trainable) for end-to-end training, balancing the preservation of pretrained functional knowledge and task-specific adaptation. Experimental results show that MZSGO-DA, relying solely on sequence inputs, comprehensively outperforms MZSGO across all ontologies, significantly improving function prediction performance and deployment efficiency in end-to-end scenarios.
+
+\end{eabstract}
