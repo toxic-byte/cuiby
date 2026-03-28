@@ -1329,14 +1329,14 @@
   \begin{center}\xiaosan\heiti\hitsz@declarename\end{center}
   \par\hitsz@declaretext
   \vspace{\baselineskip}
-  \par\hspace{6em}\hitsz@authorsig\hfill\hitsz@frontdate\hitsz@datefill
+  \par\hspace{6em}\hitsz@authorsig\raisebox{-8pt}{\includegraphics[height=3em]{figures/cby.jpg}}\hfill\hitsz@frontdate 2026\hspace{0.5em}年\hspace{0.5em}5\hspace{0.5em}月\hspace{0.5em}13\hspace{0.5em}日
   \vspace{3\baselineskip}
   \begin{center}\xiaosan\heiti\hitsz@authorizationtitle\end{center}
   \par\hitsz@authorizationtext
   \vspace{2\baselineskip}
-  \par\hspace{6em}\hitsz@authorsig\hfill\hitsz@frontdate\hitsz@datefill
+  \par\hspace{6em}\hitsz@authorsig\raisebox{-8pt}{\includegraphics[height=3em]{figures/cby.jpg}}\hfill\hitsz@frontdate 2026\hspace{0.5em}年\hspace{0.5em}5\hspace{0.5em}月\hspace{0.5em}14\hspace{0.5em}日
   \vspace{1\baselineskip}
-  \par\hspace{6em}\hitsz@teachersig\hfill\hitsz@frontdate\hitsz@datefill
+  \par\hspace{6em}\hitsz@teachersig\raisebox{-8pt}{\includegraphics[height=3em]{figures/ljy.png}}\hfill\hitsz@frontdate 2026\hspace{0.5em}年\hspace{0.5em}5\hspace{0.5em}月\hspace{0.5em}14\hspace{0.5em}日
 }
 \def\hitsz@authorization@bachelor@toc{%
   \hitsz@declarename@bachelor
