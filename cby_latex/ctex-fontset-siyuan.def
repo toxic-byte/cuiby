@@ -63,18 +63,18 @@
       }
       {
         \setCJKmainfont
-          [ BoldFont = SimHei , ItalicFont = KaiTi ] { SourceHanSerifCN-Regular }
+          [ BoldFont = SimHei , ItalicFont = KaiTi_GB2312 ] { SimSun }
         \setCJKsansfont
-          [ BoldFont = { *~Bold } ] { Microsoft~YaHei }
-        \setCJKmonofont { FangSong }
-        \setCJKfamilyfont { zhkai } { KaiTi }
-        \setCJKfamilyfont { zhfs }  { FangSong }
-        \setCJKfamilyfont { zhsong }  { SourceHanSerifCN-Regular }
-        \setCJKfamilyfont { zhhei }   { SimHei }
-        \setCJKfamilyfont { zhli }    { LiSu }
-        \setCJKfamilyfont { zhyou }   { YouYuan }
+          [ BoldFont = SimHei ] { SimHei }
+        \setCJKmonofont { STFangsong }
+        \setCJKfamilyfont { zhkai }  { KaiTi_GB2312 }
+        \setCJKfamilyfont { zhfs }   { STFangsong }
+        \setCJKfamilyfont { zhsong } { SimSun }
+        \setCJKfamilyfont { zhhei }  { SimHei }
+        \setCJKfamilyfont { zhli }   { KaiTi_GB2312 }
+        \setCJKfamilyfont { zhyou }  { PingFang~SC }
         \setCJKfamilyfont { zhyahei }
-          [ BoldFont = { *~Bold } ] { Microsoft~YaHei }
+          [ BoldFont = SimHei ] { SimHei }
       }
   }
 \NewDocumentCommand \songti   { } { \CJKfamily { zhsong } }
