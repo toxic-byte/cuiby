@@ -12,7 +12,7 @@
 
 \subsection{蛋白质功能预测问题的定义}
 
-蛋白质功能预测通常以基因本体（Gene Ontology, GO）\cite{ashburner2000gene}作为标准化注释体系。GO将蛋白质功能划分为生物过程（Biological Process, BP）、分子功能（Molecular Function, MF）和细胞组分（Cellular Component, CC）三个相互独立但内部结构复杂的子本体。每个GO术语不仅具有标准化名称和文本定义，还通过“”和“”等关系组织成有向无环图（Directed Acyclic Graph, DAG）\cite{goeman2008multiple}，子节点是父节点的具体化，如图~\ref{fig:go_dag}所示。这种层级结构使蛋白质功能预测区别于普通的多标签分类任务：不同标签之间存在明确的祖先—后代依赖关系，且越接近叶节点的术语语义越具体、样本越稀疏。
+蛋白质功能预测通常以基因本体（Gene Ontology, GO）\cite{ashburner2000gene}作为标准化注释体系。GO将蛋白质功能划分为生物过程（Biological Process, BP）、分子功能（Molecular Function, MF）和细胞组分（Cellular Component, CC）三个相互独立但内部结构复杂的子本体。每个GO术语不仅具有标准化名称和文本定义，还通过``is\_a''和``part\_of''等关系组织成有向无环图（Directed Acyclic Graph, DAG）\cite{goeman2008multiple}，子节点是父节点的具体化，如图~\ref{fig:go_dag}所示。这种层级结构使蛋白质功能预测区别于普通的多标签分类任务：不同标签之间存在明确的祖先—后代依赖关系，且越接近叶节点的术语语义越具体、样本越稀疏。
 
 \begin{figure}[htbp]
 \centering
@@ -127,7 +127,7 @@ f: \mathcal{X} \to \mathcal{A}
 
 蛋白质功能预测天然具备零样本学习的特征：GO标签空间包含数万个功能术语，其中大量术语标注样本极度稀缺甚至在训练集中完全缺失，且新的GO术语仍在持续创建。将通用零样本学习框架应用于蛋白质功能预测时，核心挑战在于如何构建合适的语义空间——GO术语具有层级结构化的本体关系和丰富的文本定义，为构建高质量语义空间提供了独特优势。
 
-现有蛋白质功能预测中的零样本方法可从语义空间构建方式的角度进行分类。第一类是基于本体结构嵌入的方法。DeepGOZero\cite{kulmanov2022deepgozero}利用GO本体的逻辑公理（如“”关系）将功能术语嵌入几何空间，通过本体结构关系推断未见术语的位置。DeepGO-SE\cite{kulmanov2024protein}在此基础上引入预训练蛋白质语言模型和神经符号语义蕴涵机制，增强了模型对GO语义层级的推理能力。此类方法充分利用了GO的层级结构信息，但受限于嵌入空间的表达能力。
+现有蛋白质功能预测中的零样本方法可从语义空间构建方式的角度进行分类。第一类是基于本体结构嵌入的方法。DeepGOZero\cite{kulmanov2022deepgozero}利用GO本体的逻辑公理（如``is\_a''关系）将功能术语嵌入几何空间，通过本体结构关系推断未见术语的位置。DeepGO-SE\cite{kulmanov2024protein}在此基础上引入预训练蛋白质语言模型和神经符号语义蕴涵机制，增强了模型对GO语义层级的推理能力。此类方法充分利用了GO的层级结构信息，但受限于嵌入空间的表达能力。
 
 第二类是基于文本语义匹配的方法，借鉴了通用零样本学习中嵌入对齐的思想。ProTranslator\cite{gao2022protranslator}将蛋白质功能预测重新定义为序列表示与功能描述文本之间的翻译问题，通过序列到文本的匹配实现对未见功能术语的预测。ProtNote\cite{char2025protnote}进一步利用预训练语言模型编码GO术语的自然语言定义，通过多模态匹配框架实现灵活的开放标签功能注释。此类方法充分利用了GO术语定义中蕴含的丰富语义信息。
 
