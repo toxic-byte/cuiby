@@ -41,7 +41,9 @@ embed_dim=1280, nlp_dim=2560, loss='bce',optimizer="adam"):
         'loss': loss,
         'entry_path': './data/entry.list',
         'ia_path': './data/IA.txt',
-        'optimizer':optimizer
+        'optimizer':optimizer,
+        # 预训练数据路径（完整Swiss-Prot排除测试集）
+        'pretrain_path': './data/sequence/swissprot_pretrain.txt',
     }
     
     if run_mode == "sample":

@@ -1,10 +1,12 @@
 """
-DDP下游训练主入口（v4版本）—— End-to-End 训练。
+MZSGO-DA 下游训练主入口 —— End-to-End 双Adapter + 拼接融合。
 
-★ 核心改进：
+核心设计：
 1. 不再提取静态embedding，直接end-to-end训练
-2. 双Adapter策略：adapter_0(冻结) + adapter_1(可训练)
+2. 双Adapter策略：adapter_0(冻结,预训练域功能先验) + adapter_1(可训练,任务适配)
 3. ESM2在forward中参与计算，但参数不更新
+4. 序列特征与GO标签文本嵌入拼接后送入分类MLP
+5. 对序列特征施加模态丢弃（p=0.15）
 
 使用方式：
     CUDA_VISIBLE_DEVICES=0,1,2,3,4,6,7 torchrun --nproc_per_node=7 main_ddp.py \
@@ -283,9 +285,12 @@ def evaluate_model(model, test_dataloader, list_embedding, ia_list, key,
     
     return {
         'p': p, 'r': r, 'Fmax': f, 'aupr': aupr, 'threshold': th,
-        'prop_Fmax': prop_fmax, 'prop_aupr': prop_aupr,
+        'prop_Fmax': prop_fmax, 'prop_precision': prop_precision, 'prop_recall': prop_recall,
+        'prop_aupr': prop_aupr, 'prop_threshold': prop_th,
         'unseen': label_metrics['unseen'],
         'seen': label_metrics['seen'],
+        'unseen_count': len(unseen_indices) if unseen_indices is not None else 0,
+        'seen_count': len(seen_indices) if seen_indices is not None else 0,
         'harmonic_mean': harmonic_mean
     }
 
@@ -314,18 +319,19 @@ def main():
     
     if is_main_process(rank):
         print(f"\n{'='*80}")
-        print(f"End-to-End MZSGO Downstream Training (v4)")
+        print(f"MZSGO-DA End-to-End Downstream Training")
         print(f"{'='*80}")
-        print(f"Key v4 improvements:")
+        print(f"Key features:")
         print(f"  - End-to-End training (no static embeddings)")
-        print(f"  - Dual Adapter: adapter_0(frozen) + adapter_1(trainable)")
+        print(f"  - Dual Adapter: adapter_0(frozen,pretrained) + adapter_1(trainable)")
+        print(f"  - Concatenation fusion (seq || label → MLP)")
         print(f"  - Pretrain checkpoint: {args.pretrain_ckpt}")
         print(f"  - Gradient accumulation: {args.gradient_accumulation_steps}")
     
     ontologies_to_train = get_ontologies_to_train(args.onto)
     
     # 加载 NLP 模型和 GO 本体
-    nlp_tokenizer, nlp_model = load_nlp_model(config)
+    nlp_model, nlp_tokenizer = load_nlp_model(config)
     
     label_space = {
         'biological_process': [],
@@ -498,9 +504,9 @@ def main():
         if is_main_process(rank) and metrics is not None:
             metrics_output_test[key] = metrics
             
-            ckpt_dir = './ckpt/cafa5/MZSGO_v4/'
+            ckpt_dir = './ckpt/cafa5/MZSGO_DA/'
             os.makedirs(ckpt_dir, exist_ok=True)
-            ckpt_path = os.path.join(ckpt_dir, f"{ctime}MZSGO_v4_{key}_final.pt")
+            ckpt_path = os.path.join(ckpt_dir, f"{ctime}MZSGO_DA_{key}_final.pt")
             base_model = model.module if isinstance(model, DDP) else model
             torch.save(base_model.state_dict(), ckpt_path)
             print(f"Model saved to {ckpt_path}")

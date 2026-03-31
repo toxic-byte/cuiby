@@ -1,14 +1,14 @@
 """
-ESM2 Adapter 模块（v4版本）
+ESM2 Adapter 模块（MZSGO-DA）
 
-核心改进（相比 pre_v3）：
-1. Adapter 嵌入 Transformer 层内部（attn后 + FFN后），而非串联在外面
-2. 残差连接：module(x) + x（不用 LayerNorm 包裹残差）
-3. 正常梯度反传，去掉 FrozenLayerForward 和 detach
-4. 支持多组 Adapter 并行（用于下游双 Adapter 策略）
+核心设计：
+1. Adapter 嵌入 Transformer 层内部（attn后 + FFN后）
+2. 残差连接：Adapter(x) = LN(W_up · ReLU(W_down · x)) + x
+3. 正常梯度反传，ESM2参数冻结但保持在计算图中
+4. 支持多组 Adapter 并行（用于下游双 Adapter 策略，输出均值融合）
 
-设计借鉴 S-PLM (Medical SAM Adapter) 的思路，但不需要 fork 整个 ESM2 代码，
-而是通过动态替换 TransformerLayer 来注入 Adapter。
+每个Transformer层包含两个适配器实例，一组适配器共包含 2*N_layer 个ResMLP模块。
+默认仅对ESM2最后 N_adapter=16 层注入适配器。
 """
 
 import torch

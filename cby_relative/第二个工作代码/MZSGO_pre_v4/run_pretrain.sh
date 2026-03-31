@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# v4 预训练启动脚本
+# MZSGO-DA 双通道对比学习预训练启动脚本
 # 使用 DDP 在多 GPU 上进行对比学习预训练
 # ============================================================
 
@@ -12,27 +12,36 @@ cd "$(dirname "$0")"
 LOG_DIR="./logs/pretrain"
 mkdir -p ${LOG_DIR}
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-LOG_FILE="${LOG_DIR}/pretrain_v4_${TIMESTAMP}.log"
+LOG_FILE="${LOG_DIR}/pretrain_da_${TIMESTAMP}.log"
 
 # 预训练参数
 BATCH_SIZE=8            # 每张GPU的batch size
-GRAD_ACCUM=2            # 梯度累积步数，有效batch = 8*7*2 = 112
+GRAD_ACCUM=2            # 梯度累积步数，有效batch = 8*6*2 = 96
 EPOCHS=50
 LR=1e-4
 TEMPERATURE=0.07
 NUM_ADAPTER_LAYERS=16
 PROJ_DIM=256
-ADAPTER_DROPOUT=0.0     # S-PLM 不用 dropout
+ADAPTER_DROPOUT=0.0
 SAVE_DIR="./ckpt/pretrain"
 
+# ★ 双通道损失权重
+LAMBDA_DOM=0.5
+LAMBDA_FUNC=0.5
+
+# 早停参数
+PATIENCE=5
+MIN_DELTA=0.0001
+
 echo "============================================"
-echo "v4 Pretraining (Internal Adapter)"
+echo "MZSGO-DA Dual-Channel Pretraining"
 echo "============================================"
-echo "Key improvements over v3:"
+echo "Key features:"
+echo "  - Dual-channel: seq-domain + seq-function"
+echo "  - λ_dom=${LAMBDA_DOM}, λ_func=${LAMBDA_FUNC}"
 echo "  - Adapter inside Transformer (attn后 + FFN后)"
 echo "  - Clean residual: module(x) + x"
-echo "  - Normal gradient backprop (no FrozenLayerForward)"
-echo "  - Adapter dropout: ${ADAPTER_DROPOUT}"
+echo "  - Normal gradient backprop"
 echo ""
 echo "GPUs: ${CUDA_VISIBLE_DEVICES} (${NPROC} GPUs)"
 echo "Log: ${LOG_FILE}"
@@ -52,6 +61,8 @@ nohup torchrun \
     --num_adapter_layers ${NUM_ADAPTER_LAYERS} \
     --projection_output_dim ${PROJ_DIM} \
     --adapter_dropout ${ADAPTER_DROPOUT} \
+    --lambda_dom ${LAMBDA_DOM} \
+    --lambda_func ${LAMBDA_FUNC} \
     --save_dir ${SAVE_DIR} \
     --log_dir ${LOG_DIR} \
     --save_every 5 \

@@ -1,67 +1,88 @@
-# MZSGO-DA v4: Internal Adapter + End-to-End Training
+# MZSGO-DA: Domain-Aware Adapter Pretraining for Protein Function Prediction
 
-## 相比 v3 的核心改进
+## 方法概述
 
-### 1. Adapter 嵌入 Transformer 层内部（最关键！）
+MZSGO-DA（MZSGO with Domain-Aware Adapter pretraining）通过在ESM2的Transformer层中注入轻量级适配器模块，在冻结主干参数的前提下，通过**双通道对比学习**将InterPro域文本语义和GO功能定义语义引入序列编码过程，从而增强序列表征与功能预测目标之间的关联。
 
-**v3**: Adapter 串联在 Transformer 层外面
-```
-Transformer_Layer → Adapter → 下一层
-（Adapter 替换了整层输出，serial）
-```
+## 两阶段训练流程
 
-**v4**: Adapter 嵌入 Transformer 层内部（attn后 + FFN后）
+### 阶段1：域功能感知双通道对比学习预训练
+
+- 在ESM2后16层注入adapter_0，冻结ESM2原始参数
+- **序列-域通道**：将序列表示与InterPro域文本嵌入对齐
+- **序列-功能通道**：将序列表示与GO功能文本嵌入对齐
+- 总损失：`L_pretrain = λ_dom * L_CL^dom + λ_func * L_CL^func`（λ_dom=λ_func=0.5）
+- 缺乏域注释的蛋白质仅参与序列-功能通道
+- 三个独立投影头：ProjHead_seq, ProjHead_dom, ProjHead_func
+- 投影维度 d_p = 256，中间隐藏维度 512
+- 温度超参数 τ = 0.07
+
+### 阶段2：双适配器端到端下游训练
+
+- 冻结adapter_0，注入新的可训练adapter_1
+- 两组Adapter在同一层并行运行，输出均值融合
+- **拼接融合策略**：
+  - 序列特征投影：h_seq ∈ R^1280 → h_seq' ∈ R^512
+  - 标签文本投影：E_label ∈ R^2560 → h_label' ∈ R^512
+  - 模态丢弃：仅对序列特征，p=0.15
+  - 拼接：H_fused = [h_seq' ∥ h_label'] ∈ R^1024
+  - 分类MLP：H_fused → LN → GELU → Dropout → 1
+- 推理时仅需输入蛋白质序列和候选GO标签文本，无需显式域嵌入
+
+## 核心设计
+
+### 1. Adapter嵌入Transformer层内部
+
+Adapter在Transformer层中有两个注入位置：
+- 注入位置①：多头自注意力输出之后
+- 注入位置②：前馈网络输出之后
+
 ```
 Self-Attention → Adapter_attn → residual →
 FFN → Adapter_ffn → residual
-（Adapter 与原始路径并行，parallel）
 ```
 
-### 2. 残差连接修正
+### 2. 适配器模块（ResMLP）
 
-**v3**: `LayerNorm(adapter_out + residual)` → 16层累积导致分布偏移 (cos_sim=0.27)
+```
+Adapter(x) = LN(W_up · ReLU(W_down · x)) + x
+```
+其中 d=1280, d_b=640
 
-**v4**: `module(x) + x`（LayerNorm在module内部，残差是纯净加法）→ 保持原始ESM2分布
+### 3. 多组Adapter融合
 
-### 3. 正常梯度反传
+预训练阶段 G=1，下游阶段 G=2：
+```
+X_adapter = (1/G) * Σ Adapter^(g)(X)
+```
 
-**v3**: `detach() + FrozenLayerForward (identity Jacobian近似)` → 梯度信号严重失真
+### 4. 下游拼接融合（vs 第三章门控融合）
 
-**v4**: ESM2参数冻结(`requires_grad=False`)但保持在计算图中，梯度正常通过
-
-### 4. End-to-End 下游训练
-
-**v3**: 预训练 → 提取静态embedding → 下游用固定embedding训练
-
-**v4**: 预训练 → 下游End-to-End（adapter_0冻结 + adapter_1可训练 + 分类头），每次forward都经过ESM2
-
-### 5. 双 Adapter 策略
-
-- **adapter_0**（预训练阶段学习的domain信息）→ 冻结
-- **adapter_1**（下游任务新加的task-specific适配）→ 可训练
-- 两组Adapter在同一层并行，输出取平均
+相较于MZSGO的三模态门控融合：
+- 本章仅涉及序列与标签两路输入
+- 序列表征已通过适配器预训练注入了域功能先验
+- 信息融合的复杂度较低，采用拼接方式即可满足需求
 
 ## 文件结构
 
 ```
 MZSGO_pre_v4/
 ├── esm_adapter.py          # 核心: ResMLP + 动态注入Adapter到ESM2
-├── pretrain_model.py       # 预训练模型 (ESM2+Adapter + 对比学习)
-├── pretrain.py             # 预训练脚本 (DDP)
-├── model_downstream.py     # 下游模型 (End-to-End 双Adapter)
+├── pretrain_model.py       # 预训练模型 (双通道对比学习: seq-dom + seq-func)
+├── pretrain_dataset.py     # 预训练数据集 (支持域+功能嵌入，保留无域样本)
+├── pretrain.py             # 预训练脚本 (DDP, 支持λ_dom/λ_func)
+├── model_downstream.py     # 下游模型 (End-to-End 双Adapter + 拼接融合)
 ├── main_ddp.py             # 下游训练脚本 (DDP)
 ├── run_pretrain.sh         # 预训练启动脚本
 ├── run_downstream.sh       # 下游训练启动脚本
 ├── run_pipeline.sh         # 完整流水线
-├── utils/ -> ../MZSGO_pre_v3/utils/   # 共享工具
-├── data/ -> ../MZSGO_pre_v3/data/     # 共享数据
-└── pretrain_dataset.py -> ../MZSGO_pre_v3/pretrain_dataset.py
+└── utils/                  # 工具函数
 ```
 
 ## 快速开始
 
 ```bash
-# 完整流水线（预训练 + 下游End-to-End + 零样本测试）
+# 完整流水线（双通道预训练 + 下游End-to-End + 零样本测试）
 bash run_pipeline.sh
 
 # 仅预训练
@@ -71,34 +92,23 @@ bash run_pretrain.sh
 bash run_downstream.sh
 ```
 
-## 预训练流水线简化
+## 参数量统计
 
-v3 是4个阶段：
-1. 预训练 → 2. 提取embedding → 3. 下游训练 → 4. 测试
+对于ESM2-650M + 16层Adapter：
 
-v4 简化为2个阶段：
-1. 预训练 → 2. End-to-End下游训练（自动评估）
-
-省掉了"提取embedding"这一步，因为End-to-End训练不需要静态embedding。
+| 组件 | 参数量 | 状态 |
+|------|--------|------|
+| ESM2原始参数 | ~650M | 冻结 |
+| adapter_0（16层×2个） | ~53M | 冻结 |
+| adapter_1（16层×2个） | ~53M | 可训练 |
+| 特征投影与分类头 | ~2M | 可训练 |
+| 总计 | ~758M | — |
+| 可训练参数 | ~55M | 7.3% |
 
 ## 显存注意
 
 End-to-End训练时ESM2在forward中参与计算（虽然参数冻结），
-显存占用比v3的静态embedding方式大。建议：
-- batch_size_train: 4 per GPU（v3用16）
+显存占用比静态embedding方式大。建议：
+- batch_size_train: 4 per GPU
 - gradient_accumulation_steps: 4（补偿小batch）
-- 有效batch = 4 × 7GPUs × 4accum = 112（与v3一致）
-
-## 技术细节
-
-### Adapter 注入机制
-不需要Fork整个ESM2代码。通过 `inject_adapters_into_esm2()` 在运行时
-动态替换 `TransformerLayer` 为 `AdapterTransformerLayer`。
-
-### 参数量
-对于ESM2-650M + 16层Adapter：
-- ESM2原始参数: ~650M (冻结)
-- adapter_0: ~32个ResMLP (每层2个: attn后+FFN后) × (1280→640→1280+LN) ≈ 约53M
-- adapter_1: 同上 ≈ 约53M
-- 分类头: ~2M
-- **可训练**: adapter_1 + 分类头 ≈ 55M
+- 有效batch = 4 × 6GPUs × 4accum = 96

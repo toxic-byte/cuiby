@@ -1,6 +1,7 @@
 #!/bin/bash
 # ============================================================
-# v4 下游 End-to-End 训练启动脚本
+# MZSGO-DA 下游 End-to-End 训练启动脚本
+# 双Adapter + 拼接融合策略
 # ============================================================
 
 export CUDA_VISIBLE_DEVICES=2,3,4,5,6,7
@@ -11,11 +12,11 @@ cd "$(dirname "$0")"
 LOG_DIR="./logs/downstream"
 mkdir -p ${LOG_DIR}
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-LOG_FILE="${LOG_DIR}/downstream_v4_${TIMESTAMP}.log"
+LOG_FILE="${LOG_DIR}/downstream_da_${TIMESTAMP}.log"
 
 # 下游训练参数
 BATCH_SIZE=4            # ESM2在forward中，显存需求大，batch size要小
-GRAD_ACCUM=4            # 梯度累积补偿小batch，有效batch = 4*7*4 = 112
+GRAD_ACCUM=4            # 梯度累积补偿小batch，有效batch = 4*6*4 = 96
 EPOCHS=30
 LR=1e-4
 PRETRAIN_CKPT="./ckpt/pretrain/pretrain_best.pt"
@@ -23,11 +24,12 @@ PATIENCE=5              # 早停：连续5个epoch loss不降则停止
 MIN_DELTA=0.0001        # 最小改善阈值
 
 echo "============================================"
-echo "v4 End-to-End Downstream Training"
+echo "MZSGO-DA End-to-End Downstream Training"
 echo "============================================"
-echo "Key improvements:"
+echo "Key features:"
 echo "  - End-to-End (no static embeddings)"
 echo "  - Dual Adapter: adapter_0(frozen) + adapter_1(trainable)"
+echo "  - Concatenation fusion (seq || label → MLP)"
 echo ""
 echo "GPUs: ${CUDA_VISIBLE_DEVICES} (${NPROC} GPUs)"
 echo "Pretrain ckpt: ${PRETRAIN_CKPT}"
@@ -48,6 +50,8 @@ nohup torchrun \
     --pretrain_ckpt ${PRETRAIN_CKPT} \
     --gradient_accumulation_steps ${GRAD_ACCUM} \
     --fp16 \
+    --patience ${PATIENCE} \
+    --min_delta ${MIN_DELTA} \
     > "${LOG_FILE}" 2>&1 &
 
 PID=$!

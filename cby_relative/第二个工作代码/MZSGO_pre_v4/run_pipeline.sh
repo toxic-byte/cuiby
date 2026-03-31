@@ -1,43 +1,47 @@
 #!/bin/bash
 # ============================================================
-# v4 完整流水线：预训练 -> End-to-End 下游训练 -> 测试
+# MZSGO-DA 完整流水线：双通道预训练 -> End-to-End 下游训练 -> 零样本测试
 # ============================================================
 
-export CUDA_VISIBLE_DEVICES=2,3,4,5,6,7
-NPROC=6
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+NPROC=8
+TORCHRUN=/d/cuiby/miniconda3/envs/dplm/bin/torchrun
+export http_proxy="http://127.0.0.1:7894"
+export https_proxy="http://127.0.0.1:7894"
 
 cd "$(dirname "$0")"
 
 LOG_DIR="./logs/pipeline"
 mkdir -p ${LOG_DIR}
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-LOG_FILE="${LOG_DIR}/pipeline_v4_${TIMESTAMP}.log"
+LOG_FILE="${LOG_DIR}/pipeline_da_${TIMESTAMP}.log"
 
 run_pipeline() {
     set -e
 
     echo "============================================================"
-    echo "MZSGO v4 Full Pipeline"
+    echo "MZSGO-DA Full Pipeline"
     echo "============================================================"
-    echo "Key v4 improvements:"
-    echo "  1. Adapter inside Transformer (not serial outside)"
-    echo "  2. Clean residual: module(x) + x"
-    echo "  3. Normal gradient backprop (no FrozenLayerForward)"
+    echo "Key features:"
+    echo "  1. Dual-channel pretrain: seq-domain + seq-function"
+    echo "  2. Adapter inside Transformer (attn后 + FFN后)"
+    echo "  3. Clean residual: module(x) + x"
     echo "  4. End-to-End downstream (no static embeddings)"
     echo "  5. Dual Adapter: adapter_0(frozen) + adapter_1(trainable)"
+    echo "  6. Concatenation fusion (seq || label → MLP)"
     echo "============================================================"
     echo "Start: $(date)"
     echo ""
 
     # ============================================================
-    # Stage 1: 对比学习预训练
+    # Stage 1: 双通道对比学习预训练
     # ============================================================
     echo "============================================================"
-    echo "Stage 1: Contrastive Pretraining (v4)"
+    echo "Stage 1: Dual-Channel Contrastive Pretraining"
     echo "Start: $(date)"
     echo "============================================================"
 
-    torchrun \
+    ${TORCHRUN} \
         --nproc_per_node=${NPROC} \
         --master_port=29500 \
         pretrain.py \
@@ -50,6 +54,8 @@ run_pipeline() {
         --num_adapter_layers 16 \
         --projection_output_dim 256 \
         --adapter_dropout 0.0 \
+        --lambda_dom 0.5 \
+        --lambda_func 0.5 \
         --save_dir ./ckpt/pretrain \
         --log_dir ./logs/pretrain \
         --save_every 5 \
@@ -62,7 +68,6 @@ run_pipeline() {
 
     # ============================================================
     # Stage 2: End-to-End 下游训练 (full mode)
-    # ★ 不再需要 Stage 2 提取 embedding！直接 end-to-end
     # ============================================================
     echo ""
     echo "============================================================"
@@ -70,7 +75,7 @@ run_pipeline() {
     echo "Start: $(date)"
     echo "============================================================"
 
-    torchrun \
+    ${TORCHRUN} \
         --nproc_per_node=${NPROC} \
         --master_port=29501 \
         main_ddp.py \
@@ -97,7 +102,7 @@ run_pipeline() {
     echo "Start: $(date)"
     echo "============================================================"
 
-    torchrun \
+    ${TORCHRUN} \
         --nproc_per_node=${NPROC} \
         --master_port=29502 \
         main_ddp.py \
@@ -120,10 +125,10 @@ run_pipeline() {
     echo "============================================================"
 }
 
-echo "Launching v4 pipeline in background..."
+echo "Launching MZSGO-DA pipeline in background..."
 echo "Log: ${LOG_FILE}"
 
-nohup bash -c "$(declare -f run_pipeline); cd $(pwd); export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}; export NPROC=${NPROC}; run_pipeline" > "${LOG_FILE}" 2>&1 &
+nohup bash -c "$(declare -f run_pipeline); cd $(pwd); export CUDA_VISIBLE_DEVICES=${CUDA_VISIBLE_DEVICES}; export NPROC=${NPROC}; export TORCHRUN=${TORCHRUN}; export http_proxy=${http_proxy}; export https_proxy=${https_proxy}; run_pipeline" > "${LOG_FILE}" 2>&1 &
 
 PID=$!
 echo "PID: ${PID}"

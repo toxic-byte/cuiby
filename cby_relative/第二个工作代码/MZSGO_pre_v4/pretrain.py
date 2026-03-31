@@ -1,9 +1,10 @@
 """
-预训练主脚本（v4版本）：使用DDP进行多GPU分布式训练。
+预训练主脚本（MZSGO-DA）：使用DDP进行多GPU分布式训练。
 
-v4改进：
-- 使用内嵌Adapter的ESM2（正常梯度反传）
-- 额外保存adapter_state_dict，用于下游任务加载
+双通道对比学习预训练：
+- 序列-域通道：将InterPro域文本语义注入adapter
+- 序列-功能通道：将GO功能定义语义注入adapter  
+- 总损失 = λ_dom * L_CL^dom + λ_func * L_CL^func
 
 使用方式：
     CUDA_VISIBLE_DEVICES=0,1,2,3,4,6,7 torchrun --nproc_per_node=7 pretrain.py \
@@ -32,7 +33,7 @@ from config import setup_environment, get_config
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Domain-Aware Contrastive Pretraining (v4)')
+    parser = argparse.ArgumentParser(description='MZSGO-DA Dual-Channel Contrastive Pretraining')
     
     # 数据参数
     parser.add_argument('--run_mode', type=str, default='full', choices=['full', 'sample'])
@@ -47,6 +48,12 @@ def parse_args():
     parser.add_argument('--temperature', type=float, default=0.07)
     parser.add_argument('--adapter_dropout', type=float, default=0.0,
                         help='Adapter dropout (S-PLM uses 0)')
+    
+    # ★ 双通道损失权重
+    parser.add_argument('--lambda_dom', type=float, default=0.5,
+                        help='Weight for seq-domain contrastive loss')
+    parser.add_argument('--lambda_func', type=float, default=0.5,
+                        help='Weight for seq-function contrastive loss')
     
     # 训练参数
     parser.add_argument('--batch_size', type=int, default=8)
@@ -112,6 +119,8 @@ def train_one_epoch(model, dataloader, optimizer, scheduler, scaler, epoch,
                     args, writer, rank, global_step):
     model.train()
     total_loss = 0.0
+    total_loss_dom = 0.0
+    total_loss_func = 0.0
     num_batches = 0
     
     if is_main_process(rank):
@@ -122,6 +131,8 @@ def train_one_epoch(model, dataloader, optimizer, scheduler, scaler, epoch,
     for batch_idx, batch in enumerate(pbar):
         tokens = batch['tokens'].cuda(non_blocking=True)
         domain_embeddings = batch['domain_embeddings'].cuda(non_blocking=True)
+        func_embeddings = batch['func_embeddings'].cuda(non_blocking=True)
+        has_domain = batch['has_domain'].cuda(non_blocking=True)
         
         is_accumulation_step = (batch_idx + 1) % args.gradient_accumulation_steps != 0
         
@@ -130,11 +141,15 @@ def train_one_epoch(model, dataloader, optimizer, scheduler, scaler, epoch,
         
         if args.fp16:
             with torch.cuda.amp.autocast():
-                loss, seq_proj, domain_proj = model(tokens, domain_embeddings)
+                loss, loss_dom, loss_func, seq_proj, domain_proj, func_proj = model(
+                    tokens, domain_embeddings, func_embeddings, has_domain
+                )
             scaled_loss = loss / args.gradient_accumulation_steps
             scaler.scale(scaled_loss).backward()
         else:
-            loss, seq_proj, domain_proj = model(tokens, domain_embeddings)
+            loss, loss_dom, loss_func, seq_proj, domain_proj, func_proj = model(
+                tokens, domain_embeddings, func_embeddings, has_domain
+            )
             scaled_loss = loss / args.gradient_accumulation_steps
             scaled_loss.backward()
         
@@ -151,6 +166,8 @@ def train_one_epoch(model, dataloader, optimizer, scheduler, scaler, epoch,
             scheduler.step()
         
         total_loss += loss.item()
+        total_loss_dom += loss_dom.item()
+        total_loss_func += loss_func.item()
         num_batches += 1
         global_step += 1
         
@@ -158,28 +175,50 @@ def train_one_epoch(model, dataloader, optimizer, scheduler, scaler, epoch,
             if isinstance(pbar, tqdm):
                 pbar.set_postfix({
                     'loss': f'{loss.item():.4f}',
+                    'dom': f'{loss_dom.item():.4f}',
+                    'func': f'{loss_func.item():.4f}',
                     'lr': f'{scheduler.get_last_lr()[0]:.6f}'
                 })
             
             if global_step % args.log_every == 0 and writer is not None:
                 writer.add_scalar('train/loss', loss.item(), global_step)
+                writer.add_scalar('train/loss_dom', loss_dom.item(), global_step)
+                writer.add_scalar('train/loss_func', loss_func.item(), global_step)
                 writer.add_scalar('train/lr', scheduler.get_last_lr()[0], global_step)
                 
                 with torch.no_grad():
-                    sim_matrix = torch.matmul(seq_proj, domain_proj.T)
-                    diag_sim = sim_matrix.diag().mean().item()
-                    off_diag_mask = ~torch.eye(sim_matrix.size(0), dtype=torch.bool, 
-                                                device=sim_matrix.device)
-                    off_diag_sim = sim_matrix[off_diag_mask].mean().item()
+                    # 序列-域相似度
+                    sim_matrix_dom = torch.matmul(seq_proj, domain_proj.T)
+                    diag_sim_dom = sim_matrix_dom.diag().mean().item()
+                    off_diag_mask_dom = ~torch.eye(sim_matrix_dom.size(0), dtype=torch.bool, 
+                                                device=sim_matrix_dom.device)
+                    off_diag_sim_dom = sim_matrix_dom[off_diag_mask_dom].mean().item()
                     
-                    writer.add_scalar('train/pos_similarity', diag_sim, global_step)
-                    writer.add_scalar('train/neg_similarity', off_diag_sim, global_step)
-                    writer.add_scalar('train/sim_gap', diag_sim - off_diag_sim, global_step)
+                    writer.add_scalar('train/pos_sim_dom', diag_sim_dom, global_step)
+                    writer.add_scalar('train/neg_sim_dom', off_diag_sim_dom, global_step)
+                    writer.add_scalar('train/sim_gap_dom', diag_sim_dom - off_diag_sim_dom, global_step)
+                    
+                    # 序列-功能相似度
+                    sim_matrix_func = torch.matmul(seq_proj, func_proj.T)
+                    diag_sim_func = sim_matrix_func.diag().mean().item()
+                    off_diag_mask_func = ~torch.eye(sim_matrix_func.size(0), dtype=torch.bool, 
+                                                device=sim_matrix_func.device)
+                    off_diag_sim_func = sim_matrix_func[off_diag_mask_func].mean().item()
+                    
+                    writer.add_scalar('train/pos_sim_func', diag_sim_func, global_step)
+                    writer.add_scalar('train/neg_sim_func', off_diag_sim_func, global_step)
+                    writer.add_scalar('train/sim_gap_func', diag_sim_func - off_diag_sim_func, global_step)
     
     avg_loss = total_loss / max(num_batches, 1)
+    avg_loss_dom = total_loss_dom / max(num_batches, 1)
+    avg_loss_func = total_loss_func / max(num_batches, 1)
+    
     loss_tensor = torch.tensor([avg_loss], device='cuda')
     dist.all_reduce(loss_tensor, op=dist.ReduceOp.AVG)
     avg_loss = loss_tensor.item()
+    
+    if is_main_process(rank):
+        print(f"  Avg Loss: {avg_loss:.4f} (dom: {avg_loss_dom:.4f}, func: {avg_loss_func:.4f})")
     
     return avg_loss, global_step
 
@@ -197,7 +236,7 @@ def save_checkpoint(model, optimizer, scheduler, scaler, epoch, global_step,
         'scaler_state_dict': scaler.state_dict() if scaler is not None else None,
         'avg_loss': avg_loss,
         'args': vars(args),
-        # ★ v4: 额外保存 adapter 的 state_dict，方便下游加载
+        # ★ 额外保存 adapter 的 state_dict，方便下游加载
         'adapter_state_dict': model_to_save.get_adapter_state_dict(),
     }
     
@@ -212,13 +251,16 @@ def main():
     
     if is_main_process(rank):
         print(f"\n{'='*80}")
-        print(f"Domain-Aware Contrastive Pretraining (v4 - Internal Adapter)")
+        print(f"MZSGO-DA Dual-Channel Contrastive Pretraining")
         print(f"{'='*80}")
         print(f"World size: {world_size}")
-        print(f"Key v4 improvements:")
+        print(f"Key features:")
+        print(f"  - Dual-channel: seq-domain + seq-function contrastive learning")
+        print(f"  - λ_dom={args.lambda_dom}, λ_func={args.lambda_func}")
         print(f"  - Adapter embedded INSIDE Transformer layers (attn后 + FFN后)")
-        print(f"  - Clean residual: module(x) + x (no LayerNorm wrapping)")
-        print(f"  - Normal gradient backprop (no FrozenLayerForward/detach)")
+        print(f"  - Clean residual: module(x) + x")
+        print(f"  - Normal gradient backprop")
+        print(f"  - Temperature: {args.temperature}")
         print(f"  - Adapter dropout: {args.adapter_dropout}")
         print(f"Arguments: {vars(args)}")
     
@@ -230,25 +272,26 @@ def main():
     
     dataset = build_pretrain_dataset(config)
     domain_dim = dataset.domain_features.shape[1]
+    func_dim = dataset.func_features.shape[1]
     
     model = DomainAwarePretrainModel(
         esm_type=args.esm_type,
         domain_dim=domain_dim,
+        func_dim=func_dim,
         projection_hidden_dim=args.projection_hidden_dim,
         projection_output_dim=args.projection_output_dim,
         num_adapter_layers=args.num_adapter_layers,
         bottleneck_dim=args.bottleneck_dim,
         adapter_dropout=args.adapter_dropout,
         temperature=args.temperature,
+        lambda_dom=args.lambda_dom,
+        lambda_func=args.lambda_func,
     ).cuda()
     
     if is_main_process(rank):
         model.print_trainable_params()
     
     # DDP包装
-    # ★ v4: 因为 ESM2 参数冻结但仍在计算图中，
-    # 而 Adapter 参数嵌入在被替换的层内部，DDP 需要 find_unused_parameters
-    # 来处理 lm_head、contact_head 等不参与反传的模块
     model = DDP(model, device_ids=[local_rank], output_device=local_rank,
                 find_unused_parameters=True)
     

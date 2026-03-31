@@ -1,14 +1,13 @@
 """
-预训练模型（v4版本）
+预训练模型（v4版本 - MZSGO-DA）
 
-核心改进（相比 pre_v3）：
-1. Adapter 嵌入 ESM2 Transformer 层内部（attn后 + FFN后），正常梯度反传
-2. 残差连接：module(x) + x（不再用 LayerNorm(out + residual)）
-3. 去掉 FrozenLayerForward 和 detach
-4. ESM2 参数冻结但保持在计算图中（梯度正常流过，只是不更新）
+双通道对比学习预训练：
+1. 序列-域通道：将InterPro域文本语义注入adapter
+2. 序列-功能通道：将GO功能定义语义注入adapter
+3. 总损失 = λ_dom * L_CL^dom + λ_func * L_CL^func
 
-预训练目标：通过对比学习(InfoNCE)将蛋白质domain信息注入ESM2的Adapter表示中。
-预训练后，ESM2+Adapter只需序列输入即可产出携带domain信息的embedding。
+Adapter 嵌入 ESM2 Transformer 层内部（attn后 + FFN后），正常梯度反传。
+ESM2 参数冻结但保持在计算图中（梯度正常流过，只是不更新）。
 """
 
 import torch
@@ -27,7 +26,10 @@ from esm_adapter import (
 class ProjectionHead(nn.Module):
     """
     投影头：将编码器输出映射到对比学习的共享空间。
-    使用2层MLP + LayerNorm。
+    使用2层MLP + LayerNorm + GELU + Dropout。
+    
+    结构：Linear → LN → GELU → Dropout → Linear → LN
+    中间隐藏维度为512，输出向量经L2归一化后用于计算余弦相似度。
     """
     def __init__(self, input_dim, hidden_dim=512, output_dim=256, dropout=0.1):
         super().__init__()
@@ -93,7 +95,6 @@ class ESM2WithAdapter(nn.Module):
         )
         
         # ★ 冻结 ESM2 原始参数，只训练 Adapter
-        # 正常梯度反传，不需要 FrozenLayerForward！
         freeze_esm_parameters(self.esm_model, self.adapter_params)
         
         self.batch_converter = self.alphabet.get_batch_converter()
@@ -101,12 +102,6 @@ class ESM2WithAdapter(nn.Module):
     def forward(self, tokens, return_residue_repr=False):
         """
         前向传播。
-        
-        ★ 关键改动：不再手动遍历层 + FrozenLayerForward + detach，
-        而是直接调用 ESM2 的 forward（因为层已经被替换为 AdapterTransformerLayer）。
-        
-        ESM2 forward 会正常遍历所有层，Adapter 自然参与计算图。
-        冻结的 ESM2 参数不会被更新，但梯度可以正常流过。
         
         Args:
             tokens: [B, L] tokenized 序列
@@ -148,27 +143,33 @@ class ESM2WithAdapter(nn.Module):
 
 class DomainAwarePretrainModel(nn.Module):
     """
-    Domain-Aware 预训练模型（v4版本）。
+    Domain-Aware 预训练模型（MZSGO-DA）。
     
-    通过对比学习将蛋白质结构域(domain)信息注入ESM2序列表示。
+    通过双通道对比学习将域功能语义和GO标签文本语义共同注入序列编码器的适配器参数中。
     
     架构：
-    - 序列编码器：ESM2 + 内嵌 Adapter -> 投影头 -> 序列投影
-    - 域编码器：预计算的 domain embedding -> 投影头 -> 域投影
-    - 对比损失：InfoNCE (NT-Xent)
+    - 序列编码器：ESM2 + 内嵌 Adapter -> ProjHead_seq -> 序列投影 z_seq
+    - 域编码器：预计算的 domain embedding -> ProjHead_dom -> 域投影 z_dom
+    - 功能编码器：预计算的 GO func embedding -> ProjHead_func -> 功能投影 z_func
+    - 双通道对比损失：L = λ_dom * L_CL^dom + λ_func * L_CL^func
     """
     def __init__(self,
                  esm_type='esm2_t33_650M_UR50D',
                  domain_dim=2560,
+                 func_dim=2560,
                  projection_hidden_dim=512,
                  projection_output_dim=256,
                  num_adapter_layers=16,
                  bottleneck_dim=None,
                  adapter_dropout=0.0,
-                 temperature=0.07):
+                 temperature=0.07,
+                 lambda_dom=0.5,
+                 lambda_func=0.5):
         super().__init__()
         
         self.temperature = temperature
+        self.lambda_dom = lambda_dom
+        self.lambda_func = lambda_func
         
         # 序列编码器：ESM2 + 内嵌 Adapter
         self.seq_encoder = ESM2WithAdapter(
@@ -181,7 +182,7 @@ class DomainAwarePretrainModel(nn.Module):
         
         self.seq_embed_dim = self.seq_encoder.embed_dim
         
-        # 序列投影头
+        # 序列投影头 ProjHead_seq
         self.seq_projection = ProjectionHead(
             input_dim=self.seq_embed_dim,
             hidden_dim=projection_hidden_dim,
@@ -189,24 +190,40 @@ class DomainAwarePretrainModel(nn.Module):
             dropout=adapter_dropout
         )
         
-        # 域投影头
+        # 域投影头 ProjHead_dom
         self.domain_projection = ProjectionHead(
             input_dim=domain_dim,
             hidden_dim=projection_hidden_dim,
             output_dim=projection_output_dim,
             dropout=adapter_dropout
         )
+        
+        # ★ 功能投影头 ProjHead_func（新增：用于序列-功能对比通道）
+        self.func_projection = ProjectionHead(
+            input_dim=func_dim,
+            hidden_dim=projection_hidden_dim,
+            output_dim=projection_output_dim,
+            dropout=adapter_dropout
+        )
     
-    def forward(self, tokens, domain_embeddings):
+    def forward(self, tokens, domain_embeddings, func_embeddings, has_domain_mask=None):
         """
+        双通道对比学习前向传播。
+        
         Args:
             tokens: [B, L] tokenized 蛋白质序列
             domain_embeddings: [B, domain_dim] 预计算的 domain embedding
+            func_embeddings: [B, func_dim] 预计算的 GO 功能 embedding
+            has_domain_mask: [B] bool tensor，标记哪些样本有域注释
+                            None 时默认所有样本都有域注释
             
         Returns:
-            loss: 对比学习损失
+            loss: 双通道对比学习总损失
+            loss_dom: 序列-域通道损失（仅有域注释的样本）
+            loss_func: 序列-功能通道损失（所有样本）
             seq_proj: [B, proj_dim] 序列投影
             domain_proj: [B, proj_dim] 域投影
+            func_proj: [B, proj_dim] 功能投影
         """
         # 序列编码
         seq_repr = self.seq_encoder(tokens)  # [B, embed_dim]
@@ -214,31 +231,49 @@ class DomainAwarePretrainModel(nn.Module):
         # 投影到共享空间
         seq_proj = self.seq_projection(seq_repr)  # [B, proj_dim]
         domain_proj = self.domain_projection(domain_embeddings)  # [B, proj_dim]
+        func_proj = self.func_projection(func_embeddings)  # [B, proj_dim]
         
         # L2 归一化
         seq_proj = F.normalize(seq_proj, dim=-1)
         domain_proj = F.normalize(domain_proj, dim=-1)
+        func_proj = F.normalize(func_proj, dim=-1)
         
-        # InfoNCE 对比损失
-        loss = self.info_nce_loss(seq_proj, domain_proj)
+        # ★ 双通道 InfoNCE 对比损失
+        # 通道1：序列-域（仅有域注释的样本参与）
+        if has_domain_mask is not None and has_domain_mask.sum() > 1:
+            seq_proj_dom = seq_proj[has_domain_mask]
+            domain_proj_dom = domain_proj[has_domain_mask]
+            loss_dom = self.info_nce_loss(seq_proj_dom, domain_proj_dom)
+        elif has_domain_mask is not None and has_domain_mask.sum() <= 1:
+            # 不足2个有域注释的样本，无法构成对比学习
+            loss_dom = torch.tensor(0.0, device=seq_proj.device)
+        else:
+            # has_domain_mask=None，所有样本都参与
+            loss_dom = self.info_nce_loss(seq_proj, domain_proj)
         
-        return loss, seq_proj, domain_proj
+        # 通道2：序列-功能（所有样本参与）
+        loss_func = self.info_nce_loss(seq_proj, func_proj)
+        
+        # 总损失：加权和
+        loss = self.lambda_dom * loss_dom + self.lambda_func * loss_func
+        
+        return loss, loss_dom, loss_func, seq_proj, domain_proj, func_proj
     
-    def info_nce_loss(self, seq_proj, domain_proj):
+    def info_nce_loss(self, seq_proj, target_proj):
         """
         InfoNCE 对比学习损失（双向）。
         
-        正样本对：同一蛋白质的 (序列投影, 域投影)
-        负样本对：不同蛋白质的 (序列投影, 域投影)
+        正样本对：同一蛋白质的 (序列投影, 目标投影)
+        负样本对：不同蛋白质的 (序列投影, 目标投影)
         """
         batch_size = seq_proj.shape[0]
-        logits = torch.matmul(seq_proj, domain_proj.T) / self.temperature
+        logits = torch.matmul(seq_proj, target_proj.T) / self.temperature
         labels = torch.arange(batch_size, device=logits.device)
         
-        loss_seq2domain = F.cross_entropy(logits, labels)
-        loss_domain2seq = F.cross_entropy(logits.T, labels)
+        loss_seq2target = F.cross_entropy(logits, labels)
+        loss_target2seq = F.cross_entropy(logits.T, labels)
         
-        return (loss_seq2domain + loss_domain2seq) / 2.0
+        return (loss_seq2target + loss_target2seq) / 2.0
     
     def extract_sequence_embedding(self, tokens):
         """预训练后，仅用序列编码器提取 domain-aware 序列表示"""
@@ -257,7 +292,7 @@ class DomainAwarePretrainModel(nn.Module):
         frozen_params = total_params - trainable_params
         
         print(f"\n{'='*60}")
-        print(f"Model Parameter Summary (v4 - Internal Adapter):")
+        print(f"Model Parameter Summary (MZSGO-DA - Dual-Channel Pretrain):")
         print(f"  Total parameters:     {total_params:,}")
         print(f"  Trainable parameters: {trainable_params:,} ({100*trainable_params/total_params:.2f}%)")
         print(f"  Frozen parameters:    {frozen_params:,} ({100*frozen_params/total_params:.2f}%)")
