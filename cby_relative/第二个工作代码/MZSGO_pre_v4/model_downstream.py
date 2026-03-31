@@ -1,19 +1,19 @@
 """
-下游任务模型（MZSGO-DA）—— End-to-End 双 Adapter + 拼接融合策略
+Downstream task model (MZSGO-DA) -- End-to-End dual Adapter + concatenation fusion strategy.
 
-核心设计：
-1. 不再提取静态 embedding，而是 end-to-end 训练
-2. 双 Adapter 策略：
-   - adapter_0（预训练得来）→ 冻结，保持域功能语义先验
-   - adapter_1（下游新加的）→ 可训练，学习 task-specific 适配
-3. ESM2 + adapter_0 + adapter_1 全部在 forward 中参与计算
-4. 序列特征与GO标签文本嵌入分别投影后拼接，送入分类MLP输出功能预测概率
-5. 对序列特征施加模态丢弃策略（p=0.15）
+Core design:
+1. No static embeddings, end-to-end training
+2. Dual Adapter strategy:
+   - adapter_0 (pretrained) → frozen, preserves domain functional semantic prior
+   - adapter_1 (newly added for downstream) → trainable, learns task-specific adaptation
+3. ESM2 + adapter_0 + adapter_1 all participate in forward computation
+4. Sequence features and GO label text embeddings separately projected then concatenated,
+   fed into classification MLP for function prediction probabilities
 
-融合方式（相较于第三章MZSGO的门控融合机制）：
-- 本章仅涉及序列与标签两路输入
-- 序列表征已通过适配器预训练注入了域功能先验
-- 信息融合的复杂度较低，采用拼接方式即可满足需求
+Fusion method (compared to Chapter 3 MZSGO's gated fusion):
+- This chapter only involves sequence and label two-way inputs
+- Sequence representation already injected with domain functional prior via adapter pretraining
+- Information fusion complexity is lower, concatenation suffices.
 """
 
 import torch
@@ -31,8 +31,8 @@ from esm_adapter import (
 
 class FeatureDropout(nn.Module):
     """
-    模态丢弃策略：在训练阶段对序列特征施加丢弃，
-    以增强模型对序列侧噪声和缺失扰动的鲁棒性。
+    Modality dropout strategy: apply dropout to sequence features during training
+    to enhance robustness to sequence-side noise and missing perturbations.
     """
     def __init__(self, dropout_prob=0.15):
         super().__init__()
@@ -44,7 +44,7 @@ class FeatureDropout(nn.Module):
         
         batch_size = seq_feat.size(0)
         device = seq_feat.device
-        # 对序列特征进行模态级别的随机丢弃
+        # Modality-level random dropout for sequence features
         mask = (torch.rand(batch_size, 1, device=device) > self.dropout_prob).float()
         seq_feat = seq_feat * mask
         
@@ -53,13 +53,13 @@ class FeatureDropout(nn.Module):
 
 class EndToEndMZSGO(nn.Module):
     """
-    End-to-End MZSGO-DA 下游任务模型。
+    End-to-End MZSGO-DA downstream task model.
     
-    架构：
-    - ESM2 + adapter_0(冻结) + adapter_1(可训练) → 序列表示 h_seq ∈ R^1280
+    Architecture:
+    - ESM2 + adapter_0(frozen) + adapter_1(trainable) → sequence representation h_seq ∈ R^1280
     - h_seq → W_seq → LN → GELU → Dropout → h_seq' ∈ R^512
     - E_label → W_label → LN → GELU → Dropout → h_label' ∈ R^512
-    - 模态丢弃（仅对 h_seq'，p=0.15）
+    - Modality dropout (only on h_seq', p=0.15)
     - H_fused = [h_seq' ∥ h_label'] ∈ R^1024
     - ŷ = σ(W_out · Dropout(GELU(LN(W_cls · H_fused))))
     """
@@ -71,7 +71,7 @@ class EndToEndMZSGO(nn.Module):
                  feature_dropout_prob=0.15):
         super().__init__()
         
-        # === ESM2 + 双 Adapter ===
+        # === ESM2 + Dual Adapter ===
         if esm_type == 'esm2_t33_650M_UR50D':
             self.esm_model, self.alphabet = esm.pretrained.esm2_t33_650M_UR50D()
             self.num_layers = 33
@@ -88,7 +88,7 @@ class EndToEndMZSGO(nn.Module):
         if bottleneck_dim is None:
             bottleneck_dim = self.embed_dim // 2
         
-        # ★ 注入双 Adapter：adapter_0(预训练) + adapter_1(下游)
+        # Inject dual Adapter: adapter_0(pretrained) + adapter_1(downstream)
         self.adapter_params = inject_adapters_into_esm2(
             self.esm_model,
             num_adapter_layers=[num_adapter_layers, num_adapter_layers],
@@ -98,21 +98,21 @@ class EndToEndMZSGO(nn.Module):
             adapter_dropout=adapter_dropout,
         )
         
-        # 冻结 ESM2 原始参数
+        # Freeze ESM2 original parameters
         freeze_esm_parameters(self.esm_model, self.adapter_params)
         
-        # ★ 加载预训练的 adapter_0 并冻结
+        # Load pretrained adapter_0 and freeze
         if pretrain_adapter_ckpt is not None:
             self._load_pretrain_adapter(pretrain_adapter_ckpt)
         
-        # ★ 冻结 adapter_0，只训练 adapter_1
+        # Freeze adapter_0, only train adapter_1
         freeze_adapter_group(self.adapter_params, 'adapter_0', freeze=True)
         freeze_adapter_group(self.adapter_params, 'adapter_1', freeze=False)
         
         self.batch_converter = self.alphabet.get_batch_converter()
         
-        # === 特征投影层 ===
-        # 序列特征投影：h_seq ∈ R^1280 → h_seq' ∈ R^512
+        # === Feature projection layers ===
+        # Sequence feature projection: h_seq ∈ R^1280 → h_seq' ∈ R^512
         self.seq_proj = nn.Sequential(
             nn.Linear(self.embed_dim, hidden_dim),
             nn.LayerNorm(hidden_dim),
@@ -120,7 +120,7 @@ class EndToEndMZSGO(nn.Module):
             nn.Dropout(dropout * 0.5)
         )
         
-        # GO标签文本嵌入投影：E_label ∈ R^nlp_dim → h_label' ∈ R^512
+        # GO label text embedding projection: E_label ∈ R^nlp_dim → h_label' ∈ R^512
         self.nlp_proj = nn.Sequential(
             nn.Linear(nlp_dim, hidden_dim),
             nn.LayerNorm(hidden_dim),
@@ -128,10 +128,10 @@ class EndToEndMZSGO(nn.Module):
             nn.Dropout(dropout * 0.5)
         )
         
-        # ★ 模态丢弃（仅对序列特征，p=0.15）
+        # Modality dropout (only on sequence features, p=0.15)
         self.feature_dropout = FeatureDropout(dropout_prob=feature_dropout_prob)
         
-        # ★ 拼接融合 + 分类MLP
+        # Concatenation fusion + classification MLP
         # H_fused = [h_seq' ∥ h_label'] ∈ R^1024 → MLP → 1
         fused_dim = hidden_dim * 2  # 512 + 512 = 1024
         self.classifier = nn.Sequential(
@@ -144,14 +144,14 @@ class EndToEndMZSGO(nn.Module):
     
     def _load_pretrain_adapter(self, ckpt_path):
         """
-        加载预训练的 adapter_0 参数。
+        Load pretrained adapter_0 parameters.
         
-        预训练 checkpoint 的 adapter 参数名形如：
-            layer_17.adapter_0.0.module.0.weight  (attention 后的 ResMLP)
-            layer_17.adapter_0.1.module.0.weight  (FFN 后的 ResMLP)
+        Pretrained checkpoint adapter parameter names look like:
+            layer_17.adapter_0.0.module.0.weight  (ResMLP after attention)
+            layer_17.adapter_0.1.module.0.weight  (ResMLP after FFN)
         
-        下游模型也有相同的命名（因为 adapter_names=['adapter_0', 'adapter_1']），
-        所以直接 strict=False 加载即可（adapter_1 的参数不在 checkpoint 中，保持随机初始化）。
+        Downstream model has same naming (because adapter_names=['adapter_0', 'adapter_1']),
+        so load with strict=False (adapter_1 parameters not in checkpoint, remain randomly initialized).
         """
         import os
         if not os.path.exists(ckpt_path):
@@ -164,7 +164,7 @@ class EndToEndMZSGO(nn.Module):
         if 'adapter_state_dict' in checkpoint:
             adapter_state = checkpoint['adapter_state_dict']
         elif 'model_state_dict' in checkpoint:
-            # 从完整 checkpoint 中提取 adapter 参数
+            # Extract adapter parameters from full checkpoint
             adapter_state = {}
             for key, value in checkpoint['model_state_dict'].items():
                 if 'adapter_params.' in key:
@@ -178,7 +178,7 @@ class EndToEndMZSGO(nn.Module):
         )
         print(f"  Loaded adapter_0 weights. Missing: {len(missing)}, Unexpected: {len(unexpected)}")
         if missing:
-            # 预期 adapter_1 的参数会 missing（因为它们是新加的）
+            # Expect adapter_1 parameters to be missing (they are newly added)
             adapter_1_missing = [k for k in missing if 'adapter_1' in k]
             other_missing = [k for k in missing if 'adapter_1' not in k]
             print(f"  adapter_1 keys (expected missing): {len(adapter_1_missing)}")
@@ -187,9 +187,9 @@ class EndToEndMZSGO(nn.Module):
     
     def forward_esm(self, tokens):
         """
-        通过 ESM2 + 双 Adapter 获取序列表示。
+        Get sequence representation via ESM2 + dual Adapter.
         
-        手动实现 forward 以更好地控制内存（跳过 LM Head 等不需要的部分）。
+        Manually implement forward to better control memory (skip LM Head etc.).
         """
         assert tokens.ndim == 2
         
@@ -216,7 +216,7 @@ class EndToEndMZSGO(nn.Module):
         else:
             padding_mask_for_layers = padding_mask
         
-        # 遍历所有层（已经被替换为 AdapterTransformerLayer）
+        # Iterate through all layers (already replaced with AdapterTransformerLayer)
         for layer in model.layers:
             x, _ = layer(x, self_attn_padding_mask=padding_mask_for_layers,
                         need_head_weights=False)
@@ -240,51 +240,48 @@ class EndToEndMZSGO(nn.Module):
     def forward(self, tokens, nlp_embedding, batch_size,
                 return_attention_weights=False):
         """
-        End-to-End 前向传播。
+        End-to-End forward pass.
         
         Args:
-            tokens: [B, L] tokenized 蛋白质序列
-            nlp_embedding: [num_labels, nlp_dim] GO 文本 embedding
-            batch_size: 实际 batch 大小
-            return_attention_weights: 保留接口兼容性（不再使用门控权重）
+            tokens: [B, L] tokenized protein sequences
+            nlp_embedding: [num_labels, nlp_dim] GO text embedding
+            batch_size: actual batch size
+            return_attention_weights: keep interface compatibility (no gating weights used)
             
         Returns:
             logits: [B, num_labels]
         """
         num_labels = nlp_embedding.size(0)
         
-        # ★ ESM2 + 双 Adapter 编码序列
+        # ESM2 + dual Adapter encode sequence
         seq_repr = self.forward_esm(tokens)  # [B, embed_dim]
         
-        # 扩展序列表示到 [B * num_labels, embed_dim]
+        # Expand sequence representation to [B * num_labels, embed_dim]
         seq_expanded = seq_repr.unsqueeze(1).expand(-1, num_labels, -1)
         seq_flat = seq_expanded.reshape(-1, seq_expanded.size(-1))
         
-        # 投影
+        # Project
         seq_feat = self.seq_proj(seq_flat)  # [B * num_labels, hidden_dim=512]
         nlp_feat = self.nlp_proj(nlp_embedding)  # [num_labels, hidden_dim=512]
         
-        # 扩展 NLP 特征
+        # Expand NLP features
         nlp_feat_expanded = nlp_feat.unsqueeze(0).expand(batch_size, -1, -1)
         nlp_feat_batched = nlp_feat_expanded.reshape(-1, nlp_feat.size(-1))  # [B * num_labels, 512]
         
-        # ★ 模态丢弃（仅对序列特征，p=0.15）
-        seq_feat, nlp_feat_batched = self.feature_dropout(seq_feat, nlp_feat_batched)
-        
-        # ★ 拼接融合：H_fused = [h_seq' ∥ h_label'] ∈ R^1024
+        # Concatenation fusion: H_fused = [h_seq' ∥ h_label'] ∈ R^1024
         fused_feat = torch.cat([seq_feat, nlp_feat_batched], dim=-1)  # [B * num_labels, 1024]
         
-        # 分类MLP
+        # Classification MLP
         logits = self.classifier(fused_feat)  # [B * num_labels, 1]
         logits = logits.view(batch_size, num_labels)
         
         if return_attention_weights:
-            # 保持接口兼容性，返回 None 作为权重
+            # Maintain interface compatibility, return None as weights
             return logits, None
         return logits
     
     def print_trainable_params(self):
-        """打印可训练参数信息"""
+        """Print trainable parameter information"""
         total_params = sum(p.numel() for p in self.parameters())
         trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
         frozen_params = total_params - trainable_params
