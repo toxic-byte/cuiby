@@ -10,7 +10,7 @@
 
 根据经典分子生物学的“序列—结构—功能”范式，氨基酸序列决定蛋白质的空间结构，空间结构进而决定其生物学功能。蛋白质在序列组成、折叠方式和空间构象上的高度多样性，构成了其功能多样化的分子基础。如何从序列、结构及相关信息中准确推断蛋白质功能，始终是生物学与生物信息学领域的核心科学问题。近年来，高通量测序技术与结构生物学方法的快速发展，推动蛋白质相关数据以前所未有的速度积累。尤其是AlphaFold2\cite{jumper2021highly}在结构预测领域的突破，显著降低了高精度结构信息的获取门槛，为蛋白质功能预测提供了新的信息来源。
 
-然而，与序列和结构数据的爆发式增长相比，经实验验证的蛋白质功能注释积累速度仍十分缓慢\cite{friedberg2006automated}。传统功能研究主要依赖生物实验验证，虽然可信度高，但实验流程复杂、周期漫长，难以满足大规模功能解析的需求\cite{lin2024comprehensive}。序列与注释之间日益扩大的“注释鸿沟”，使开发高效、准确的计算方法以实现自动化功能预测成为亟待解决的关键问题。
+然而，与序列和结构数据的爆发式增长相比，经实验验证的蛋白质功能注释积累速度仍十分缓慢\cite{friedberg2006automated}。传统功能研究主要依赖生物实验验证，虽然可信度高，但实验流程复杂、周期漫长，难以满足大规模功能解析的需求\cite{lin2024comprehensive}。序列与注释之间日益扩大的功能标注缺口，使开发高效、准确的计算方法以实现自动化功能预测成为亟待解决的关键问题。
 
 为实现蛋白质功能的标准化描述，国际生物信息学界采用基因本体（Gene Ontology, GO）系统进行统一注释\cite{ashburner2000gene}。GO从生物过程（Biological Process, BP）、分子功能（Molecular Function, MF）和细胞组分（Cellular Component, CC）三个维度刻画蛋白质功能，并通过有向无环图组织术语间的层级关系。这一标准化体系为自动预测提供了统一的标签空间，但也带来了术语数量庞大、类别分布严重不均以及大量术语缺乏充分标注等挑战。与此同时，研究者逐渐认识到仅依赖单一来源的信息难以全面刻画蛋白质功能。随着蛋白质语言模型、结构预测工具和生物医学文本表示方法的不断发展，如何综合利用序列、结构、蛋白质域描述等多源信息提升功能预测性能，已成为该领域亟需深入探索的重要课题。
 
@@ -36,7 +36,7 @@
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/struct2go_model.png}
+\includegraphics[width=1.0\textwidth]{figures/struct2go_model.png}
 \caption{Struct2GO模型概览图\cite{jiao2023struct2go}}
 \label{fig:struct2go_model}
 \end{figure}
@@ -47,7 +47,7 @@
 
 \begin{figure}[!htb]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/dpfunc_model.png}
+\includegraphics[width=1.0\textwidth]{figures/dpfunc_model.png}
 \caption{DPFunc模型概览图\cite{wang2025dpfunc}}
 \label{fig:dpfunc_model}
 \end{figure}
@@ -94,7 +94,7 @@ Kulmanov等人\cite{kulmanov2022deepgozero}提出DeepGOZero，是零样本蛋白
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.95\textwidth]{figures/protnote.png}
+\includegraphics[width=1.0\textwidth]{figures/protnote.png}
 \caption{ProtNote模型概览图\cite{char2025protnote}}
 \label{fig:protnote_model}
 \end{figure}
@@ -115,7 +115,7 @@ Boadu等人\cite{boadu2025funbind}提出FunBind，从统一多模态对齐的角
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/pair.png}
+\includegraphics[width=1.0\textwidth]{figures/pair.png}
 \caption{PAIR模型概览图\cite{duan2025pair}}
 \label{fig:pair_model}
 \end{figure}
@@ -126,7 +126,7 @@ Boadu等人\cite{boadu2025funbind}提出FunBind，从统一多模态对齐的角
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/s_plm.png}
+\includegraphics[width=1.0\textwidth]{figures/s_plm.png}
 \caption{S-PLM模型概览图\cite{wang2025splm}}
 \label{fig:splm_model}
 \end{figure}

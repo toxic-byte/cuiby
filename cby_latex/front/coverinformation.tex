@@ -16,8 +16,8 @@
   % 秘级
   %=====
   statesecrets={公开},
-  natclassifiedindex={TP391},
-  intclassifiedindex={68T07},
+  natclassifiedindex={TP399},
+  intclassifiedindex={004.8},
   %
   %=========
   % 中文信息
@@ -61,21 +61,21 @@
 % 中文摘要
 \begin{cabstract}
 
-蛋白质功能预测是生物信息学领域的核心任务之一，其目标是揭示蛋白质序列与生物学功能之间的映射关系。随着高通量测序技术的快速发展，蛋白质序列数据呈指数级增长，而经实验验证的功能注释仍十分有限，序列与功能之间的“注释鸿沟”日益突出。在此背景下，依靠计算方法开展自动化功能预测，已成为缓解注释不足、提升生物数据利用效率的重要途径。现有深度学习方法通常将基因本体（Gene Ontology, GO）标签视为固定的分类标识，主要依赖序列模式进行封闭标签空间下的分类，较少利用蛋白质域描述和GO定义中蕴含的丰富语义信息，因此在未见标签和长尾类别上的泛化能力仍然不足。本论文围绕“多模态语义建模”与“预训练增强”两条递进路径，分别从开放标签预测和端到端部署两个层面展开蛋白质功能预测研究。
+蛋白质功能预测是生物信息学领域的核心任务之一，其目标是揭示蛋白质序列与生物学功能之间的映射关系。随着高通量测序技术的快速发展，蛋白质序列数据呈指数级增长，而经实验验证的功能注释仍十分有限，序列与功能之间的功能标注缺口日益突出。在此背景下，依靠计算方法开展自动化功能预测，已成为缓解注释不足、提升生物数据利用效率的重要途径。现有深度学习方法通常将基因本体（Gene Ontology, GO）标签视为固定的分类标识，主要依赖序列模式进行封闭标签空间下的分类，较少利用蛋白质域描述和GO定义中蕴含的丰富语义信息，因此在未见标签和长尾类别上的泛化能力仍然不足。本论文围绕“多模态语义建模”与“预训练增强”两条递进路径，分别从开放标签预测和端到端部署两个层面展开蛋白质功能预测研究。
 
 针对现有方法语义利用不充分、难以预测未见功能标签的问题，本论文提出了一种多模态零样本蛋白质功能注释方法MZSGO。该方法将蛋白质功能预测表述为蛋白质与GO术语之间的语义匹配问题，利用蛋白质语言模型ESM2提取序列进化特征，并借助文本嵌入模型对蛋白质域描述与GO功能定义进行统一语义编码。在此基础上，本论文引入非对称特征丢弃策略以增强模型对模态缺失场景的鲁棒性，同时设计自适应门控融合模块以动态调节不同信息源的贡献权重，实现异构特征在共享潜在空间中的有效整合。实验结果表明，MZSGO在标准测试集上的有监督指标具有竞争力，并在零样本场景下显著优于现有方法，验证了多模态语义融合在开放标签预测中的有效性。
 
-为进一步降低推理阶段对显式域语义输入的依赖，本论文在MZSGO的基础上提出了基于域感知适配器预训练的蛋白质功能预测方法MZSGO-DA。该方法将轻量级适配器模块注入序列模型的Transformer层，通过“序列—域”和“序列—功能”双通道对比学习预训练，将域功能语义注入适配器参数中。在下游阶段，MZSGO-DA采用冻结适配器与可训练适配器并行的双适配器策略，在保留预训练功能先验的同时实现任务特定适配。实验结果表明，MZSGO-DA在下游推理阶段仅依赖序列输入，便在多数指标上达到或接近MZSGO的水平，尤其在MF本体上实现了全面超越，在保持预测性能的同时显著降低了推理阶段的输入依赖。
+为进一步降低推理阶段对显式域语义输入的依赖，本论文在MZSGO的基础上提出了基于域感知适配器预训练的蛋白质功能预测方法MZSGO-DA。该方法将轻量级适配器模块注入序列模型的Transformer层，通过“序列—域”和“序列—功能”双通道对比学习预训练，将域功能语义注入适配器参数中。在下游阶段，MZSGO-DA采用冻结适配器与可训练适配器并行的双适配器策略，在保留预训练功能先验的同时实现任务特定适配。实验结果表明，MZSGO-DA在下游推理阶段仅依赖序列输入，便在多数指标上达到或接近MZSGO的水平，尤其在分子功能本体上实现了全面超越，在保持预测性能的同时显著降低了推理阶段的输入依赖。
 
 \end{cabstract}
 
 % 英文摘要
 \begin{eabstract}
 
-Protein function prediction is a fundamental task in bioinformatics, aiming to uncover the mapping between protein sequences and biological functions. With the rapid growth of high-throughput sequencing, protein sequence data has expanded exponentially, whereas experimentally verified functional annotations remain scarce. As a result, the gap between sequence availability and function annotation continues to widen, making computational prediction an essential solution for large-scale automatic annotation. Most existing deep learning approaches treat Gene Ontology (GO) terms as fixed class identifiers and mainly rely on sequence patterns for closed-set classification. Such a formulation underutilizes the rich semantic information contained in protein domain descriptions and GO definitions, which in turn limits generalization to unseen labels and long-tail categories. This dissertation addresses these challenges along two progressive directions: multimodal semantic modeling for open-label prediction and pretraining-based enhancement for end-to-end deployment.
+Protein function prediction is a fundamental task in bioinformatics, aiming to uncover the mapping between protein sequences and biological functions. With the rapid growth of high-throughput sequencing, protein sequence data has expanded exponentially, whereas experimentally verified functional annotations remain scarce. As a result, the disparity between available sequences and verified functional annotations continues to grow, making computational prediction an essential solution for large-scale automatic annotation. Most existing deep learning approaches treat Gene Ontology (GO) terms as fixed class identifiers and mainly rely on sequence patterns for closed-set classification. Such a formulation underutilizes the rich semantic information contained in protein domain descriptions and GO definitions, which in turn limits generalization to unseen labels and long-tail categories. This dissertation addresses these challenges along two progressive directions: multimodal semantic modeling for open-label prediction and pretraining-based enhancement for end-to-end deployment.
 
 To address the insufficient use of semantic knowledge and the inability to predict unseen functional labels, this dissertation proposes MZSGO, a multimodal zero-shot protein function annotation method. MZSGO formulates protein function prediction as a semantic matching problem between proteins and GO terms. It uses the protein language model ESM2 to extract evolutionary sequence representations and employs a text embedding model to encode protein domain descriptions and GO definitions into a unified semantic space. An asymmetric feature dropout strategy is introduced to improve robustness under missing-modality conditions, and an adaptive gated fusion module is designed to dynamically weight different information sources and integrate heterogeneous features in a shared latent space. Experimental results show that MZSGO achieves competitive performance on supervised benchmarks and substantially outperforms existing methods in zero-shot settings, demonstrating the effectiveness of multimodal semantic fusion for open-label protein function prediction.
 
-To further reduce the reliance on explicit domain semantic input during inference, this dissertation proposes MZSGO-DA, a protein function prediction method based on domain-aware adapter pretraining. MZSGO-DA injects lightweight adapters into the Transformer layers of the sequence encoder and performs dual-channel contrastive pretraining on sequence--domain and sequence--function pairs, thereby injecting domain-related functional semantics into the adapter parameters. In the downstream stage, a dual-adapter strategy is adopted, where one pretrained adapter is frozen to preserve prior knowledge and another trainable adapter is introduced for task-specific adaptation. Experimental results show that MZSGO-DA, requiring only sequence input at downstream inference time, achieves comparable or superior performance to MZSGO on most metrics across the three GO ontologies, with particularly notable improvements on the MF ontology, while substantially reducing the input dependency at inference time.
+To further reduce the reliance on explicit domain semantic input during inference, this dissertation proposes MZSGO-DA, a protein function prediction method based on domain-aware adapter pretraining. MZSGO-DA injects lightweight adapters into the Transformer layers of the sequence encoder and performs dual-channel contrastive pretraining on sequence--domain and sequence--function pairs, thereby injecting domain-related functional semantics into the adapter parameters. In the downstream stage, a dual-adapter strategy is adopted, where one pretrained adapter is frozen to preserve prior knowledge and another trainable adapter is introduced for task-specific adaptation. Experimental results show that MZSGO-DA, requiring only sequence input at downstream inference time, achieves comparable or superior performance to MZSGO on most metrics across the three GO ontologies, with particularly notable improvements on the Molecular Function ontology, while substantially reducing the input dependency at inference time.
 
 \end{eabstract}
