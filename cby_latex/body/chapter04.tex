@@ -90,8 +90,9 @@ $\hat{y} \leftarrow \sigma(\text{MLP}_{cls}(\mathbf{H}_{fused}))$\;
 
 \subsection{适配器模块与注入机制}
 
-本论文设计了基于残差多层感知机（ResMLP）的轻量级适配器模块。每个适配器由降维线性层、ReLU激活函数、升维线性层及层归一化组成，并通过残差连接保留原始信息流：
+本论文设计了基于残差多层感知机（ResMLP）的轻量级适配器模块。每个适配器由降维线性层、ReLU激活函数、升维线性层及层归一化组成，并通过残差连接保留原始信息流，如公式~\eqref{eq:adapter_resmlp}所示：
 \begin{equation}
+\label{eq:adapter_resmlp}
     \text{Adapter}(\mathbf{x}) = \text{LN}(\mathbf{W}_{up} \cdot \text{ReLU}(\mathbf{W}_{down} \cdot \mathbf{x})) + \mathbf{x}
 \end{equation}
 其中$\mathbf{W}_{down} \in \mathbb{R}^{d_b \times d}$为降维矩阵，$\mathbf{W}_{up} \in \mathbb{R}^{d \times d_b}$为升维矩阵，$d=1280$为ESM2的隐藏维度，$d_b=d/2=640$为瓶颈维度，LN为层归一化。
@@ -112,8 +113,9 @@ $\hat{y} \leftarrow \sigma(\text{MLP}_{cls}(\mathbf{H}_{fused}))$\;
 
 因此，每个Transformer层包含两个适配器实例，一组适配器共包含$2N_{layer}$个ResMLP模块。本论文默认仅对ESM2最后$N_{adapter}=16$层注入适配器，以在保留浅层通用序列表示能力的同时增强深层表示的任务相关性。
 
-当存在多组适配器时，各组适配器在同一层内并行计算，其输出通过均值方式融合：
+当存在多组适配器时，各组适配器在同一层内并行计算，其输出通过均值方式融合，如公式~\eqref{eq:adapter_merge}所示：
 \begin{equation}
+\label{eq:adapter_merge}
     \mathbf{X}_{adapter} = \frac{1}{G}\sum_{g=1}^{G}\text{Adapter}^{(g)}(\mathbf{X})
 \end{equation}
 其中$G$为适配器组数，预训练阶段$G=1$，下游训练阶段$G=2$。
@@ -249,63 +251,75 @@ $\hat{y} \leftarrow \sigma(\text{MLP}_{cls}(\mathbf{H}_{fused}))$\;
 
 \subsection{双通道对比学习预训练}
 
-预训练阶段的目标是通过双通道对比学习，将域功能语义和GO标签文本语义共同注入序列编码器的适配器参数中。在序列编码方面，将蛋白质序列$P$输入注入adapter$_0$的ESM2模型，获得每个残基位置的上下文嵌入，并通过平均池化得到蛋白质级表示：
+预训练阶段的目标是通过双通道对比学习，将域功能语义和GO标签文本语义共同注入序列编码器的适配器参数中。在序列编码方面，将蛋白质序列$P$输入注入adapter$_0$的ESM2模型，获得每个残基位置的上下文嵌入，并通过平均池化得到蛋白质级表示，如公式~\eqref{eq:da_seq_encode}所示：
 \begin{equation}
+\label{eq:da_seq_encode}
     \mathbf{h}_{seq} = \text{MeanPool}(\text{ESM2}_{adapter_0}(P)) \in \mathbb{R}^{1280}
 \end{equation}
 在域嵌入方面，蛋白质域的文本嵌入$\mathbf{h}_{dom} \in \mathbb{R}^{2560}$由Qwen3-Embedding预计算并缓存。在功能嵌入方面，蛋白质对应的GO功能标签文本嵌入$\mathbf{h}_{func} \in \mathbb{R}^{2560}$同样由Qwen3-Embedding预计算。对于拥有多个GO注释的蛋白质，将各GO标签的文本嵌入经平均池化聚合为蛋白质级功能表示。
 
-为将不同来源的表示映射到共享对比空间，设计三个独立投影头：
+为将不同来源的表示映射到共享对比空间，设计三个独立投影头，如公式~\eqref{eq:proj_seq}--\eqref{eq:proj_func}所示：
 \begin{equation}
+\label{eq:proj_seq}
     \mathbf{z}_{seq} = \text{ProjHead}_{seq}(\mathbf{h}_{seq}) \in \mathbb{R}^{d_p}
 \end{equation}
 \begin{equation}
+\label{eq:proj_dom}
     \mathbf{z}_{dom} = \text{ProjHead}_{dom}(\mathbf{h}_{dom}) \in \mathbb{R}^{d_p}
 \end{equation}
 \begin{equation}
+\label{eq:proj_func}
     \mathbf{z}_{func} = \text{ProjHead}_{func}(\mathbf{h}_{func}) \in \mathbb{R}^{d_p}
 \end{equation}
-其中$d_p=256$为投影维度。每个投影头均由两层MLP组成：
+其中$d_p=256$为投影维度。每个投影头均由两层MLP组成，如公式~\eqref{eq:projhead}所示：
 \begin{equation}
+\label{eq:projhead}
     \text{ProjHead}(\mathbf{x}) = \text{LN}\!\left(\mathbf{W}_2 \cdot \text{Dropout}\!\left(\text{GELU}\!\left(\text{LN}(\mathbf{W}_1 \cdot \mathbf{x})\right)\right)\right)
 \end{equation}
 中间隐藏维度为512。输出向量经L2归一化后用于计算余弦相似度。
 
-给定一批$B$个蛋白质样本，构建两个对比学习通道。对于“序列-域”通道，每个样本$i$对应的序列投影$\mathbf{z}_{seq}^i$与域投影$\mathbf{z}_{dom}^i$构成正样本对，同一批次中其他样本构成负样本对：
+给定一批$B$个蛋白质样本，构建两个对比学习通道。对于“序列-域”通道，每个样本$i$对应的序列投影$\mathbf{z}_{seq}^i$与域投影$\mathbf{z}_{dom}^i$构成正样本对，同一批次中其他样本构成负样本对，如公式~\eqref{eq:cl_seq2dom}--\eqref{eq:cl_dom_total}所示：
 \begin{equation}
+\label{eq:cl_seq2dom}
     \mathcal{L}_{seq \to dom} = -\frac{1}{B}\sum_{i=1}^{B}
     \log
     \frac{\exp(\text{sim}(\mathbf{z}_{seq}^i,\mathbf{z}_{dom}^i)/\tau)}
     {\sum_{j=1}^{B}\exp(\text{sim}(\mathbf{z}_{seq}^i,\mathbf{z}_{dom}^j)/\tau)}
 \end{equation}
 \begin{equation}
+\label{eq:cl_dom2seq}
     \mathcal{L}_{dom \to seq} = -\frac{1}{B}\sum_{i=1}^{B}
     \log
     \frac{\exp(\text{sim}(\mathbf{z}_{dom}^i,\mathbf{z}_{seq}^i)/\tau)}
     {\sum_{j=1}^{B}\exp(\text{sim}(\mathbf{z}_{dom}^i,\mathbf{z}_{seq}^j)/\tau)}
 \end{equation}
 \begin{equation}
+\label{eq:cl_dom_total}
     \mathcal{L}_{CL}^{dom} = \frac{1}{2}\left(\mathcal{L}_{seq \to dom} + \mathcal{L}_{dom \to seq}\right)
 \end{equation}
 
-对于“序列—功能”通道，每个样本$i$对应的序列投影$\mathbf{z}_{seq}^i$与功能投影$\mathbf{z}_{func}^i$构成正样本对：
+对于“序列—功能”通道，每个样本$i$对应的序列投影$\mathbf{z}_{seq}^i$与功能投影$\mathbf{z}_{func}^i$构成正样本对，如公式~\eqref{eq:cl_seq2func}--\eqref{eq:cl_func_total}所示：
 \begin{equation}
+\label{eq:cl_seq2func}
     \mathcal{L}_{seq \to func} = -\frac{1}{B}\sum_{i=1}^{B}
     \log
     \frac{\exp(\text{sim}(\mathbf{z}_{seq}^i,\mathbf{z}_{func}^i)/\tau)}
     {\sum_{j=1}^{B}\exp(\text{sim}(\mathbf{z}_{seq}^i,\mathbf{z}_{func}^j)/\tau)}
 \end{equation}
 \begin{equation}
+\label{eq:cl_func2seq}
     \mathcal{L}_{func \to seq} = -\frac{1}{B}\sum_{i=1}^{B}
     \log
     \frac{\exp(\text{sim}(\mathbf{z}_{func}^i,\mathbf{z}_{seq}^i)/\tau)}
     {\sum_{j=1}^{B}\exp(\text{sim}(\mathbf{z}_{func}^i,\mathbf{z}_{seq}^j)/\tau)}
 \end{equation}
 \begin{equation}
+\label{eq:cl_func_total}
     \mathcal{L}_{CL}^{func} = \frac{1}{2}\left(\mathcal{L}_{seq \to func} + \mathcal{L}_{func \to seq}\right)
 \end{equation}
-总预训练损失为两个通道的加权和：
+总预训练损失为两个通道的加权和，如公式~\eqref{eq:pretrain_loss}所示：
 \begin{equation}
+\label{eq:pretrain_loss}
     \mathcal{L}_{pretrain} = \lambda_{dom}\mathcal{L}_{CL}^{dom} + \lambda_{func}\mathcal{L}_{CL}^{func}
 \end{equation}
 其中$\lambda_{dom}=\lambda_{func}=0.5$，$\text{sim}(\cdot,\cdot)$为余弦相似度，$\tau=0.07$为温度超参数。
@@ -337,15 +351,17 @@ $\hat{y} \leftarrow \sigma(\text{MLP}_{cls}(\mathbf{H}_{fused}))$\;
     \hat{y} = \sigma\left(\mathbf{W}_{out}\cdot \text{Dropout}\left(\text{GELU}\left(\text{LN}(\mathbf{W}_{cls}\mathbf{H}_{fused})\right)\right)\right)
 \end{equation}
 
-下游训练使用与第三章一致的本体特异性损失函数策略。对于BP和MF本体，采用二分类交叉熵损失：
+下游训练使用与第三章一致的本体特异性损失函数策略。对于BP和MF本体，采用二分类交叉熵损失，如公式~\eqref{eq:da_bce}所示：
 \begin{equation}
+\label{eq:da_bce}
     \mathcal{L}_{BCE} = -\frac{1}{N}\sum_{i=1}^{N}
     \left[
     y_i\log(\hat{y}_i) + (1-y_i)\log(1-\hat{y}_i)
     \right]
 \end{equation}
-对于CC本体，为缓解类别不平衡问题，采用Focal Loss：
+对于CC本体，为缓解类别不平衡问题，采用Focal Loss，如公式~\eqref{eq:da_focal}所示：
 \begin{equation}
+\label{eq:da_focal}
     \mathcal{L}_{FL} = -\frac{1}{N}\sum_{i=1}^{N}
     \left[
     \alpha y_i(1-\hat{y}_i)^{\gamma}\log(\hat{y}_i)
